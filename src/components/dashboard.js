@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 import LeadCard from "./lead-card";
 import {
   Box,
@@ -10,6 +10,7 @@ import {
   Tab,
   TextField,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 import AddLead from "./add-lead.js";
 import {
@@ -26,6 +27,8 @@ import Tasks from "./task-list";
 const filters = ["Active", "Closed"];
 
 function LeadDashboard() {
+  const timer = useRef();
+  const [loading, setLoading] = useState(true);
   const [leads, setLeads] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [{ searchText }, dispatch] = useStateValue("");
@@ -70,6 +73,9 @@ function LeadDashboard() {
         }))
       );
     });
+    timer.current = window.setTimeout(() => {
+      setLoading(false)
+    }, 1000);
   }, [filterParam]);
 
   const fetchTasks = useCallback(async () => {
@@ -97,7 +103,7 @@ function LeadDashboard() {
   useEffect(() => {
     fetchLeads();
     fetchTasks();
-  }, [fetchLeads]);
+  }, [fetchLeads, fetchTasks]);
 
   const search = (leads) => {
     return leads.filter((item) => {
@@ -137,7 +143,8 @@ function LeadDashboard() {
     <>
       <Box
         sx={{
-          flexGrow: 1,
+          display: "flex",
+          flexDirection: 'column'
         }}
       >
         <Box
@@ -174,7 +181,16 @@ function LeadDashboard() {
             </TextField>
           </div>
         </Box>
-        <Grid container justifyContent={value === "leads" ? "flex-start" : "center"}>
+        {loading && (
+          <Box sx={{ display: "flex", justifyContent: 'center', alignItems: 'center', height: "60vh" }}>
+            <CircularProgress />
+          </Box>
+        )}
+        {!loading &&
+        <Grid
+          container
+          justifyContent={value === "leads" ? "flex-start" : "center"}
+        >
           {value === "leads" ? (
             search(leads).map((lead) => (
               <Grid key={lead.id} item xs={12} sm={6} md={6} lg={4}>
@@ -189,6 +205,7 @@ function LeadDashboard() {
             </Grid>
           )}
         </Grid>
+        }
       </Box>
     </>
   );

@@ -14,7 +14,7 @@ import { useStateValue } from "../state-management/state-provider";
 import { AgricultureRounded } from "@mui/icons-material";
 import Slide from "@mui/material/Slide";
 import PropTypes from "prop-types";
-import useScrollTrigger from '@mui/material/useScrollTrigger';
+import useScrollTrigger from "@mui/material/useScrollTrigger";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -64,7 +64,7 @@ function HideOnScroll(props) {
   // will default to window.
   // This is only being set here because the demo is in an iframe.
   const trigger = useScrollTrigger({
-    target: window ? window() : undefined,
+    target: window,
   });
 
   return (
@@ -73,15 +73,6 @@ function HideOnScroll(props) {
     </Slide>
   );
 }
-
-HideOnScroll.propTypes = {
-  children: PropTypes.element.isRequired,
-  /**
-   * Injected by the documentation to work in an iframe.
-   * You won't need it on your project.
-   */
-  window: PropTypes.func,
-};
 
 export default function MainAppBar(props) {
   const [{ searchText }, dispatch] = useStateValue();
@@ -109,7 +100,7 @@ export default function MainAppBar(props) {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <HideOnScroll {...props}>
-        <AppBar >
+        <AppBar>
           <Toolbar>
             <IconButton
               size="large"
