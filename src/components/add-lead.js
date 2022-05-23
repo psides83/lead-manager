@@ -393,7 +393,8 @@ export default function AddLead(props) {
       <Dialog
         onClose={handleCloseDialog}
         open={isShowingDialog}
-        style={{ backdropFilter: "blur(4px)" }}
+        style={{ backdropFilter: "blur(5px)" }}
+        PaperProps={{ style: { borderRadius: 8 }, elevation: 24 }}
       >
         <Box
           sx={{

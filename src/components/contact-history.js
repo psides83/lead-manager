@@ -1,5 +1,9 @@
 // import { DialogContent } from "@material-ui/core";
-import { EscalatorWarning, History, PhoneIphoneRounded } from "@mui/icons-material";
+import {
+  EscalatorWarning,
+  History,
+  PhoneIphoneRounded,
+} from "@mui/icons-material";
 import {
   Avatar,
   Dialog,
@@ -57,7 +61,13 @@ function ContactHistory(props) {
           Contact History
         </Button>
       </Tooltip>
-      <Dialog onClose={handleCloseDialog} open={isShowingDialog} scroll="paper">
+      <Dialog
+        onClose={handleCloseDialog}
+        open={isShowingDialog}
+        style={{ backdropFilter: "blur(5px)" }}
+        scroll="paper"
+        PaperProps={{ style: { borderRadius: 8 }, elevation: 24 }}
+      >
         <DialogTitle id="history-dialog-title">
           Lead Contact History
         </DialogTitle>
@@ -65,10 +75,10 @@ function ContactHistory(props) {
           <List
             sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
           >
-          {events?.map((event) => (
+            {events?.map((event) => (
               <ListItem key={event.id}>
                 <ListItemAvatar>
-                  <Avatar style={{backgroundColor: "#FFDE00"}}>
+                  <Avatar style={{ backgroundColor: "#FFDE00" }}>
                     <PhoneIphoneRounded color="primary" />
                   </Avatar>
                 </ListItemAvatar>
@@ -77,7 +87,7 @@ function ContactHistory(props) {
                   secondary={event.timestamp}
                 />
               </ListItem>
-          ))}
+            ))}
           </List>
         </DialogContent>
       </Dialog>

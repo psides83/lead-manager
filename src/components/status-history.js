@@ -42,12 +42,12 @@ function StatusHistory(props) {
   return (
     <>
       <Tooltip title="Lead Status History">
-      {/* <Typography color="text.secondary">Status History</Typography> */}
-      <IconButton onClick={handleToggleDialog}>
-        <History />
-      </IconButton>
-          </Tooltip>
-        {/* <Button
+        {/* <Typography color="text.secondary">Status History</Typography> */}
+        <IconButton onClick={handleToggleDialog}>
+          <History />
+        </IconButton>
+      </Tooltip>
+      {/* <Button
           // color="success"
           size="small"
         //   variant="outlined"
@@ -57,18 +57,22 @@ function StatusHistory(props) {
         >
           Contact History
         </Button> */}
-      <Dialog onClose={handleCloseDialog} open={isShowingDialog} scroll="paper">
-        <DialogTitle id="history-dialog-title">
-          Lead Status History
-        </DialogTitle>
+      <Dialog
+        onClose={handleCloseDialog}
+        open={isShowingDialog}
+        style={{ backdropFilter: "blur(4px)" }}
+        scroll="paper"
+        PaperProps={{ style: { borderRadius: 8 }, elevation: 24 }}
+      >
+        <DialogTitle id="history-dialog-title">Lead Status History</DialogTitle>
         <DialogContent dividers>
           <List
-              sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
-            >
-          {events.sort(compare)?.map((event) => (
+            sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
+          >
+            {events.sort(compare)?.map((event) => (
               <ListItem key={event.id}>
                 <ListItemAvatar>
-                  <Avatar style={{backgroundColor: "#FFDE00"}}>
+                  <Avatar style={{ backgroundColor: "#FFDE00" }}>
                     <Agriculture color="primary" />
                   </Avatar>
                 </ListItemAvatar>
@@ -77,7 +81,7 @@ function StatusHistory(props) {
                   secondary={event.timestamp}
                 />
               </ListItem>
-          ))}
+            ))}
           </List>
         </DialogContent>
       </Dialog>

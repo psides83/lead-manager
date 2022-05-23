@@ -100,7 +100,7 @@ export default function MainAppBar(props) {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <HideOnScroll {...props}>
-        <AppBar>
+        <AppBar elevation={8}>
           <Toolbar>
             <IconButton
               size="large"

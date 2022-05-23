@@ -24,7 +24,7 @@ import {
 import { setDoc, collection, doc } from "@firebase/firestore";
 import { db } from "../services/firebase";
 // import { UpArrow } from "../../icons";
-import { color } from "@mui/system";
+import { borderRadius, color, style } from "@mui/system";
 import moment from "moment";
 
 /**
@@ -38,7 +38,13 @@ import moment from "moment";
  * setValidationMessage, setOpenError, setOpenSuccess
  */
 function AddTaskDialog(props) {
-  const { lead, tasksCount, setValidationMessage, setOpenError, setOpenSuccess } = props;
+  const {
+    lead,
+    tasksCount,
+    setValidationMessage,
+    setOpenError,
+    setOpenSuccess,
+  } = props;
   const [task, setTask] = useState("");
   const [isShowingDialog, setIsShowingDialog] = useState(false);
 
@@ -68,7 +74,7 @@ function AddTaskDialog(props) {
           leadName: lead.name,
           task: task,
           isComplete: false,
-          order: tasksCount + 1
+          order: tasksCount + 1,
         },
         { merge: true }
       );
@@ -107,7 +113,8 @@ function AddTaskDialog(props) {
       <Dialog
         onClose={handleCloseDialog}
         open={isShowingDialog}
-        style={{ backdropFilter: "blur(4px)" }}
+        style={{ backdropFilter: "blur(5px)" }}
+        PaperProps={{ style: { borderRadius: 8 }, elevation: 24 }}
       >
         <Box
           sx={{

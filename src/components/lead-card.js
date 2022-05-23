@@ -283,10 +283,10 @@ export default function LeadCard(props) {
       sx={{
         minWidth: 350,
         // minHeight: 250,
-        borderRadius: "10px",
+        borderRadius: 2,
         margin: "12px",
       }}
-      elevation={6}
+      elevation={4}
     >
       <CardContent>
         <Stack
