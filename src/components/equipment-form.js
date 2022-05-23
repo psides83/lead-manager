@@ -79,10 +79,11 @@ export default function EquipmentForm(props) {
   const handleCloseDialog = async () => {
     setIsShowingDialog(false);
     setIsShowingConfirmDialog(false);
-    await resetLeadForm();
+    resetLeadForm();
   };
 
   const handleToggleDialog = () => {
+    setDataHasChanges(false)
     setIsShowingDialog(!isShowingDialog);
   };
 
@@ -138,9 +139,12 @@ export default function EquipmentForm(props) {
           `Model edited from ${
             importedData.model === "" ? "BLANK" : importedData.model
           } to ${model === "" ? "BLANK" : model}`
-        )
-      );
+          )
+          );
+          console.log("you got here")
     }
+
+
 
     if (stock !== importedData.stock) {
       setChange(
@@ -238,9 +242,9 @@ export default function EquipmentForm(props) {
       { merge: true }
     );
 
-    setIsShowingDialog(false);
-    // setValidationMessage("lead successfully edited");
-    // setOpenSuccess(true);
+    // setIsShowingDialog(false);
+    setValidationMessage("lead successfully edited");
+    setOpenSuccess(true);
     handleCloseDialog();
 
     // sendNewleadEmail(
@@ -250,11 +254,11 @@ export default function EquipmentForm(props) {
     //   userProfile,
     //   salesman
     // );
-    await resetLeadForm();
+    resetLeadForm();
   };
 
   // Reset the Lead form
-  const resetLeadForm = async () => {
+  const resetLeadForm = () => {
     setModel("");
     setStock("");
     setSerial("");
@@ -551,7 +555,7 @@ export default function EquipmentForm(props) {
                 disabled={!dataHasChanges}
                 onClick={equipmentSubmitValidation}
               >
-                <p>Save</p>
+                Save
               </Button>
             </Grid>
           </Grid>

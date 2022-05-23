@@ -64,7 +64,7 @@ function TaskList(props) {
   const [searchText, setSearchText] = useState("");
   const [searchParam] = useState(["leadID", "isComplete"]);
   const [showingTasks, setShowingTasks] = useState(false);
-  const onlyCompleted = true
+  const onlyCompleted = true;
 
   const showTasks = (event) => {
     event.preventDefault();
@@ -132,7 +132,9 @@ function TaskList(props) {
         >
           <Badge
             badgeContent={
-              search(tasks).length !== 0 ? search(tasks, onlyCompleted).length : null
+              search(tasks).length !== 0
+                ? search(tasks, onlyCompleted).length
+                : null
             }
             color="primary"
           >
@@ -341,7 +343,12 @@ export default function LeadCard(props) {
           <Typography color="text.secondary">{`Status: ${status}`}</Typography>
           <StatusHistory events={lead.changeLog} />
         </Stack>
-        <EquipmentSection lead={lead} />
+        <EquipmentSection
+          lead={lead}
+          setValidationMessage={setValidationMessage}
+          setOpenError={setOpenError}
+          setOpenSuccess={setOpenSuccess}
+        />
 
         <TaskList
           lead={lead}

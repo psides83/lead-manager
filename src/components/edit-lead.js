@@ -77,6 +77,7 @@ export default function EditLead(props) {
 
   const handleToggleDialog = () => {
     setSuccess(false);
+    setLoading(false);
     setIsShowingDialog(!isShowingDialog);
   };
 
@@ -200,6 +201,7 @@ export default function EditLead(props) {
           } to ${name === "" ? "BLANK" : name}`
         )
       );
+      console.log("you made it here")
     }
 
     if (email !== importedData.email) {
@@ -291,10 +293,10 @@ export default function EditLead(props) {
       willFinance: willFinance,
       hasTrade: hasTrade,
       willPurchase: willPurchase,
-      changeLog: lead.changeLog,
+      changeLog: changeLog,
     };
 
-    const leadRef = doc(db, "leads", lead?.id);
+    const leadRef = doc(db, "leads", lead.id);
 
     await setDoc(leadRef, firestoreLead, { merge: true });
 
@@ -302,10 +304,10 @@ export default function EditLead(props) {
     setSuccess(true);
     setValidationMessage("lead successfully edited");
     setOpenSuccess(true);
-    timer.current = window.setTimeout(() => {
+    // timer.current = window.setTimeout(() => {
       handleCloseDialog();
       resetLeadForm();
-    }, 1000);
+    // }, 1000);
 
     // sendNewleadEmail(
     //   timestamp,
@@ -565,7 +567,7 @@ export default function EditLead(props) {
               </Button>
             </Grid>
 
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={6}>
               <Box sx={{ position: "relative" }}>
                 <Button
                   fullWidth
@@ -588,7 +590,7 @@ export default function EditLead(props) {
                       }}
                     />
                   )}
-                  {success ? <p>Success</p> : <p>Save</p>}
+                  {success ? "Success" : loading ? "Saving" : "Save"}
                 </Button>
               </Box>
             </Grid>

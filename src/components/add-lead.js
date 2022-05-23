@@ -91,6 +91,7 @@ export default function AddLead(props) {
   };
 
   const handleToggleDialog = () => {
+    setLeadSuccess(false)
     setIsShowingDialog(!isShowingDialog);
     console.log(equipmentList);
   };
@@ -706,6 +707,7 @@ export default function AddLead(props) {
               <Box sx={{ position: "relative" }}>
                 <Button
                   variant="outlined"
+                  size="small"
                   disabled={model === "" || loadingEquipment}
                   color="primary"
                   startIcon={equipmentSuccess ? <CheckCircleOutlineRounded/> : <AddCircleOutlined />}
@@ -735,6 +737,7 @@ export default function AddLead(props) {
               <Box sx={{ position: "relative" }}>
                 <Button
                   fullWidth
+                  size="small"
                   disabled={(name === "" || model === "" && equipmentList.length === 0) || loadingLead}
                   variant="contained"
                   endIcon={leadSuccess ? <CheckRounded /> : <SaveRounded />}
@@ -754,7 +757,7 @@ export default function AddLead(props) {
                       }}
                     />
                   )}
-                  {leadSuccess ? <p>Success</p> : <p>Save</p>}
+                  {leadSuccess ? "Success" : "Save"}
                 </Button>
               </Box>
             </Grid>
