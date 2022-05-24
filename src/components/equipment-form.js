@@ -33,9 +33,11 @@ import {
   Snackbar,
   ListItemButton,
   ListItemText,
+  CircularProgress,
 } from "@mui/material";
 import {
   AddCircleOutlineRounded,
+  CheckRounded,
   Close,
   DeleteRounded,
   EditRounded,
@@ -62,7 +64,7 @@ export default function EquipmentForm(props) {
   var [model, setModel] = useState("");
   var [stock, setStock] = useState("");
   var [serial, setSerial] = useState("");
-  var [status, setStatus] = useState("Equipment added to lead");
+  var [status, setStatus] = useState("Equipment added");
   var [availability, setAvailability] = useState("Availability Unknown");
   var [notes, setNotes] = useState("");
   var [changeLog, setChangeLog] = useState([]);
@@ -72,6 +74,8 @@ export default function EquipmentForm(props) {
   const [dataHasChanges, setDataHasChanges] = useState(false);
   const [isShowingDialog, setIsShowingDialog] = useState(false);
   const [isShowingConfirmDialog, setIsShowingConfirmDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   // var [validationMessage, setValidationMessage] = useState("");
   //#endregion
@@ -83,7 +87,8 @@ export default function EquipmentForm(props) {
   };
 
   const handleToggleDialog = () => {
-    setDataHasChanges(false)
+    setDataHasChanges(false);
+    setSuccess(false)
     setIsShowingDialog(!isShowingDialog);
   };
 
@@ -134,17 +139,16 @@ export default function EquipmentForm(props) {
 
   const logChanges = () => {
     if (model !== importedData.model) {
+      console.log(importedData);
       setChange(
         change.push(
           `Model edited from ${
             importedData.model === "" ? "BLANK" : importedData.model
           } to ${model === "" ? "BLANK" : model}`
-          )
-          );
-          console.log("you got here")
+        )
+      );
     }
-
-
+    console.log(change);
 
     if (stock !== importedData.stock) {
       setChange(
@@ -198,6 +202,7 @@ export default function EquipmentForm(props) {
     const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
     const id = equipment ? equipment.id : moment().format("yyyyMMDDHHmmss");
     logChanges();
+    console.log("you made it here");
     var changeString = change.toString().replace(/,/g, ", ");
 
     if (changeString[0] === ",") {
@@ -243,6 +248,8 @@ export default function EquipmentForm(props) {
     );
 
     // setIsShowingDialog(false);
+    setLoading(false)
+    setSuccess(true)
     setValidationMessage("lead successfully edited");
     setOpenSuccess(true);
     handleCloseDialog();
@@ -254,7 +261,7 @@ export default function EquipmentForm(props) {
     //   userProfile,
     //   salesman
     // );
-    resetLeadForm();
+    // resetLeadForm();
   };
 
   // Reset the Lead form
@@ -266,6 +273,7 @@ export default function EquipmentForm(props) {
     setNotes("");
     setAvailability("");
     setChangeLog([]);
+    setChange([])
     setImportedData({});
     setDataHasChanges(false);
   };
@@ -273,6 +281,7 @@ export default function EquipmentForm(props) {
   // Requst submission validation.
   const equipmentSubmitValidation = async (event) => {
     event.preventDefault();
+    setLoading(true)
 
     const lowerCaseLetters = /[a-z]/g;
     const upperCaseLetters = /[A-Z]/g;
@@ -551,11 +560,25 @@ export default function EquipmentForm(props) {
                 fullWidth
                 variant="contained"
                 color="primary"
-                endIcon={<SaveRounded />}
-                disabled={!dataHasChanges}
+                endIcon={success ? <CheckRounded /> : <SaveRounded />}
+                disabled={!dataHasChanges || loading}
                 onClick={equipmentSubmitValidation}
               >
-                Save
+                {loading && (
+                    <CircularProgress
+                      size={24}
+                      color="primary"
+                      sx={{
+                        // color: green[500],
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        marginTop: "-12px",
+                        marginLeft: "-12px",
+                      }}
+                    />
+                  )}
+                  {success ? "Success" : loading ? "Saving" : "Save"}
               </Button>
             </Grid>
           </Grid>

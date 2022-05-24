@@ -91,7 +91,7 @@ export default function AddLead(props) {
   };
 
   const handleToggleDialog = () => {
-    setLeadSuccess(false)
+    setLeadSuccess(false);
     setIsShowingDialog(!isShowingDialog);
     console.log(equipmentList);
   };
@@ -250,11 +250,7 @@ export default function AddLead(props) {
     setLeadSuccess(true);
     setValidationMessage("lead successfully submitted");
     setOpenSuccess(true);
-    timer.current = window.setTimeout(() => {
-      handleCloseDialog();
-      resetLeadForm();
-      setEquepmentList([]);
-    }, 1000);
+    handleCloseDialog();
   };
 
   // Reset complete form
@@ -278,8 +274,8 @@ export default function AddLead(props) {
 
   // Reset the Equipment form
   const resetEquipmentForm = async () => {
-    setLoadingEquipment(false)
-    setEquipmentSuccess(true)
+    setLoadingEquipment(false);
+    setEquipmentSuccess(true);
     timer.current = window.setTimeout(() => {
       setEquipmentSuccess(false);
       setModel("");
@@ -509,7 +505,7 @@ export default function AddLead(props) {
               <Stack direction="row">
                 {checkBoxes.map((option) => (
                   <FormControlLabel
-                  key={option.id}
+                    key={option.id}
                     control={
                       <Checkbox
                         id={option.id}
@@ -710,7 +706,13 @@ export default function AddLead(props) {
                   size="small"
                   disabled={model === "" || loadingEquipment}
                   color="primary"
-                  startIcon={equipmentSuccess ? <CheckCircleOutlineRounded/> : <AddCircleOutlined />}
+                  startIcon={
+                    equipmentSuccess ? (
+                      <CheckCircleOutlineRounded />
+                    ) : (
+                      <AddCircleOutlined />
+                    )
+                  }
                   onClick={equipmentSubmitValidation}
                 >
                   {loadingEquipment && (
@@ -738,7 +740,11 @@ export default function AddLead(props) {
                 <Button
                   fullWidth
                   size="small"
-                  disabled={(name === "" || model === "" && equipmentList.length === 0) || loadingLead}
+                  disabled={
+                    name === "" ||
+                    (model === "" && equipmentList.length === 0) ||
+                    loadingLead
+                  }
                   variant="contained"
                   endIcon={leadSuccess ? <CheckRounded /> : <SaveRounded />}
                   onClick={leadSubmitValidation}
