@@ -15,6 +15,7 @@ import { AgricultureRounded } from "@mui/icons-material";
 import Slide from "@mui/material/Slide";
 import PropTypes from "prop-types";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
+import { auth } from "../services/firebase";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -75,7 +76,7 @@ function HideOnScroll(props) {
 }
 
 export default function MainAppBar(props) {
-  const [{ searchText }, dispatch] = useStateValue();
+  const [{ searchText, user }, dispatch] = useStateValue();
   const [openSuccess, setOpenSuccess] = React.useState(false);
   const [openError, setOpenError] = useState(false);
   var [validationMessage, setValidationMessage] = useState("");
@@ -97,6 +98,15 @@ export default function MainAppBar(props) {
     });
   };
 
+  const logout = (e) => {
+    e.preventDefault();
+    if (user) {
+      // User is signed in, see docs for a list of available properties
+      // https://firebase.google.com/docs/reference/js/firebase.User
+      auth.signOut();
+    }
+  }
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <HideOnScroll {...props}>
@@ -108,6 +118,7 @@ export default function MainAppBar(props) {
               color="inherit"
               aria-label="open drawer"
               sx={{ mr: 2 }}
+              onClick={logout}
             >
               <AgricultureRounded />
             </IconButton>
