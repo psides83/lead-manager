@@ -1,5 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+} from "react-router-dom";
 import { auth, db } from "./services/firebase";
 import MainAppBar from "./components/app-bar.js";
 import LeadDashboard from "./components/dashboard.js";
@@ -11,6 +16,9 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import SignUp from "./components/sign-up";
 import SignIn from "./components/sign-in";
+import CustomerView from "./components/customer-view";
+import CustomerAppBar from "./components/customer-app-bar";
+import CustomerDashboard from "./components/customer-dashboard";
 
 const theme = createTheme({
   palette: {
@@ -40,8 +48,12 @@ export default function App() {
   const [{ user }, dispatch] = useStateValue();
   const [loading, setLoading] = useState(true);
   const [userProfile, setProfile] = useState({});
+  const customer = {
+    name: "Johnny Barrett",
+    phone: "3343994356",
+  };
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       onSnapshot(doc(db, "users", user?.uid), (doc) => {
         console.log("Current User: ", doc.data());
@@ -54,7 +66,7 @@ export default function App() {
     } catch (error) {
       console.log("error", error);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -77,7 +89,9 @@ export default function App() {
         setLoading(false);
       }
     });
-  }, [dispatch]);
+
+    fetchProfile();
+  }, [dispatch, fetchProfile]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -86,6 +100,10 @@ export default function App() {
       <Box style={{ marginTop: user && "75px" }}>
         <Router>
           <Routes>
+            <Route
+              path="/customer-view"
+              element={<CustomerAppBar customer={customer} />}
+            />
             <Route path="/" element={user ? <LeadDashboard /> : <SignIn />} />
           </Routes>
         </Router>

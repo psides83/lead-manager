@@ -2,7 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from 'firebase/firestore';
-
+import { getStorage, ref } from "firebase/storage";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -29,7 +29,10 @@ const auth = getAuth(app);
 // Firestore
 const db = getFirestore(app);
 
+// Get a reference to the storage service, which is used to create references in your storage bucket
+const storage = getStorage();
+
 // Analytics
 // const analytics = getAnalytics(app);
 
-export { app, auth, db };
+export { app, auth, db, storage };

@@ -21,7 +21,7 @@ import moment from "moment";
 import React, { useState } from "react";
 import { db } from "../services/firebase";
 
-function ContactDialog({ lead }) {
+function CustomerContactDialog({ lead }) {
   const [isShowingDialog, setIsShowingDialog] = useState(false);
 
   const handleCloseDialog = () => {
@@ -35,46 +35,18 @@ function ContactDialog({ lead }) {
   const logCall = async (e) => {
     e.preventDefault();
 
-    const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
-    const id = moment().format("yyyyMMDDHHmmss");
-    const contactLog = {
-      id: id,
-      event: "Called",
-      timestamp: timestamp,
-    };
-
-    lead.contactLog.push(contactLog);
-
-    const leadRef = doc(db, "leads", lead.id);
-
-    await setDoc(leadRef, { contactLog: lead.contactLog }, { merge: true });
-
-    window.location.href = `tel:${lead.phone}`;
+    window.location.href = `tel:3347349544`;
   };
 
   const logText = async (e) => {
     e.preventDefault();
 
-    const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
-    const id = moment().format("yyyyMMDDHHmmss");
-    const contactLog = {
-      id: id,
-      event: "Texted",
-      timestamp: timestamp,
-    };
-
-    lead.contactLog.push(contactLog);
-
-    const leadRef = doc(db, "leads", lead.id);
-
-    await setDoc(leadRef, { contactLog: lead.contactLog }, { merge: true });
-
-    window.location.href = `sms:+1${lead.phone}`;
+    window.location.href = `sms:+13347349544`;
   };
 
   return (
     <>
-      <Tooltip title="Contact Lead">
+      <Tooltip title="Contact Salesman">
         <IconButton aria-label="phone" onClick={handleToggleDialog}>
           <PhoneIphoneRounded />
         </IconButton>
@@ -115,4 +87,4 @@ function ContactDialog({ lead }) {
   );
 }
 
-export default ContactDialog;
+export default CustomerContactDialog;

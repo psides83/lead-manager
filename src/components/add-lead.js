@@ -48,7 +48,6 @@ import {
   SaveRounded,
   CheckCircleOutlineRounded,
 } from "@mui/icons-material";
-import { async } from "@firebase/util";
 import { PhoneNumberMask } from "./phone-number-mask";
 
 const ListItem = styled("li")(({ theme }) => ({
@@ -214,38 +213,6 @@ export default function AddLead(props) {
     const leadRef = doc(db, "leads", firestoreLead.id);
 
     await setDoc(leadRef, firestoreLead, { merge: true });
-
-    // for (var i = 0; i < equipmentList.length; i++) {
-    //   const equipment = {
-    //     leadID: firestoreLead.id,
-    //     id: equipmentList[i].id.toString(),
-    //     timestamp: firestoreLead.timestamp,
-    //     model: equipmentList[i].model,
-    //     stock: equipmentList[i].stock,
-    //     serial: equipmentList[i].serial,
-    //     availability: equipmentList[i].availability,
-    //     status: equipmentList[i].status,
-    //     notes: equipmentList[i].notes,
-    //     changeLog: equipmentList[i].changeLog,
-    //   };
-
-    //   const equipmentRef = doc(
-    //     db,
-    //     "leads",
-    //     firestoreLead.id,
-    //     "equipment",
-    //     equipment.id
-    //   );
-    //   await setDoc(equipmentRef, equipment, { merge: true });
-    // }
-
-    // sendNewleadEmail(
-    //   timestamp,
-    //   equipmentList,
-    //   fullName,
-    //   userProfile,
-    //   salesman
-    // );
     setLoadingLead(false);
     setLeadSuccess(true);
     setValidationMessage("lead successfully submitted");
@@ -366,15 +333,16 @@ export default function AddLead(props) {
   return (
     <>
       <Tooltip title="Add New Lead">
-        <IconButton
-          size="large"
-          edge="start"
+        <Button
+          // size="small"
+          // edge="start"
           color="inherit"
           onClick={handleToggleDialog}
-          sx={{ ml: 2 }}
+          endIcon={<PersonAddAltRounded color="inherit" />}
+          // sx={{ ml: 2 }}
         >
-          <PersonAddAltRounded />
-        </IconButton>
+          <Typography sx={{ display: { xs: "none", sm: "block" } }}>Add Lead</Typography>
+        </Button>
         {/* <Button
           color="secondary"
           size="small"

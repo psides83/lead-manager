@@ -9,13 +9,14 @@ import InputBase from "@mui/material/InputBase";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import AddLead from "./add-lead";
-import { Alert, Snackbar, Tooltip } from "@mui/material";
+import { Alert, Snackbar, Tab, Tabs, Tooltip } from "@mui/material";
 import { useStateValue } from "../state-management/state-provider";
 import { AccountCircleRounded, AgricultureRounded } from "@mui/icons-material";
 import Slide from "@mui/material/Slide";
 import PropTypes from "prop-types";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import { auth } from "../services/firebase";
+import CustomerDashboard from "./customer-dashboard";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -75,10 +76,12 @@ function HideOnScroll(props) {
   );
 }
 
-export default function MainAppBar(props) {
+export default function CustomerAppBar(props) {
+  const { customer } = props;
   const [{ searchText, user }, dispatch] = useStateValue();
   const [openSuccess, setOpenSuccess] = React.useState(false);
   const [openError, setOpenError] = useState(false);
+  const [value, setValue] = useState("leads");
   var [validationMessage, setValidationMessage] = useState("");
 
   // Handle closing of the alerts.
@@ -89,6 +92,10 @@ export default function MainAppBar(props) {
 
     setOpenSuccess(false);
     setOpenError(false);
+  };
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
   };
 
   const handleSearchInput = (e) => {
@@ -105,84 +112,66 @@ export default function MainAppBar(props) {
       // https://firebase.google.com/docs/reference/js/firebase.User
       auth.signOut();
     }
-  }
+  };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <HideOnScroll {...props}>
-        <AppBar elevation={8}>
-          <Toolbar>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              sx={{ mr: 2 }}
-              // onClick={useNavigate("/")}
-            >
-              <AgricultureRounded />
-            </IconButton>
-            <Typography
-              variant="h6"
-              noWrap
-              component="div"
-              sx={{ flexGrow: 1, display: { xs: "none", sm: "block" } }}
-            >
-              Lead Manager
-            </Typography>
-            <Search>
-              <SearchIconWrapper>
-                <SearchIcon />
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{ "aria-label": "search" }}
-                value={searchText}
-                onChange={handleSearchInput}
-              />
-            </Search>
-            <Box sx={{ flexGrow: 4 }} />
-            <AddLead
-              setValidationMessage={setValidationMessage}
-              setOpenError={setOpenError}
-              setOpenSuccess={setOpenSuccess}
-            />
-            <Tooltip title={user ? "Log Out" : "Log In"}>
+    <>
+      <Box sx={{ flexGrow: 1 }}>
+        <HideOnScroll {...props}>
+          <AppBar elevation={8}>
+            <Toolbar>
+              <IconButton
+                size="large"
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                sx={{ mr: 2 }}
+                // onClick={useNavigate("/")}
+              >
+                <AgricultureRounded />
+              </IconButton>
+              <Typography
+                variant="h6"
+                noWrap
+                component="div"
+                sx={{ flexGrow: 1, display: { xs: "none", sm: "block" } }}
+              >
+                Customer Dashboard
+              </Typography>
 
-            <IconButton
-              size="large"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={logout}
-            >
-              <AccountCircleRounded />
-            </IconButton>
-            </Tooltip>
-          </Toolbar>
-        </AppBar>
-      </HideOnScroll>
+              
+              <Box sx={{ flexGrow: 4 }} />
+            </Toolbar>
+          </AppBar>
+        </HideOnScroll>
 
-      <Snackbar
-        open={openSuccess}
-        autoHideDuration={3000}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
-          {validationMessage}
-        </Alert>
-      </Snackbar>
+        <Snackbar
+          open={openSuccess}
+          autoHideDuration={3000}
+          onClose={handleClose}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert
+            onClose={handleClose}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            {validationMessage}
+          </Alert>
+        </Snackbar>
 
-      <Snackbar
-        open={openError}
-        autoHideDuration={3000}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert onClose={handleClose} severity="error" sx={{ width: "100%" }}>
-          {validationMessage}
-        </Alert>
-      </Snackbar>
-    </Box>
+        <Snackbar
+          open={openError}
+          autoHideDuration={3000}
+          onClose={handleClose}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert onClose={handleClose} severity="error" sx={{ width: "100%" }}>
+            {validationMessage}
+          </Alert>
+        </Snackbar>
+      </Box>
+      <CustomerDashboard customer={customer} />
+    </>
   );
 }
