@@ -6,19 +6,18 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { auth, db } from "./services/firebase";
-import MainAppBar from "./components/app-bar.js";
-import LeadDashboard from "./components/dashboard.js";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
 import { Box } from "@mui/system";
 import { useStateValue } from "./state-management/state-provider";
 import { doc, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import SignUp from "./components/sign-up";
-import SignIn from "./components/sign-in";
-import CustomerView from "./components/customer-view";
-import CustomerAppBar from "./components/customer-app-bar";
-import CustomerDashboard from "./components/customer-dashboard";
+import MainAppBar from "./components/lead-components/app-bar";
+import LeadDashboard from "./components/lead-components/dashboard";
+import CustomerAppBar from "./components/customer-components/customer-app-bar";
+import SignIn from "./components/lead-components/sign-in";
+import Loading from "./components/loading";
+import CustomerSignUp from "./components/customer-components/customer-sign-up";
 
 const theme = createTheme({
   palette: {
@@ -45,53 +44,68 @@ const theme = createTheme({
 });
 
 export default function App() {
-  const [{ user }, dispatch] = useStateValue();
-  const [loading, setLoading] = useState(true);
+  const [{ user, customerUser, loading }, dispatch] = useStateValue();
   const [userProfile, setProfile] = useState({});
-  const customer = {
-    name: "Johnny Barrett",
-    phone: "3343994356",
+
+  const fetchProfile = (user) => {
+    if (user) {
+      try {
+        onSnapshot(doc(db, "users", user?.uid), (doc) => {
+          console.log("Current User: ", doc.data());
+          dispatch({
+            type: "SET_USER_PROFILE",
+            userProfile: doc.data(),
+          });
+        });
+      } catch (error) {
+        console.log("error", error);
+      }
+    }
   };
 
-  const fetchProfile = useCallback(async () => {
-    try {
-      onSnapshot(doc(db, "users", user?.uid), (doc) => {
-        console.log("Current User: ", doc.data());
-        setProfile(doc.data());
-        dispatch({
-          type: "SET_USER_PROFILE",
-          userProfile: doc.data(),
-        });
-      });
-    } catch (error) {
-      console.log("error", error);
-    }
-  }, [user]);
-
-  useEffect(() => {
+  const updateAuth = useCallback(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/firebase.User
         // setTimeout( function() { setLoading(false); }, 2000);
-
+        if (user.email == null) {
+          dispatch({
+            type: "SET_CUSTOMER_USER",
+            customerUser: user,
+          });
+          fetchProfile(user);
+          return;
+        }
         dispatch({
           type: "SET_USER",
           user: user,
         });
-        setLoading(false);
+        fetchProfile(user);
       } else {
         // User is signed out
         dispatch({
           type: "SET_USER",
           user: null,
         });
-        setLoading(false);
+        // User is signed out
+        dispatch({
+          type: "SET_CUSTOMER_USER",
+          customerUser: null,
+        });
+
+        // User is signed out
+        dispatch({
+          type: "SET_USER_PROFILE",
+          userProfile: null,
+        });
       }
     });
+  }, [onAuthStateChanged]);
 
-    fetchProfile();
-  }, [dispatch, fetchProfile]);
+  useEffect(() => {
+    updateAuth();
+  }, [dispatch, updateAuth]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -102,7 +116,7 @@ export default function App() {
           <Routes>
             <Route
               path="/customer-view"
-              element={<CustomerAppBar customer={customer} />}
+              element={customerUser ? <CustomerAppBar /> : <CustomerSignUp />}
             />
             <Route path="/" element={user ? <LeadDashboard /> : <SignIn />} />
           </Routes>

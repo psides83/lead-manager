@@ -4,10 +4,8 @@ import Card from "@mui/material/Card";
 import Stack from "@mui/material/Stack";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
-import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import HistoryIcon from "@mui/icons-material/History";
 import {
   collection,
   doc,
@@ -16,24 +14,16 @@ import {
   query,
   setDoc,
 } from "firebase/firestore";
-import { db } from "../services/firebase";
+import { db } from "../../services/firebase";
 import {
   AccountBalanceRounded,
   AgricultureRounded,
   AttachMoneyRounded,
-  EditRounded,
-  ExpandLessRounded,
-  ExpandMoreRounded,
   MailRounded,
-  PhoneIphoneRounded,
 } from "@mui/icons-material";
-import ContactHistory from "./contact-history";
-import StatusHistory from "./status-history";
+import StatusHistory from "../lead-components/status-history";
 import {
   Alert,
-  Badge,
-  Checkbox,
-  Collapse,
   Link,
   List,
   ListItem,
@@ -44,10 +34,6 @@ import {
   Tooltip,
 } from "@mui/material";
 import moment from "moment";
-import ContactDialog from "./contact-dialog";
-import EditLead from "./edit-lead";
-import AddTaskDialog from "./add-lead-tasks";
-import EquipmentForm from "./equipment-form";
 import CustomerContactDialog from "./customer-contact-dialog";
 
 const bull = (

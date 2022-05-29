@@ -1,6 +1,6 @@
 //Imports
 import React, { useRef, useState } from "react";
-import { db } from "../services/firebase";
+import { db } from "../../services/firebase";
 import { setDoc, doc } from "@firebase/firestore";
 // import { useStateValue } from "../state-management/StateProvider";
 import moment from "moment";
@@ -8,7 +8,7 @@ import {
   equipmentAvailabilityArray,
   equipmentStatusArray,
   leadStatusArray,
-} from "../models/arrays";
+} from "../../models/arrays";
 // import { sendNewleadEmail } from "../services/email-service";
 import { styled } from "@mui/material/styles";
 import {

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { auth, db } from "../services/firebase";
+import { auth, db } from "../../services/firebase";
 import {
   setDoc,
   doc,
@@ -11,8 +11,6 @@ import {
   query,
   collection,
 } from "@firebase/firestore";
-// import { classGroups } from "../../../models/classGroups";
-// import fbceLogo from "../../../logos/fbce-logo-childcare.svg";
 import {
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
@@ -20,7 +18,6 @@ import {
 } from "firebase/auth";
 import {
   Alert,
-  CssBaseline,
   FormHelperText,
   Typography,
   OutlinedInput,

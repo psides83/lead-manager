@@ -1,15 +1,12 @@
 //Imports
 import React, { useCallback, useEffect, useState } from "react";
-import { db } from "../services/firebase";
+import { db } from "../../services/firebase";
 import { setDoc, doc, deleteDoc } from "@firebase/firestore";
-// import { useStateValue } from "../state-management/StateProvider";
 import moment from "moment";
 import {
   equipmentAvailabilityArray,
   equipmentStatusArray,
-  leadStatusArray,
-} from "../models/arrays";
-// import { sendNewleadEmail } from "../services/email-service";
+} from "../../models/arrays";
 import { styled } from "@mui/material/styles";
 import {
   Box,
@@ -23,14 +20,6 @@ import {
   Dialog,
   DialogTitle,
   Tooltip,
-  Checkbox,
-  FormControlLabel,
-  Container,
-  Avatar,
-  FormGroup,
-  Alert,
-  Chip,
-  Snackbar,
   ListItemButton,
   ListItemText,
   CircularProgress,
@@ -40,11 +29,8 @@ import {
   CheckRounded,
   Close,
   DeleteRounded,
-  EditRounded,
   SaveRounded,
 } from "@mui/icons-material";
-import { async } from "@firebase/util";
-import { PhoneNumberMask } from "./phone-number-mask";
 
 const ListItem = styled("li")(({ theme }) => ({
   margin: theme.spacing(0.5),

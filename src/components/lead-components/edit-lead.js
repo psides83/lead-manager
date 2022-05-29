@@ -1,10 +1,10 @@
 //Imports
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { db } from "../services/firebase";
+import { db } from "../../services/firebase";
 import { setDoc, doc, deleteDoc } from "@firebase/firestore";
 // import { useStateValue } from "../state-management/StateProvider";
 import moment from "moment";
-import { leadStatusArray } from "../models/arrays";
+import { leadStatusArray } from "../../models/arrays";
 // import { sendNewleadEmail } from "../services/email-service";
 import { styled } from "@mui/material/styles";
 import {

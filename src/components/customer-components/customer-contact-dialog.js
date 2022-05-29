@@ -19,7 +19,7 @@ import {
 import { doc, setDoc } from "firebase/firestore";
 import moment from "moment";
 import React, { useState } from "react";
-import { db } from "../services/firebase";
+import { db } from "../../services/firebase";
 
 function CustomerContactDialog({ lead }) {
   const [isShowingDialog, setIsShowingDialog] = useState(false);

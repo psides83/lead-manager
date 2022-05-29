@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { onSnapshot, doc } from "firebase/firestore";
-import { useStateValue } from "../state-management/state-provider";
-import { auth, db } from "../services/firebase";
+import { useStateValue } from "../../state-management/state-provider";
+import { auth, db } from "../../services/firebase";
 import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,

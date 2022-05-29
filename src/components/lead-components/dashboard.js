@@ -12,7 +12,6 @@ import {
   MenuItem,
   CircularProgress,
 } from "@mui/material";
-import AddLead from "./add-lead.js";
 import {
   collection,
   onSnapshot,
@@ -20,8 +19,8 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { db } from "../services/firebase";
-import { useStateValue } from "../state-management/state-provider";
+import { db } from "../../services/firebase";
+import { useStateValue } from "../../state-management/state-provider";
 import Tasks from "./task-list";
 
 const filters = ["Active", "Closed"];
@@ -58,6 +57,7 @@ function LeadDashboard() {
       setLeads(
         querySnapshot.docs.map((doc) => ({
           id: doc.data().id,
+          uid: doc.data().uid,
           timestamp: doc.data().timestamp,
           name: doc.data().name,
           email: doc.data().email,

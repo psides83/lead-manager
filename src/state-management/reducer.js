@@ -1,6 +1,9 @@
 export const initialState = {
+  loading: true,
   searchText: "",
   user: null,
+  customerUser: null,
+  userProfile: null
 };
 
 const reducer = (state, action) => {
@@ -10,6 +13,12 @@ const reducer = (state, action) => {
       return {
         ...state,
         user: action.user,
+      };
+
+    case "SET_CUSTOMER_USER":
+      return {
+        ...state,
+        customerUser: action.customerUser,
       };
 
     case "SET_USER_PROFILE":
@@ -22,6 +31,12 @@ const reducer = (state, action) => {
       return {
         ...state,
         searchText: action.searchText,
+      };
+
+    case "SET_LOADING":
+      return {
+        ...state,
+        loading: action.loading,
       };
 
     default:

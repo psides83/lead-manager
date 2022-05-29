@@ -22,7 +22,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { setDoc, collection, doc } from "@firebase/firestore";
-import { db } from "../services/firebase";
+import { db } from "../../services/firebase";
 // import { UpArrow } from "../../icons";
 import { borderRadius, color, style } from "@mui/system";
 import moment from "moment";

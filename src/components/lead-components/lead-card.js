@@ -2,21 +2,14 @@ import React, { useCallback, useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Stack from "@mui/material/Stack";
-import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
-import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import HistoryIcon from "@mui/icons-material/History";
 import {
-  collection,
   doc,
-  onSnapshot,
-  orderBy,
-  query,
   setDoc,
 } from "firebase/firestore";
-import { db } from "../services/firebase";
+import { db } from "../../services/firebase";
 import {
   AccountBalanceRounded,
   AgricultureRounded,

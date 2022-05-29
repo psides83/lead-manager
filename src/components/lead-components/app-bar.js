@@ -10,12 +10,12 @@ import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import AddLead from "./add-lead";
 import { Alert, Snackbar, Tooltip } from "@mui/material";
-import { useStateValue } from "../state-management/state-provider";
+import { useStateValue } from "../../state-management/state-provider";
 import { AccountCircleRounded, AgricultureRounded } from "@mui/icons-material";
 import Slide from "@mui/material/Slide";
 import PropTypes from "prop-types";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
-import { auth } from "../services/firebase";
+import { auth } from "../../services/firebase";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -103,6 +103,22 @@ export default function MainAppBar(props) {
     if (user) {
       // User is signed in, see docs for a list of available properties
       // https://firebase.google.com/docs/reference/js/firebase.User
+      // User is signed out
+      dispatch({
+        type: "SET_USER",
+        user: null,
+      });
+      // User is signed out
+      dispatch({
+        type: "SET_CUSTOMER_USER",
+        customerUser: null,
+      });
+      
+      // User is signed out
+      dispatch({
+        type: "SET_USER_PROFILE",
+        userProfile: null,
+      });
       auth.signOut();
     }
   }

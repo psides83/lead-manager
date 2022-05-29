@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -8,15 +8,17 @@ import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
-import AddLead from "./add-lead";
 import { Alert, Snackbar, Tab, Tabs, Tooltip } from "@mui/material";
-import { useStateValue } from "../state-management/state-provider";
+import { useStateValue } from "../../state-management/state-provider";
 import { AccountCircleRounded, AgricultureRounded } from "@mui/icons-material";
 import Slide from "@mui/material/Slide";
 import PropTypes from "prop-types";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
-import { auth } from "../services/firebase";
+import { auth } from "../../services/firebase";
 import CustomerDashboard from "./customer-dashboard";
+import { onAuthStateChanged } from "firebase/auth";
+import CustomerSignUp from "./customer-sign-up";
+import Loading from "../loading";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -77,8 +79,8 @@ function HideOnScroll(props) {
 }
 
 export default function CustomerAppBar(props) {
-  const { customer } = props;
-  const [{ searchText, user }, dispatch] = useStateValue();
+  const { leads } = props
+  const [{ userProfile, customerUser, loading }, dispatch] = useStateValue();
   const [openSuccess, setOpenSuccess] = React.useState(false);
   const [openError, setOpenError] = useState(false);
   const [value, setValue] = useState("leads");
@@ -98,23 +100,20 @@ export default function CustomerAppBar(props) {
     setValue(newValue);
   };
 
-  const handleSearchInput = (e) => {
-    dispatch({
-      type: "SET_SEARCH_TEXT",
-      searchText: e.target.value,
-    });
-  };
-
-  const logout = (e) => {
-    e.preventDefault();
-    if (user) {
-      // User is signed in, see docs for a list of available properties
-      // https://firebase.google.com/docs/reference/js/firebase.User
-      auth.signOut();
-    }
-  };
+  // const logout = (e) => {
+  //   e.preventDefault();
+  //   if (user) {
+  //     // User is signed in, see docs for a list of available properties
+  //     // https://firebase.google.com/docs/reference/js/firebase.User
+  //     auth.signOut();
+  //   }
+  // };
 
   return (
+    <>
+      {loading && <Loading/>}
+    {!customerUser ? <CustomerSignUp />
+    :
     <>
       <Box sx={{ flexGrow: 1 }}>
         <HideOnScroll {...props}>
@@ -139,7 +138,6 @@ export default function CustomerAppBar(props) {
                 Customer Dashboard
               </Typography>
 
-              
               <Box sx={{ flexGrow: 4 }} />
             </Toolbar>
           </AppBar>
@@ -171,7 +169,9 @@ export default function CustomerAppBar(props) {
           </Alert>
         </Snackbar>
       </Box>
-      <CustomerDashboard customer={customer} />
+      <CustomerDashboard leads={leads} />
+      </>
+    }
     </>
   );
 }
