@@ -10,6 +10,7 @@ import {
   addDoc,
   collection,
   doc,
+  getDoc,
   onSnapshot,
   query,
   setDoc,
@@ -17,27 +18,45 @@ import {
 } from "firebase/firestore";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
-import { db } from "../../services/firebase";
+import {
+  db,
+  requestForToken,
+  onMessageListener,
+  messaging,
+} from "../../services/firebase";
+import { sendNotificationToClient } from "../../services/firebase-admin";
 
 function CustomerMessenger(props) {
-  const { user, lead } = props;
+  const { user, lead, leads } = props;
   const [messageText, setMessageText] = useState("");
   const [messages, setMessages] = useState([]);
 
+  const getSalesmanUID = useCallback(async () => {
+    const docRef = doc(db, "users");
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      console.log("Document data:", docSnap.data());
+    } else {
+      // doc.data() will be undefined in this case
+      console.log("No such document!");
+    }
+  }, []);
+
   const recipiantID = useCallback(() => {
     if (user.type === "admin") return lead.uid;
-    if (user.type === "customer") return "MT9eUPO0ZxVIQLv1sOjnHJpV9YD3";
-  }, [user, lead]);
+    if (user.type === "customer") return leads[0]?.salesmanID;
+  }, [user, lead, leads]);
 
   const threadID = useCallback(() => {
     if (user.type === "admin") return user.id + lead.uid;
-    if (user.type === "customer")
-      return "MT9eUPO0ZxVIQLv1sOjnHJpV9YD3" + user.id;
+    if (user.type === "customer") return leads[0]?.salesmanID + user.id;
     return;
-  }, [user, lead]);
+  }, [user, lead, leads]);
 
   //    Fetch leads from firestore
   const fetchMessages = useCallback(async () => {
+    console.log(threadID());
     const messagesQuery = query(
       collection(db, "messages"),
       where("threadID", "==", threadID())
@@ -57,7 +76,6 @@ function CustomerMessenger(props) {
     });
 
     console.log(user?.type);
-
     // timer.current = window.setTimeout(() => {
     //   setLoading(false);
     // }, 1000);
@@ -71,6 +89,10 @@ function CustomerMessenger(props) {
     e.preventDefault();
     const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
     const id = moment().format("yyyyMMDDHHmmss");
+    const notificationMessage = {
+          title: "New message recieved from salesman",
+          body: messageText,
+        };
 
     if (threadID()) {
       const messageData = {
@@ -83,28 +105,12 @@ function CustomerMessenger(props) {
         threadID: threadID(),
       };
       const newMessage = doc(db, "messages", messageData.id);
-      await setDoc(newMessage, messageData, { merge: true });
+      await setDoc(newMessage, messageData, { merge: true })
+      .then(
+        // sendNotificationToClient(lead.notificationToken, notificationMessage)
+      );
       setMessageText("");
     }
-  };
-
-  const filter = (messages) => {
-    return messages.filter((message) => {
-      /*
-      // in here we check if our region is equal to our c state
-      // if it's equal to then only return the messages that match
-      // if not return All the countries
-      */
-      if (lead) {
-        if (message.sednerID === lead.uid || message.recipiantID === lead.uid) {
-          return message;
-        }
-      }
-      if (message.senderID === user?.id || message.recipiantID === user?.id) {
-        return message;
-      }
-      return null;
-    });
   };
 
   return (
@@ -149,20 +155,20 @@ function CustomerMessenger(props) {
               sx={{
                 display: "flex",
                 justifyContent:
-                  message.sender === user?.type ? "flex-end" : "flex-start",
+                  message.senderID === user?.id ? "flex-end" : "flex-start",
                 flexGrow: 1,
               }}
             >
               <Box
                 sx={{
                   background:
-                    message.sender === user?.type ? "#367C2B" : "#e9e9e9",
+                    message.senderID === user?.id ? "#367C2B" : "#e9e9e9",
                   padding: "4px 12px 4px 12px",
                   margin: "0 12px 12px",
                   borderRadius: "30px",
                   textAlign: "left",
                   alignSelf: "flex-end",
-                  color: message.sender === user?.type ? "white" : "inherit",
+                  color: message.senderID === user?.id ? "white" : "inherit",
                 }}
               >
                 {message.text}
