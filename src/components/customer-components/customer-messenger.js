@@ -24,7 +24,6 @@ import {
   onMessageListener,
   messaging,
 } from "../../services/firebase";
-import { sendNotificationToClient } from "../../services/firebase-admin";
 
 function CustomerMessenger(props) {
   const { user, lead, leads } = props;
