@@ -71,6 +71,7 @@ function CustomerDashboard() {
         querySnapshot.docs.map((doc) => ({
           id: doc.data().id,
           uid: doc.data().uid,
+          salesmanID: doc.data().salesmanID,
           timestamp: doc.data().timestamp,
           name: doc.data().name,
           email: doc.data().email,
@@ -113,7 +114,9 @@ function CustomerDashboard() {
             </Grid>
           ))}
           <Grid item xs={12} sm={6} md={6} lg={4}>
-            <CustomerMessenger user={userProfile} />
+            {leads.length !== 0 && (
+              <CustomerMessenger user={userProfile} leads={leads} />
+            )}
           </Grid>
         </Grid>
       </Box>
