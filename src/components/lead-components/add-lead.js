@@ -49,6 +49,7 @@ import {
   CheckCircleOutlineRounded,
 } from "@mui/icons-material";
 import { PhoneNumberMask } from "./phone-number-mask";
+import { useStateValue } from "../../state-management/state-provider";
 
 const ListItem = styled("li")(({ theme }) => ({
   margin: theme.spacing(0.5),
@@ -57,6 +58,7 @@ const ListItem = styled("li")(({ theme }) => ({
 export default function AddLead(props) {
   //#region State Properties
   const { setValidationMessage, setOpenSuccess, setOpenError } = props;
+  const [{ userProfile }] = useStateValue();
   // const [openSuccess, setOpenSuccess] = useState(false);
   // const [openError, setOpenError] = useState(false);
   var [name, setName] = useState("");
@@ -196,6 +198,7 @@ export default function AddLead(props) {
 
     const firestoreLead = {
       id: id,
+      salesmanID: userProfile.id, 
       timestamp: timestamp,
       name: name,
       email: email,
