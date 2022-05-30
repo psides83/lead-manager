@@ -1,4 +1,4 @@
-import { ArrowUpwardRounded, Check } from "@mui/icons-material";
+import { ArrowUpwardRounded, ChatBubble, Check } from "@mui/icons-material";
 import {
   Box,
   IconButton,
@@ -24,10 +24,24 @@ function CustomerMessenger(props) {
   const [messageText, setMessageText] = useState("");
   const [messages, setMessages] = useState([]);
 
+  const recipiantID = useCallback(() => {
+    if (user.type === "admin") return lead.uid;
+    if (user.type === "customer") return "MT9eUPO0ZxVIQLv1sOjnHJpV9YD3";
+  }, [user, lead]);
+
+  const threadID = useCallback(() => {
+    if (user.type === "admin") return user.id + lead.uid;
+    if (user.type === "customer")
+      return "MT9eUPO0ZxVIQLv1sOjnHJpV9YD3" + user.id;
+    return;
+  }, [user, lead]);
+
   //    Fetch leads from firestore
   const fetchMessages = useCallback(async () => {
-    console.log(lead);
-    const messagesQuery = query(collection(db, "messages"));
+    const messagesQuery = query(
+      collection(db, "messages"),
+      where("threadID", "==", threadID())
+    );
 
     onSnapshot(messagesQuery, (querySnapshot) => {
       setMessages(
@@ -57,18 +71,21 @@ function CustomerMessenger(props) {
     e.preventDefault();
     const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
     const id = moment().format("yyyyMMDDHHmmss");
-    const messageData = {
-      id: id,
-      timestamp: timestamp,
-      text: messageText,
-      sender: user.type,
-      senderID: user.id,
-      recipiantID:
-        user?.type === "admin" ? lead?.uid : "MT9eUPO0ZxVIQLv1sOjnHJpV9YD3",
-    };
-    const newMessage = doc(db, "messages", messageData.id);
-    await setDoc(newMessage, messageData, { merge: true });
-    setMessageText("");
+
+    if (threadID()) {
+      const messageData = {
+        id: id,
+        timestamp: timestamp,
+        text: messageText,
+        sender: user.type,
+        senderID: user.id,
+        recipiantID: recipiantID(),
+        threadID: threadID(),
+      };
+      const newMessage = doc(db, "messages", messageData.id);
+      await setDoc(newMessage, messageData, { merge: true });
+      setMessageText("");
+    }
   };
 
   const filter = (messages) => {
@@ -126,7 +143,7 @@ function CustomerMessenger(props) {
             justifyContent: "flex-end",
           }}
         >
-          {filter(messages).map((message) => (
+          {messages.map((message) => (
             <Box
               key={message.id}
               sx={{

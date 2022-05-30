@@ -120,21 +120,6 @@ export default function CustomerCard(props) {
 
   const logEmail = async (e) => {
     e.preventDefault();
-
-    const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
-    const id = moment().format("yyyyMMDDHHmmss");
-    const contactLog = {
-      id: id,
-      event: "Emailed",
-      timestamp: timestamp,
-    };
-
-    lead.contactLog.push(contactLog);
-
-    const leadRef = doc(db, "leads", lead.id);
-
-    await setDoc(leadRef, { contactLog: lead.contactLog }, { merge: true });
-
     window.location.href = `mailto:${lead.email}`;
   };
 
@@ -164,7 +149,7 @@ export default function CustomerCard(props) {
               </IconButton>
             </Tooltip>
             <Tooltip title="View Quote">
-              <IconButton aria-label="edit" onClick={logEmail}>
+              <IconButton aria-label="edit" >
                 <AttachMoneyRounded />
               </IconButton>
             </Tooltip>
