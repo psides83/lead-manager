@@ -1,40 +1,33 @@
-import React, { useCallback, useEffect, useState } from "react";
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import Stack from "@mui/material/Stack";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import {
-  doc,
-  setDoc,
-} from "firebase/firestore";
+import React, { useState } from "react";
+import { doc, setDoc } from "firebase/firestore";
 import { db } from "../../services/firebase";
 import {
   AccountBalanceRounded,
   AgricultureRounded,
   AttachMoneyRounded,
-  EditRounded,
   ExpandLessRounded,
   ExpandMoreRounded,
   MailRounded,
-  PhoneIphoneRounded,
 } from "@mui/icons-material";
 import ContactHistory from "./contact-history";
 import StatusHistory from "./status-history";
 import {
   Alert,
   Badge,
+  Card,
+  CardContent,
   Checkbox,
   Collapse,
-  Link,
+  IconButton,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   Snackbar,
+  Stack,
   Tooltip,
+  Typography,
 } from "@mui/material";
 import moment from "moment";
 import ContactDialog from "./contact-dialog";
@@ -42,19 +35,10 @@ import EditLead from "./edit-lead";
 import AddTaskDialog from "./add-lead-tasks";
 import EquipmentForm from "./equipment-form";
 
-const bull = (
-  <Box
-    component="span"
-    sx={{ display: "inline-block", mx: "2px", transform: "scale(0.8)" }}
-  >
-    •
-  </Box>
-);
-
 function TaskList(props) {
   const { lead, tasks, setValidationMessage, setOpenError, setOpenSuccess } =
     props;
-  const [searchText, setSearchText] = useState("");
+  const [searchText] = useState("");
   const [searchParam] = useState(["leadID", "isComplete"]);
   const [showingTasks, setShowingTasks] = useState(false);
   const onlyCompleted = true;
@@ -83,12 +67,7 @@ function TaskList(props) {
         });
       } else if (item.leadID === lead.id && item.isComplete !== onlyCompleted) {
         return searchParam.some((newItem) => {
-          return (
-            item[newItem]
-              .toString()
-              .toLowerCase()
-              .indexOf(searchText.toLowerCase()) > -1
-          );
+          return item[newItem];
         });
       }
       return null;
@@ -191,6 +170,20 @@ function EquipmentSection(props) {
     showingEquipment ? setShowingEquipment(false) : setShowingEquipment(true);
   };
 
+  const stockNumber = (stock) => {
+    if (stock === undefined) return;
+    if (stock === null) return;
+    if (stock === "") return;
+    return <Typography variant="caption">{`Stock: ${stock}`}</Typography>;
+  };
+
+  const serialNumber = (serial) => {
+    if (serial === undefined) return;
+    if (serial === null) return;
+    if (serial === "") return;
+    return <Typography variant="caption">{`Serial: ${serial}`}</Typography>;
+  };
+
   return (
     <>
       <Stack direction="row" justifyContent="space-between">
@@ -215,14 +208,25 @@ function EquipmentSection(props) {
         >
           {lead.equipment.map((unit) => {
             return (
-              <ListItem key={unit.id} disablePadding>
-                <EquipmentForm
-                  equipment={unit}
-                  lead={lead}
-                  setValidationMessage={setValidationMessage}
-                  setOpenError={setOpenError}
-                  setOpenSuccess={setOpenSuccess}
-                />
+              <ListItem key={unit.id} disablePadding sx={{ width: "100%" }}>
+                <Stack
+                  direction="row"
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <EquipmentForm
+                    equipment={unit}
+                    lead={lead}
+                    setValidationMessage={setValidationMessage}
+                    setOpenError={setOpenError}
+                    setOpenSuccess={setOpenSuccess}
+                  />
+
+                  <Stack justifyItems="flex-end" alignContent="flex-end">
+                    {stockNumber(unit.stock)}
+                    {serialNumber(unit.serial)}
+                  </Stack>
+                </Stack>
               </ListItem>
             );
           })}
@@ -236,9 +240,7 @@ export default function LeadCard(props) {
   const { lead, tasks } = props;
   const name = lead.name;
   const dateCreated = lead.timestamp;
-  const lastChange = lead.changeLog.length - 1;
   const status = lead.status;
-  const notes = lead.notes;
   const [openSuccess, setOpenSuccess] = React.useState(false);
   const [openError, setOpenError] = useState(false);
   var [validationMessage, setValidationMessage] = useState("");

@@ -6,14 +6,12 @@ import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
-import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import AddLead from "./add-lead";
 import { Alert, Snackbar, Tooltip } from "@mui/material";
 import { useStateValue } from "../../state-management/state-provider";
 import { AccountCircleRounded, AgricultureRounded } from "@mui/icons-material";
 import Slide from "@mui/material/Slide";
-import PropTypes from "prop-types";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import { auth } from "../../services/firebase";
 
@@ -146,6 +144,7 @@ export default function MainAppBar(props) {
             >
               Lead Manager
             </Typography>
+              <Box sx={{ flexGrow: 4 }} />
             <Search>
               <SearchIconWrapper>
                 <SearchIcon />
@@ -157,7 +156,6 @@ export default function MainAppBar(props) {
                 onChange={handleSearchInput}
               />
             </Search>
-            <Box sx={{ flexGrow: 4 }} />
             <AddLead
               setValidationMessage={setValidationMessage}
               setOpenError={setOpenError}

@@ -1,4 +1,4 @@
-import { ArrowUpwardRounded, ChatBubble, Check } from "@mui/icons-material";
+import { ArrowUpwardRounded } from "@mui/icons-material";
 import {
   Box,
   IconButton,
@@ -7,10 +7,8 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  addDoc,
   collection,
   doc,
-  getDoc,
   onSnapshot,
   query,
   setDoc,
@@ -20,9 +18,6 @@ import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   db,
-  requestForToken,
-  onMessageListener,
-  messaging,
 } from "../../services/firebase";
 
 function CustomerMessenger(props) {
@@ -30,17 +25,17 @@ function CustomerMessenger(props) {
   const [messageText, setMessageText] = useState("");
   const [messages, setMessages] = useState([]);
 
-  const getSalesmanUID = useCallback(async () => {
-    const docRef = doc(db, "users");
-    const docSnap = await getDoc(docRef);
+  // const getSalesmanUID = useCallback(async () => {
+  //   const docRef = doc(db, "users");
+  //   const docSnap = await getDoc(docRef);
 
-    if (docSnap.exists()) {
-      console.log("Document data:", docSnap.data());
-    } else {
-      // doc.data() will be undefined in this case
-      console.log("No such document!");
-    }
-  }, []);
+  //   if (docSnap.exists()) {
+  //     console.log("Document data:", docSnap.data());
+  //   } else {
+  //     // doc.data() will be undefined in this case
+  //     console.log("No such document!");
+  //   }
+  // }, []);
 
   const recipiantID = useCallback(() => {
     if (user.type === "admin") return lead.uid;
@@ -74,11 +69,10 @@ function CustomerMessenger(props) {
       );
     });
 
-    console.log(user?.type);
     // timer.current = window.setTimeout(() => {
     //   setLoading(false);
     // }, 1000);
-  }, [user, lead]);
+  }, [threadID]);
 
   useEffect(() => {
     fetchMessages();
@@ -88,10 +82,6 @@ function CustomerMessenger(props) {
     e.preventDefault();
     const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
     const id = moment().format("yyyyMMDDHHmmss");
-    const notificationMessage = {
-          title: "New message recieved from salesman",
-          body: messageText,
-        };
 
     if (threadID()) {
       const messageData = {

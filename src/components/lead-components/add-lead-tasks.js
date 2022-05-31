@@ -1,30 +1,22 @@
 import React, { useState } from "react";
 import {
   AddTask,
-  ArrowUpward,
   Check,
   Close,
-  Message,
-  Send,
 } from "@mui/icons-material";
 import {
   Box,
   Grid,
-  Button,
   TextareaAutosize,
   Dialog,
-  DialogTitle,
   IconButton,
   Stack,
-  ListItem,
-  Chip,
   Typography,
   Tooltip,
 } from "@mui/material";
-import { setDoc, collection, doc } from "@firebase/firestore";
+import { setDoc, doc } from "@firebase/firestore";
 import { db } from "../../services/firebase";
 // import { UpArrow } from "../../icons";
-import { borderRadius, color, style } from "@mui/system";
 import moment from "moment";
 
 /**
@@ -158,6 +150,7 @@ function AddTaskDialog(props) {
                     padding: "10px 10px 12px 10px",
                     resize: "none",
                     outline: "none",
+                    fontFamily: "sans-serif",
                     fontSize: "16px",
                   }}
                   // minRows={8}
