@@ -1,9 +1,5 @@
 import React, { useState } from "react";
-import {
-  AddTask,
-  Check,
-  Close,
-} from "@mui/icons-material";
+import { AddTask, Check, Close } from "@mui/icons-material";
 import {
   Box,
   Grid,
