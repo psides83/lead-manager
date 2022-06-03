@@ -1,16 +1,12 @@
 //Imports
 import React, { useCallback, useEffect, useState } from "react";
-import { db } from "../services/firebase";
-import { setDoc, doc, deleteDoc } from "@firebase/firestore";
-// import { useStateValue } from "../state-management/StateProvider";
+import { db } from "../../services/firebase";
+import { setDoc, doc } from "@firebase/firestore";
 import moment from "moment";
 import {
   equipmentAvailabilityArray,
   equipmentStatusArray,
-  leadStatusArray,
-} from "../models/arrays";
-// import { sendNewleadEmail } from "../services/email-service";
-import { styled } from "@mui/material/styles";
+} from "../../models/arrays";
 import {
   Box,
   Grid,
@@ -23,14 +19,6 @@ import {
   Dialog,
   DialogTitle,
   Tooltip,
-  Checkbox,
-  FormControlLabel,
-  Container,
-  Avatar,
-  FormGroup,
-  Alert,
-  Chip,
-  Snackbar,
   ListItemButton,
   ListItemText,
   CircularProgress,
@@ -40,15 +28,8 @@ import {
   CheckRounded,
   Close,
   DeleteRounded,
-  EditRounded,
   SaveRounded,
 } from "@mui/icons-material";
-import { async } from "@firebase/util";
-import { PhoneNumberMask } from "./phone-number-mask";
-
-const ListItem = styled("li")(({ theme }) => ({
-  margin: theme.spacing(0.5),
-}));
 
 export default function EquipmentForm(props) {
   //#region State Properties
@@ -69,7 +50,6 @@ export default function EquipmentForm(props) {
   var [notes, setNotes] = useState("");
   var [changeLog, setChangeLog] = useState([]);
   var [change, setChange] = useState([]);
-  var [leadEquipment, setLeadEquipment] = useState([]);
   const [importedData, setImportedData] = useState({});
   const [dataHasChanges, setDataHasChanges] = useState(false);
   const [isShowingDialog, setIsShowingDialog] = useState(false);
@@ -88,7 +68,7 @@ export default function EquipmentForm(props) {
 
   const handleToggleDialog = () => {
     setDataHasChanges(false);
-    setSuccess(false)
+    setSuccess(false);
     setIsShowingDialog(!isShowingDialog);
   };
 
@@ -102,7 +82,7 @@ export default function EquipmentForm(props) {
 
   // load data from equipment
   const loadEquipmentData = useCallback(() => {
-    if (equipment) {
+    if (isShowingDialog && equipment) {
       setModel(equipment.model);
       setStock(equipment.stock);
       setSerial(equipment.serial);
@@ -119,7 +99,7 @@ export default function EquipmentForm(props) {
         status: equipment.status,
       });
     }
-  }, [isShowingDialog]);
+  }, [isShowingDialog, equipment]);
 
   useEffect(() => {
     loadEquipmentData();
@@ -248,8 +228,8 @@ export default function EquipmentForm(props) {
     );
 
     // setIsShowingDialog(false);
-    setLoading(false)
-    setSuccess(true)
+    setLoading(false);
+    setSuccess(true);
     setValidationMessage("lead successfully edited");
     setOpenSuccess(true);
     handleCloseDialog();
@@ -273,7 +253,7 @@ export default function EquipmentForm(props) {
     setNotes("");
     setAvailability("");
     setChangeLog([]);
-    setChange([])
+    setChange([]);
     setImportedData({});
     setDataHasChanges(false);
   };
@@ -281,10 +261,7 @@ export default function EquipmentForm(props) {
   // Requst submission validation.
   const equipmentSubmitValidation = async (event) => {
     event.preventDefault();
-    setLoading(true)
-
-    const lowerCaseLetters = /[a-z]/g;
-    const upperCaseLetters = /[A-Z]/g;
+    setLoading(true);
 
     if (model === "") {
       setValidationMessage("Equipment must have a model");
@@ -390,6 +367,7 @@ export default function EquipmentForm(props) {
                   >
                     {equipment.status}
                   </Typography>
+
                   <Typography
                     sx={{ display: "inline" }}
                     component="span"
@@ -565,20 +543,20 @@ export default function EquipmentForm(props) {
                 onClick={equipmentSubmitValidation}
               >
                 {loading && (
-                    <CircularProgress
-                      size={24}
-                      color="primary"
-                      sx={{
-                        // color: green[500],
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        marginTop: "-12px",
-                        marginLeft: "-12px",
-                      }}
-                    />
-                  )}
-                  {success ? "Success" : loading ? "Saving" : "Save"}
+                  <CircularProgress
+                    size={24}
+                    color="primary"
+                    sx={{
+                      // color: green[500],
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      marginTop: "-12px",
+                      marginLeft: "-12px",
+                    }}
+                  />
+                )}
+                {success ? "Success" : loading ? "Saving" : "Save"}
               </Button>
             </Grid>
           </Grid>

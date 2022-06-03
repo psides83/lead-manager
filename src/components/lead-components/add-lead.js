@@ -1,6 +1,6 @@
 //Imports
 import React, { useRef, useState } from "react";
-import { db } from "../services/firebase";
+import { db } from "../../services/firebase";
 import { setDoc, doc } from "@firebase/firestore";
 // import { useStateValue } from "../state-management/StateProvider";
 import moment from "moment";
@@ -8,7 +8,7 @@ import {
   equipmentAvailabilityArray,
   equipmentStatusArray,
   leadStatusArray,
-} from "../models/arrays";
+} from "../../models/arrays";
 // import { sendNewleadEmail } from "../services/email-service";
 import { styled } from "@mui/material/styles";
 import {
@@ -48,8 +48,8 @@ import {
   SaveRounded,
   CheckCircleOutlineRounded,
 } from "@mui/icons-material";
-import { async } from "@firebase/util";
 import { PhoneNumberMask } from "./phone-number-mask";
+import { useStateValue } from "../../state-management/state-provider";
 
 const ListItem = styled("li")(({ theme }) => ({
   margin: theme.spacing(0.5),
@@ -58,6 +58,7 @@ const ListItem = styled("li")(({ theme }) => ({
 export default function AddLead(props) {
   //#region State Properties
   const { setValidationMessage, setOpenSuccess, setOpenError } = props;
+  const [{ userProfile }] = useStateValue();
   // const [openSuccess, setOpenSuccess] = useState(false);
   // const [openError, setOpenError] = useState(false);
   var [name, setName] = useState("");
@@ -197,6 +198,7 @@ export default function AddLead(props) {
 
     const firestoreLead = {
       id: id,
+      salesmanID: userProfile.id, 
       timestamp: timestamp,
       name: name,
       email: email,
@@ -214,38 +216,6 @@ export default function AddLead(props) {
     const leadRef = doc(db, "leads", firestoreLead.id);
 
     await setDoc(leadRef, firestoreLead, { merge: true });
-
-    // for (var i = 0; i < equipmentList.length; i++) {
-    //   const equipment = {
-    //     leadID: firestoreLead.id,
-    //     id: equipmentList[i].id.toString(),
-    //     timestamp: firestoreLead.timestamp,
-    //     model: equipmentList[i].model,
-    //     stock: equipmentList[i].stock,
-    //     serial: equipmentList[i].serial,
-    //     availability: equipmentList[i].availability,
-    //     status: equipmentList[i].status,
-    //     notes: equipmentList[i].notes,
-    //     changeLog: equipmentList[i].changeLog,
-    //   };
-
-    //   const equipmentRef = doc(
-    //     db,
-    //     "leads",
-    //     firestoreLead.id,
-    //     "equipment",
-    //     equipment.id
-    //   );
-    //   await setDoc(equipmentRef, equipment, { merge: true });
-    // }
-
-    // sendNewleadEmail(
-    //   timestamp,
-    //   equipmentList,
-    //   fullName,
-    //   userProfile,
-    //   salesman
-    // );
     setLoadingLead(false);
     setLeadSuccess(true);
     setValidationMessage("lead successfully submitted");
@@ -366,15 +336,16 @@ export default function AddLead(props) {
   return (
     <>
       <Tooltip title="Add New Lead">
-        <IconButton
-          size="large"
-          edge="start"
+        <Button
+          // size="small"
+          // edge="start"
           color="inherit"
           onClick={handleToggleDialog}
-          sx={{ ml: 2 }}
+          endIcon={<PersonAddAltRounded color="inherit" />}
+          // sx={{ ml: 2 }}
         >
-          <PersonAddAltRounded />
-        </IconButton>
+          <Typography sx={{ display: { xs: "none", sm: "block" } }}>Add Lead</Typography>
+        </Button>
         {/* <Button
           color="secondary"
           size="small"

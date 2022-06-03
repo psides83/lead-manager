@@ -19,9 +19,11 @@ import {
 import { doc, setDoc } from "firebase/firestore";
 import moment from "moment";
 import React, { useState } from "react";
-import { db } from "../services/firebase";
+import { db } from "../../services/firebase";
+import LeadMessagingDialog from "./lead-messaging-dialog";
 
-function ContactDialog({ lead }) {
+function ContactDialog(props) {
+  const { lead } = props;
   const [isShowingDialog, setIsShowingDialog] = useState(false);
 
   const handleCloseDialog = () => {
@@ -74,7 +76,7 @@ function ContactDialog({ lead }) {
 
   return (
     <>
-      <Tooltip title="Call Lead">
+      <Tooltip title="Contact Lead">
         <IconButton aria-label="phone" onClick={handleToggleDialog}>
           <PhoneIphoneRounded />
         </IconButton>
@@ -108,6 +110,7 @@ function ContactDialog({ lead }) {
             >
               Text
             </Button>
+            <LeadMessagingDialog lead={lead} />
           </Stack>
         </DialogContent>
       </Dialog>

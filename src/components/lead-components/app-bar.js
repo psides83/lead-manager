@@ -6,15 +6,14 @@ import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
-import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import AddLead from "./add-lead";
-import { Alert, Snackbar } from "@mui/material";
-import { useStateValue } from "../state-management/state-provider";
-import { AgricultureRounded } from "@mui/icons-material";
+import { Alert, Snackbar, Tooltip } from "@mui/material";
+import { useStateValue } from "../../state-management/state-provider";
+import { AccountCircleRounded, AgricultureRounded } from "@mui/icons-material";
 import Slide from "@mui/material/Slide";
-import PropTypes from "prop-types";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
+import { auth } from "../../services/firebase";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -75,7 +74,7 @@ function HideOnScroll(props) {
 }
 
 export default function MainAppBar(props) {
-  const [{ searchText }, dispatch] = useStateValue();
+  const [{ searchText, user }, dispatch] = useStateValue();
   const [openSuccess, setOpenSuccess] = React.useState(false);
   const [openError, setOpenError] = useState(false);
   var [validationMessage, setValidationMessage] = useState("");
@@ -97,6 +96,31 @@ export default function MainAppBar(props) {
     });
   };
 
+  const logout = (e) => {
+    e.preventDefault();
+    if (user) {
+      // User is signed in, see docs for a list of available properties
+      // https://firebase.google.com/docs/reference/js/firebase.User
+      // User is signed out
+      dispatch({
+        type: "SET_USER",
+        user: null,
+      });
+      // User is signed out
+      dispatch({
+        type: "SET_CUSTOMER_USER",
+        customerUser: null,
+      });
+      
+      // User is signed out
+      dispatch({
+        type: "SET_USER_PROFILE",
+        userProfile: null,
+      });
+      auth.signOut();
+    }
+  }
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <HideOnScroll {...props}>
@@ -108,6 +132,7 @@ export default function MainAppBar(props) {
               color="inherit"
               aria-label="open drawer"
               sx={{ mr: 2 }}
+              // onClick={useNavigate("/")}
             >
               <AgricultureRounded />
             </IconButton>
@@ -119,6 +144,7 @@ export default function MainAppBar(props) {
             >
               Lead Manager
             </Typography>
+              <Box sx={{ flexGrow: 4 }} />
             <Search>
               <SearchIconWrapper>
                 <SearchIcon />
@@ -135,6 +161,17 @@ export default function MainAppBar(props) {
               setOpenError={setOpenError}
               setOpenSuccess={setOpenSuccess}
             />
+            <Tooltip title={user ? "Log Out" : "Log In"}>
+
+            <IconButton
+              size="large"
+              color="inherit"
+              aria-label="open drawer"
+              onClick={logout}
+            >
+              <AccountCircleRounded />
+            </IconButton>
+            </Tooltip>
           </Toolbar>
         </AppBar>
       </HideOnScroll>

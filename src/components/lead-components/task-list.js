@@ -10,12 +10,10 @@ import {
   ListItemText,
   Paper,
   Stack,
-  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
 import {
-  addDoc,
   collection,
   doc,
   onSnapshot,
@@ -25,13 +23,10 @@ import {
   writeBatch,
   where,
 } from "@firebase/firestore";
-import { db } from "../services/firebase";
+import { db } from "../../services/firebase";
 import {
-  Add,
-  CancelPresentationRounded,
   EditRounded,
   Menu,
-  Save,
 } from "@mui/icons-material";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import moment from "moment";
