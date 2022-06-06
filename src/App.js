@@ -19,6 +19,7 @@ import SignIn from "./components/lead-components/sign-in";
 import Loading from "./components/loading";
 import CustomerSignUp from "./components/customer-components/customer-sign-up";
 import toast, { Toaster } from "react-hot-toast";
+import SalesDataGrid from "./components/sales-components/sales-data-grid";
 
 const theme = createTheme({
   palette: {
@@ -138,6 +139,7 @@ export default function App() {
       <Box style={{ marginTop: user && "75px" }}>
         <Router>
           <Routes>
+            <Route path="/sales" element={user ? <SalesDataGrid /> : <SignIn />} />
             <Route
               path="/customer-view"
               element={customerUser ? <CustomerAppBar /> : <CustomerSignUp />}
