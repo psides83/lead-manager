@@ -73,9 +73,9 @@ function LeadDashboard() {
         }))
       );
     });
-    timer.current = window.setTimeout(() => {
-      setLoading(false)
-    }, 1000);
+    // timer.current = window.setTimeout(() => {
+    //   setLoading(false)
+    // }, 1000);
   }, [filterParam]);
 
   const fetchTasks = useCallback(async () => {
@@ -101,7 +101,10 @@ function LeadDashboard() {
   }, []);
 
   useEffect(() => {
-    fetchLeads();
+    fetchLeads().then(() => {
+      console.log("no  longer loading")
+      setLoading(false)
+    });
     fetchTasks();
   }, [fetchLeads, fetchTasks]);
 

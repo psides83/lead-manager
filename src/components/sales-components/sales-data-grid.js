@@ -10,6 +10,8 @@ import {
 import { db } from "../../services/firebase";
 import { currencyFormatter } from "../../utils/utils";
 import moment from "moment";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import { Money } from "@mui/icons-material";
 
 const columns = [
   {
@@ -77,6 +79,28 @@ const columns = [
 export default function SalesDataGrid() {
   const [sales, setSales] = useState([]);
   const [filterParam, setFilterParam] = useState("All");
+  const [salesData, setSalesData] = useState({});
+  const dataTypes = ["Sales", "Margin", "Commission"]
+  const years = [
+    moment().subtract(3, "years").format("yyyy"),
+    moment().subtract(2, "years").format("yyyy"),
+    moment().subtract(1, "years").format("yyyy"),
+    moment().format("yyyy"),
+  ];
+  const months = [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+  ];
 
   //    Fetch leads from firestore
   const fetchSales = useCallback(async () => {
@@ -102,12 +126,59 @@ export default function SalesDataGrid() {
     });
   }, [filterParam]);
 
+  const calculateSales = (type, year) => {
+    var salesDollars = 0;
+    var marginDollars = 0;
+    console.log(year);
+    console.log(type);
+
+    sales
+      ?.filter((sale) => {
+        const saleYear = moment(sale.saleDate.toDate()).format("yyyy");
+        const tradeSaleYear = () => {
+          if (sale.dateTradeSold !== "")
+            return moment(sale.dateTradeSold.toDate()).format("yyyy");
+          return;
+        };
+        const saleMonth = moment(sale.saleDate.toDate()).format("MM");
+        const tradeSaleMonth = () => {
+          if (sale.dateTradeSold !== "")
+            return moment(sale.dateTradeSold.toDate()).format("MM");
+          return;
+        };
+
+        if (
+          (!sale.tradeAttached || sale.dateTradeSold !== "") &&
+          (saleYear === year || tradeSaleYear === year)
+        ) {
+          return sale;
+        }
+      })
+      .forEach((value) => {
+        salesDollars += value.salePrice;
+        marginDollars += value.margin;
+      });
+
+    if (type === "Sales") return salesDollars;
+
+    if (type === "Margin") return marginDollars;
+
+    if (type === "Commission")
+      return marginDollars * 0.12;
+  };
+
+  const barHeight = (type, year) => {
+    if (type === "Sales") return calculateSales(type, year) / 20000
+    if (type === "Margin") return calculateSales(type, year) / 1500
+    if (type === "Commission") return calculateSales(type, year) / 200
+  }
+
   useEffect(() => {
     fetchSales();
   }, [fetchSales]);
 
   return (
-    <div
+    <Box
       style={{
         height: "100vh",
         width: "100vw",
@@ -115,10 +186,46 @@ export default function SalesDataGrid() {
         justifyContent: "center",
         alignContent: "center",
         // alignItems: "center",
-        border: "solid black 2px",
+        // border: "solid black 2px",
       }}
     >
-      <div
+      <Box
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: 680,
+          width: "98vw",
+          background: "white",
+          // border: "solid black 2px",
+          borderRadius: "10px",
+          alignItems: "center",
+          justifyContent: "space-between"
+        }}
+      >
+
+        {dataTypes.map((type) => (
+          <Box sx={{display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", maxWidth: '500px'}} >
+            <Typography variant="h5" color="primary" sx={{fontWeight: "medium"}} alignSelf="center">{type}</Typography>
+          <Stack direction="row" alignItems="flex-end" justifyContent="space-around" sx={{border: "solid #FFDE00 2px"}}>
+            {years.map((year) => (
+              <Stack direction="column" justifyContent="center" alignItems="center" sx={{margin: "10px"}}>
+
+                <Typography>{year}</Typography>
+                <Box sx={{width: "20px", height: barHeight(type, year), backgroundColor: "#367C2B", borderRadius: "3px 3px 0 0"}}/>
+                <Typography>{currencyFormatter.format(calculateSales(type, year))}</Typography>
+              </Stack>
+            ))}
+            {/* <Typography>Sales: {currencyFormatter.format(calculateSales(salesTotal, year))}</Typography>
+            <Typography>Margin: {currencyFormatter.format(calculateSales(marginTotal, year))}</Typography>
+            <Typography>
+              Commission: {currencyFormatter.format(calculateSales(commissionTotal, year))}
+            </Typography> */}
+          </Stack>
+          </Box>
+        ))}
+      </Box>
+
+      {/* <div
         style={{
           height: 680,
           width: "98vw",
@@ -129,7 +236,7 @@ export default function SalesDataGrid() {
       >
         <DataGrid
           rows={sales}
-        //   getRowHeight={() => "auto"}
+          //   getRowHeight={() => "auto"}
           columns={columns}
           pageSize={50}
           rowsPerPageOptions={[12]}
@@ -137,7 +244,7 @@ export default function SalesDataGrid() {
           //   //   checkboxSelection
           //   disableSelectionOnClick
         />
-      </div>
-    </div>
+      </div> */}
+    </Box>
   );
 }

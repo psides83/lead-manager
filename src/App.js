@@ -114,7 +114,7 @@ export default function App() {
         });
       }
     });
-  }, [onAuthStateChanged]);
+  }, [auth]);
 
   useEffect(() => {
     updateAuth();
@@ -123,7 +123,7 @@ export default function App() {
      }
   }, [dispatch, updateAuth, notification]);
 
-  requestForToken();
+  // requestForToken();
 
   onMessageListener()
     .then((payload) => {
