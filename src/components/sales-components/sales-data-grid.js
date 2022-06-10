@@ -115,11 +115,16 @@ export default function SalesDataGrid() {
           id: doc.data().id,
           saleID: doc.data().saleID,
           saleDate: doc.data().saleDate,
-          salePrice: doc.data().salePrice,
-          margin: doc.data().margin,
+          saleMonth: doc.data().saleMonth,
+          saleYear: doc.data().saleYear,
+          salePrice: Number(doc.data().salePrice),
+          margin: Number(doc.data().margin),
           //   commission: commission,
           tradeAttached: doc.data().tradeAttached,
+          tradeSold: doc.data().tradeSold,
           dateTradeSold: doc.data().dateTradeSold,
+          tradeSoldMonth: doc.data().tradeSoldMonth,
+          tradeSoldYear: doc.data().tradeSoldYear,
           model: doc.data().model,
         }))
       );
@@ -129,27 +134,15 @@ export default function SalesDataGrid() {
   const calculateSales = (type, year) => {
     var salesDollars = 0;
     var marginDollars = 0;
-    console.log(year);
-    console.log(type);
+    // console.log(year);
+    // console.log(type);
 
     sales
       ?.filter((sale) => {
-        const saleYear = moment(sale.saleDate.toDate()).format("yyyy");
-        const tradeSaleYear = () => {
-          if (sale.dateTradeSold !== "")
-            return moment(sale.dateTradeSold.toDate()).format("yyyy");
-          return;
-        };
-        const saleMonth = moment(sale.saleDate.toDate()).format("MM");
-        const tradeSaleMonth = () => {
-          if (sale.dateTradeSold !== "")
-            return moment(sale.dateTradeSold.toDate()).format("MM");
-          return;
-        };
 
         if (
           (!sale.tradeAttached || sale.dateTradeSold !== "") &&
-          (saleYear === year || tradeSaleYear === year)
+          (sale.saleYear === year || sale.tradeSoldYear === year)
         ) {
           return sale;
         }
@@ -160,6 +153,7 @@ export default function SalesDataGrid() {
       });
 
     if (type === "Sales") return salesDollars;
+    console.log(salesDollars)
 
     if (type === "Margin") return marginDollars;
 
