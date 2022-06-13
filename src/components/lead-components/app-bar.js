@@ -10,10 +10,15 @@ import SearchIcon from "@mui/icons-material/Search";
 import AddLead from "./add-lead";
 import { Alert, Snackbar, Tooltip } from "@mui/material";
 import { useStateValue } from "../../state-management/state-provider";
-import { AccountCircleRounded, AgricultureRounded } from "@mui/icons-material";
+import {
+  AccountCircleRounded,
+  AgricultureRounded,
+  InsertChartRounded,
+} from "@mui/icons-material";
 import Slide from "@mui/material/Slide";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import { auth } from "../../services/firebase";
+import { Link, useNavigate } from "react-router-dom";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -111,7 +116,7 @@ export default function MainAppBar(props) {
         type: "SET_CUSTOMER_USER",
         customerUser: null,
       });
-      
+
       // User is signed out
       dispatch({
         type: "SET_USER_PROFILE",
@@ -119,23 +124,25 @@ export default function MainAppBar(props) {
       });
       auth.signOut();
     }
-  }
+  };
 
   return (
     <Box sx={{ flexGrow: 1 }}>
       <HideOnScroll {...props}>
         <AppBar elevation={8}>
           <Toolbar>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              sx={{ mr: 2 }}
-              // onClick={useNavigate("/")}
-            >
-              <AgricultureRounded />
-            </IconButton>
+            <Link to="/" style={{ color: "white" }}>
+              <IconButton
+                size="large"
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                sx={{ mr: 2 }}
+                // onClick={useNavigate("/")}
+              >
+                <AgricultureRounded />
+              </IconButton>
+            </Link>
             <Typography
               variant="h6"
               noWrap
@@ -144,7 +151,7 @@ export default function MainAppBar(props) {
             >
               Lead Manager
             </Typography>
-              <Box sx={{ flexGrow: 4 }} />
+            <Box sx={{ flexGrow: 4 }} />
             <Search>
               <SearchIconWrapper>
                 <SearchIcon />
@@ -161,16 +168,27 @@ export default function MainAppBar(props) {
               setOpenError={setOpenError}
               setOpenSuccess={setOpenSuccess}
             />
+            <Tooltip title="View Sales">
+              <Link to="/sales" style={{ color: "white" }}>
+                <IconButton
+                  size="large"
+                  color="inherit"
+                  aria-label="open drawer"
+                  // component={<Link to="/sales" />}
+                >
+                  <InsertChartRounded />
+                </IconButton>
+              </Link>
+            </Tooltip>
             <Tooltip title={user ? "Log Out" : "Log In"}>
-
-            <IconButton
-              size="large"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={logout}
-            >
-              <AccountCircleRounded />
-            </IconButton>
+              <IconButton
+                size="large"
+                color="inherit"
+                aria-label="open drawer"
+                onClick={logout}
+              >
+                <AccountCircleRounded />
+              </IconButton>
             </Tooltip>
           </Toolbar>
         </AppBar>

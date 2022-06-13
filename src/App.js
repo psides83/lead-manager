@@ -5,7 +5,12 @@ import {
   Route,
   useNavigate,
 } from "react-router-dom";
-import { auth, db, onMessageListener, requestForToken } from "./services/firebase";
+import {
+  auth,
+  db,
+  onMessageListener,
+  requestForToken,
+} from "./services/firebase";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
 import { Box } from "@mui/system";
@@ -48,17 +53,19 @@ const theme = createTheme({
 export default function App() {
   const [{ user, customerUser, loading }, dispatch] = useStateValue();
   const [userProfile, setProfile] = useState({});
-  const [notification, setNotification] = useState({title: '', body: ''});
+  const [notification, setNotification] = useState({ title: "", body: "" });
 
-  const notify = () =>  toast(<ToastDisplay/>);
+  const notify = () => toast(<ToastDisplay />);
   function ToastDisplay() {
     return (
       <div>
-        <p><b>{notification?.title}</b></p>
+        <p>
+          <b>{notification?.title}</b>
+        </p>
         <p>{notification?.body}</p>
       </div>
     );
-  };
+  }
 
   const fetchProfile = (user) => {
     if (user) {
@@ -118,36 +125,42 @@ export default function App() {
 
   useEffect(() => {
     updateAuth();
-    if (notification?.title ){
-      notify()
-     }
+    if (notification?.title) {
+      notify();
+    }
   }, [dispatch, updateAuth, notification]);
 
   // requestForToken();
 
   onMessageListener()
     .then((payload) => {
-      setNotification({title: payload?.notification?.title, body: payload?.notification?.body});     
+      setNotification({
+        title: payload?.notification?.title,
+        body: payload?.notification?.body,
+      });
     })
-    .catch((err) => console.log('failed: ', err));
+    .catch((err) => console.log("failed: ", err));
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Toaster /> 
-      {user && <MainAppBar />}
-      <Box style={{ marginTop: user && "75px" }}>
-        <Router>
+      <Toaster />
+      <Router>
+        {user && <MainAppBar />}
+        <Box style={{ marginTop: user && "75px" }}>
           <Routes>
-            <Route path="/sales" element={user ? <SalesDataGrid /> : <SignIn />} />
+            <Route
+              path="/sales"
+              element={user ? <SalesDataGrid /> : <SignIn />}
+            />
             <Route
               path="/customer-view"
               element={customerUser ? <CustomerAppBar /> : <CustomerSignUp />}
             />
             <Route path="/" element={user ? <LeadDashboard /> : <SignIn />} />
           </Routes>
-        </Router>
-      </Box>
+        </Box>
+      </Router>
     </ThemeProvider>
   );
 }
