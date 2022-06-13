@@ -62,7 +62,7 @@ function CustomerDashboard() {
   const fetchLeads = useCallback(async () => {
     const leadsQuery = query(
       collection(db, "leads"),
-      where("uid", "==", userProfile.id),
+      where("uid", "==", userProfile?.id),
       where("status", "!=", "Closed")
     );
 

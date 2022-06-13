@@ -11,11 +11,7 @@ import { db } from "../../services/firebase";
 import { currencyFormatter } from "../../utils/utils";
 import moment from "moment";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import {
-  ArrowDownwardRounded,
-  ArrowUpwardRounded,
-  Money,
-} from "@mui/icons-material";
+import { ArrowDownwardRounded, ArrowUpwardRounded } from "@mui/icons-material";
 
 const columns = [
   {
@@ -163,7 +159,7 @@ export default function SalesDataGrid() {
     if (type === "Gross Revenue") return calculateSales(type, year) / 20000;
     if (type === "Margin") return calculateSales(type, year) / 1500;
     if (type === "Commission") return calculateSales(type, year) / 200;
-    if (type === "Bonus") return calculateSales(type, year) / 200;
+    if (type === "Bonus") return calculateSales(type, year) / 100;
   };
 
   const currentVsPreviousYearToDate = (type) => {
@@ -183,7 +179,6 @@ export default function SalesDataGrid() {
         if (type === "Margin") currentYearTotal += value.margin;
         if (type === "Commission") currentYearTotal += value.commission;
         if (type === "Bonus") currentYearTotal += value.bonus;
-        
       });
 
     sales
@@ -218,7 +213,7 @@ export default function SalesDataGrid() {
     if (currentVsPreviousYearToDate(type) < 0) {
       return (
         <Stack direction="row">
-          <ArrowDownwardRounded color="error" alignSelf="flex-end" />
+          <ArrowDownwardRounded color="error" />
           <Typography>
             <strong>
               {Math.abs(Math.round(currentVsPreviousYearToDate(type) * 100))}%
@@ -231,7 +226,7 @@ export default function SalesDataGrid() {
     if (currentVsPreviousYearToDate(type) > 0) {
       return (
         <Stack direction="row">
-          <ArrowUpwardRounded color="error" alignSelf="flex-end" />
+          <ArrowUpwardRounded color="success" />
           <Typography>
             <strong>
               {Math.abs(Math.round(currentVsPreviousYearToDate(type) * 100))}%
@@ -251,7 +246,7 @@ export default function SalesDataGrid() {
   return (
     <Box
       style={{
-        height: "100vh",
+        // height: "100vh",
         width: "100vw",
         display: "flex",
         justifyContent: "center",
@@ -264,7 +259,7 @@ export default function SalesDataGrid() {
         style={{
           display: "flex",
           flexDirection: "column",
-          height: 680,
+          // height: 680,
           width: "98vw",
           background: "white",
           // border: "solid black 2px",
@@ -282,13 +277,9 @@ export default function SalesDataGrid() {
               justifyContent: "center",
               alignItems: "center",
               maxWidth: "500px",
+              margin: "20px",
             }}
           >
-            <Typography>
-              Your <strong>{type}</strong> is
-            </Typography>
-
-            {trend(type)}
             <Typography
               variant="h5"
               color="primary"
@@ -297,10 +288,14 @@ export default function SalesDataGrid() {
             >
               {type}
             </Typography>
+            <Typography>
+              Your <strong>{type}</strong> is
+            </Typography>
+            {trend(type)}
             <Stack
               direction="row"
               alignItems="flex-end"
-              justifyContent="space-around"
+              justifyContent="center"
               sx={{ border: "solid #FFDE00 2px" }}
             >
               {years.map((year) => (
@@ -311,7 +306,7 @@ export default function SalesDataGrid() {
                   alignItems="center"
                   sx={{ margin: "10px" }}
                 >
-                  <Typography>{year}</Typography>
+                  <Typography variant="subtitle1">{year}</Typography>
                   <Box
                     sx={{
                       width: "20px",
@@ -320,7 +315,7 @@ export default function SalesDataGrid() {
                       borderRadius: "3px 3px 0 0",
                     }}
                   />
-                  <Typography>
+                  <Typography variant="subtitle2">
                     {currencyFormatter.format(calculateSales(type, year))}
                   </Typography>
                 </Stack>
