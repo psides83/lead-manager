@@ -11,14 +11,11 @@ import { db } from "../../services/firebase";
 import { currencyFormatter } from "../../utils/utils";
 import moment from "moment";
 import { Box, Button, Stack, Typography } from "@mui/material";
-<<<<<<< HEAD
-=======
 import {
   ArrowDownwardRounded,
   ArrowUpwardRounded,
   Money,
 } from "@mui/icons-material";
->>>>>>> c620b64f2040f195909e48c1351549ee83324698
 
 const columns = [
   {
