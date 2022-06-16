@@ -25,6 +25,7 @@ import Loading from "./components/loading";
 import CustomerSignUp from "./components/customer-components/customer-sign-up";
 import toast, { Toaster } from "react-hot-toast";
 import SalesDataGrid from "./components/sales-components/sales-data-grid";
+import {ViewportProvider} from "./utils/viewport-provider"
 
 const theme = createTheme({
   palette: {
@@ -142,25 +143,27 @@ export default function App() {
     .catch((err) => console.log("failed: ", err));
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Toaster />
-      <Router>
-        {user && <MainAppBar />}
-        <Box style={{ marginTop: user && "75px" }}>
-          <Routes>
-            <Route
-              path="/sales"
-              element={user ? <SalesDataGrid /> : <SignIn />}
-            />
-            <Route
-              path="/customer-view"
-              element={customerUser ? <CustomerAppBar /> : <CustomerSignUp />}
-            />
-            <Route path="/" element={user ? <LeadDashboard /> : <SignIn />} />
-          </Routes>
-        </Box>
-      </Router>
-    </ThemeProvider>
+    <ViewportProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Toaster />
+        <Router>
+          {user && <MainAppBar />}
+          <Box style={{ marginTop: user && "75px" }}>
+            <Routes>
+              <Route
+                path="/sales"
+                element={user ? <SalesDataGrid /> : <SignIn />}
+              />
+              <Route
+                path="/customer-view"
+                element={customerUser ? <CustomerAppBar /> : <CustomerSignUp />}
+              />
+              <Route path="/" element={user ? <LeadDashboard /> : <SignIn />} />
+            </Routes>
+          </Box>
+        </Router>
+      </ThemeProvider>
+    </ViewportProvider>
   );
 }

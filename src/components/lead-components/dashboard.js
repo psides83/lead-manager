@@ -11,6 +11,9 @@ import {
   TextField,
   MenuItem,
   CircularProgress,
+  Typography,
+  Drawer,
+  IconButton,
 } from "@mui/material";
 import {
   collection,
@@ -22,22 +25,27 @@ import {
 import { db } from "../../services/firebase";
 import { useStateValue } from "../../state-management/state-provider";
 import Tasks from "./task-list";
+import { useViewport } from "../../utils/viewport-provider";
+import { ListAltRounded } from "@mui/icons-material";
 
 const filters = ["Active", "Closed"];
 
 function LeadDashboard() {
   const timer = useRef();
+  const { width } = useViewport();
   const [loading, setLoading] = useState(true);
   const [leads, setLeads] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [{ searchText }, dispatch] = useStateValue("");
-  const [searchParam] = useState(["name"]);
+  const [searchParam] = useState(["name", "phone"]);
   const [filterParam, setFilterParam] = useState("Active");
   const [open, setOpen] = useState(false);
   const [openSuccess, setOpenSuccess] = useState(false);
   const [openError, setOpenError] = useState(false);
   var [validationMessage, setValidationMessage] = useState("");
+  const [isShowingTasksDrawer, setIsShowingTasksDrawer] = useState(false);
   const [value, setValue] = useState("leads");
+  const breakpoint = 900;
 
   // Handle closing of the alerts.
   const handleClose = (event, reason) => {
@@ -49,9 +57,29 @@ function LeadDashboard() {
     setOpenError(false);
   };
 
+  const toggleTasksDrawer = (e) => {
+    e.preventDefault();
+    if (isShowingTasksDrawer) {
+      setIsShowingTasksDrawer(false);
+    } else {
+      setIsShowingTasksDrawer(true);
+    }
+  };
+
   //    Fetch leads from firestore
   const fetchLeads = useCallback(async () => {
-    const leadsQuery = query(collection(db, "leads"), orderBy("id", "asc"));
+    var leadsQuery;
+    if (filterParam === "Closed") {
+      leadsQuery = query(
+        collection(db, "leads"),
+        where("status", "==", "Closed")
+      );
+    } else {
+      leadsQuery = query(
+        collection(db, "leads"),
+        where("status", "!=", "Closed")
+      );
+    }
 
     onSnapshot(leadsQuery, (querySnapshot) => {
       setLeads(
@@ -102,8 +130,8 @@ function LeadDashboard() {
 
   useEffect(() => {
     fetchLeads().then(() => {
-      console.log("no  longer loading")
-      setLoading(false)
+      console.log("no  longer loading");
+      setLoading(false);
     });
     fetchTasks();
   }, [fetchLeads, fetchTasks]);
@@ -121,7 +149,9 @@ function LeadDashboard() {
             item[newItem]
               .toString()
               .toLowerCase()
-              .indexOf(searchText.toLowerCase()) > -1
+              .replace(/[^0-9, a-z]/g, "")
+              .replace(/\s/g, "")
+              .indexOf(searchText.toLowerCase().replace(/\s/g, "")) > -1
           );
         });
       } else if (filterParam !== "Closed" && item.status !== "Closed") {
@@ -130,7 +160,9 @@ function LeadDashboard() {
             item[newItem]
               .toString()
               .toLowerCase()
-              .indexOf(searchText.toLowerCase()) > -1
+              .replace(/[^0-9, a-z]/g, "")
+              .replace(/\s/g, "")
+              .indexOf(searchText.toLowerCase().replace(/\s/g, "")) > -1
           );
         });
       }
@@ -142,12 +174,58 @@ function LeadDashboard() {
     setValue(newValue);
   };
 
+  const MobileView = () => {
+    return (
+      <Grid
+        container
+        justifyContent={value === "leads" ? "flex-start" : "center"}
+      >
+        {value === "leads" ? (
+          search(leads).map((lead) => (
+            <Grid key={lead.id} item xs={12} sm={6} md={6} lg={4}>
+              <LeadCard lead={lead} tasks={tasks} />
+            </Grid>
+          ))
+        ) : (
+          <Grid item xs={12} sm={6} md={6} lg={4} sx={{ mt: "10px" }}>
+            <Box display="flex" justifyContent="center">
+              <Tasks />
+            </Box>
+          </Grid>
+        )}
+      </Grid>
+    );
+  };
+
+  const DesktopView = () => {
+    return (
+      <>
+        <Grid container justifyContent={"flex-start"}>
+          {search(leads).map((lead) => (
+            <Grid key={lead.id} item xs={12} sm={6} md={6} lg={4}>
+              <LeadCard lead={lead} tasks={tasks} />
+            </Grid>
+          ))}
+        </Grid>
+        <Drawer
+          anchor="left"
+          open={isShowingTasksDrawer}
+          onClose={toggleTasksDrawer}
+        >
+          <Box>
+            <Tasks />
+          </Box>
+        </Drawer>
+      </>
+    );
+  };
+
   return (
     <>
       <Box
         sx={{
           display: "flex",
-          flexDirection: 'column'
+          flexDirection: "column",
         }}
       >
         <Box
@@ -156,11 +234,18 @@ function LeadDashboard() {
           alignItems="center"
           style={{ margin: "10px 20px 0 20px" }}
         >
+          {width > breakpoint ? (
+            <IconButton onClick={toggleTasksDrawer}>
+              <ListAltRounded />
+            </IconButton>
+          ) : null}
           <Box></Box>
-          <Tabs value={value} onChange={handleChange}>
-            <Tab label="Leads" value="leads" />
-            <Tab label="Tasks" value="tasks" />
-          </Tabs>
+          {width < breakpoint ? (
+            <Tabs className="tabs" value={value} onChange={handleChange}>
+              <Tab label="Leads" value="leads" />
+              <Tab label="Tasks" value="tasks" />
+            </Tabs>
+          ) : null}
           <div className="cards-filter">
             <TextField
               select
@@ -185,30 +270,18 @@ function LeadDashboard() {
           </div>
         </Box>
         {loading && (
-          <Box sx={{ display: "flex", justifyContent: 'center', alignItems: 'center', height: "60vh" }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "60vh",
+            }}
+          >
             <CircularProgress />
           </Box>
         )}
-        {!loading &&
-        <Grid
-          container
-          justifyContent={value === "leads" ? "flex-start" : "center"}
-        >
-          {value === "leads" ? (
-            search(leads).map((lead) => (
-              <Grid key={lead.id} item xs={12} sm={6} md={6} lg={4}>
-                <LeadCard lead={lead} tasks={tasks} />
-              </Grid>
-            ))
-          ) : (
-            <Grid item xs={12} sm={6} md={6} lg={4} sx={{ mt: "10px" }}>
-              <Box display="flex" justifyContent="center">
-                <Tasks />
-              </Box>
-            </Grid>
-          )}
-        </Grid>
-        }
+        {!loading && (width < breakpoint ? <MobileView /> : <DesktopView />)}
       </Box>
     </>
   );
