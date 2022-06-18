@@ -275,6 +275,12 @@ export default function LeadCard(props) {
     window.location.href = `mailto:${lead.email}`;
   };
 
+
+
+  const relativeTime = (date) => {
+    return moment(date, "DD-MMM-YYYY hh:mmA").fromNow();
+  };
+
   return (
     <Card
       sx={{
@@ -360,7 +366,7 @@ export default function LeadCard(props) {
         >
           <ContactHistory events={lead.contactLog} />
           <Typography variant="caption" color="text.secondary">
-            {`Updated ${lead.changeLog[0].timestamp}`}
+            {`Updated ${relativeTime(lead.changeLog[0].timestamp)}`}
           </Typography>
         </Stack>
       </CardContent>

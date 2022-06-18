@@ -72,12 +72,12 @@ function LeadDashboard() {
     if (filterParam === "Closed") {
       leadsQuery = query(
         collection(db, "leads"),
-        where("status", "==", "Closed")
+        where("status", "==", "Closed"),
       );
     } else {
       leadsQuery = query(
         collection(db, "leads"),
-        where("status", "!=", "Closed")
+        where("status", "!=", "Closed"),
       );
     }
 
@@ -137,36 +137,25 @@ function LeadDashboard() {
   }, [fetchLeads, fetchTasks]);
 
   const search = (leads) => {
-    return leads.filter((item) => {
+    return leads.sort(function (a, b) {
+      return a.id - b.id;
+    }).filter((item) => {
       /*
       // in here we check if our region is equal to our c state
       // if it's equal to then only return the items that match
       // if not return All the countries
       */
-      if (filterParam === "Closed" && item.status === filterParam) {
-        return searchParam.some((newItem) => {
-          return (
-            item[newItem]
-              .toString()
-              .toLowerCase()
-              .replace(/[^0-9, a-z]/g, "")
-              .replace(/\s/g, "")
-              .indexOf(searchText.toLowerCase().replace(/\s/g, "")) > -1
-          );
-        });
-      } else if (filterParam !== "Closed" && item.status !== "Closed") {
-        return searchParam.some((newItem) => {
-          return (
-            item[newItem]
-              .toString()
-              .toLowerCase()
-              .replace(/[^0-9, a-z]/g, "")
-              .replace(/\s/g, "")
-              .indexOf(searchText.toLowerCase().replace(/\s/g, "")) > -1
-          );
-        });
-      }
-      return null;
+
+      return searchParam.some((newItem) => {
+        return (
+          item[newItem]
+            .toString()
+            .toLowerCase()
+            .replace(/[^0-9, a-z]/g, "")
+            .replace(/\s/g, "")
+            .indexOf(searchText.toLowerCase().replace(/\s/g, "")) > -1
+        );
+      });
     });
   };
 
