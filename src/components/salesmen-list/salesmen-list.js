@@ -14,6 +14,7 @@ import {
   Box,
   Button,
   Dialog,
+  Link,
   MenuItem,
   Paper,
   Table,
@@ -26,7 +27,7 @@ import {
   Typography,
 } from "@mui/material";
 import { CancelOutlined, LocalShippingRounded } from "@mui/icons-material";
-import TransferRequestView from "../transfer-request";
+import TransferRequestView from "./transfer-request";
 import HomeSkeleton from "../loading-views/home-skeleton";
 import "../salesmen-list/salesmen-list.css";
 
@@ -66,7 +67,7 @@ function Row({ salesman }) {
         </TableCell>
 
         <TableCell key="email" component="th" scope="row">
-          {salesman.email}
+          <Link href={`mailto:${salesman.email}`}>{salesman.email}</Link>
         </TableCell>
       </TableRow>
     </React.Fragment>
@@ -76,10 +77,9 @@ function Row({ salesman }) {
 // Whole table view:
 export default function SalesmenList() {
   // #region State Properties
-  const [{ userProfile }] = useStateValue();
+  const [{ userProfile, searchText }] = useStateValue();
   const [salesmen, setSalesmen] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchText, setSearchText] = useState("");
   const [searchParam] = useState(["branch", "firstName", "lastName"]);
   const [filterParam, setFilterParam] = useState("All");
   const [emails, setEmails] = useState("");
@@ -168,8 +168,7 @@ export default function SalesmenList() {
             <HomeSkeleton />
           ) : (
             <>
-              <div
-                className="tableHead">
+              <div className="tableHead">
                 <Typography
                   variant="h4"
                   color="primary"
@@ -232,15 +231,6 @@ export default function SalesmenList() {
                         </MenuItem>
                       ))}
                     </TextField>
-                  </div>
-
-                  <div className="search">
-                    <input
-                      type="text"
-                      id="search"
-                      onChange={(e) => setSearchText(e.target.value)}
-                      placeholder="Search"
-                    ></input>
                   </div>
                 </div>
               </div>

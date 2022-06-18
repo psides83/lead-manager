@@ -10,7 +10,7 @@ import {
 import { db } from "../../services/firebase";
 import { currencyFormatter } from "../../utils/utils";
 import moment from "moment";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Paper, Stack, Typography } from "@mui/material";
 import { ArrowDownwardRounded, ArrowUpwardRounded } from "@mui/icons-material";
 
 const columns = [
@@ -245,29 +245,20 @@ export default function SalesDataGrid() {
 
   return (
     <Box
-      style={{
-        // height: "100vh",
-        width: "100vw",
-        display: "flex",
-        justifyContent: "center",
-        alignContent: "center",
-        // alignItems: "center",
-        // border: "solid black 2px",
-      }}
-    >
-      <Box
         style={{
           display: "flex",
           flexDirection: "column",
           // height: 680,
           width: "98vw",
-          background: "white",
+          // background: "white",
           // border: "solid black 2px",
-          borderRadius: "10px",
+          // borderRadius: "10px",
           alignItems: "center",
-          justifyContent: "space-between",
+          alignContent: "center",
+          justifyContent: "center",
         }}
       >
+      
         {dataTypes.map((type) => (
           <Box
             key={type}
@@ -276,6 +267,7 @@ export default function SalesDataGrid() {
               flexDirection: "column",
               justifyContent: "center",
               alignItems: "center",
+              alignContent: "center",
               maxWidth: "500px",
               margin: "20px",
             }}
@@ -293,10 +285,12 @@ export default function SalesDataGrid() {
             </Typography>
             {trend(type)}
             <Stack
+              component={Paper}
+              elevation={5}
               direction="row"
               alignItems="flex-end"
-              justifyContent="center"
-              sx={{ border: "solid #FFDE00 2px" }}
+              justifyContent="space-around"
+              sx={{  borderRadius: "10px", minWidth: "350px" }}
             >
               {years.map((year) => (
                 <Stack
@@ -304,20 +298,21 @@ export default function SalesDataGrid() {
                   direction="column"
                   justifyContent="center"
                   alignItems="center"
-                  sx={{ margin: "10px" }}
+                  sx={{ margin: "8px" }}
                 >
-                  <Typography variant="subtitle1">{year}</Typography>
-                  <Box
-                    sx={{
-                      width: "20px",
-                      height: barHeight(type, year),
-                      backgroundColor: "#367C2B",
-                      borderRadius: "3px 3px 0 0",
-                    }}
-                  />
-                  <Typography variant="subtitle2">
+                  <Typography variant="caption">
                     {currencyFormatter.format(calculateSales(type, year))}
                   </Typography>
+
+                  <Box
+                    sx={{
+                      width: "25px",
+                      height: barHeight(type, year),
+                      backgroundColor: "#367C2B",
+                      borderRadius: "4px 4px 0 0",
+                    }}
+                  />
+                  <Typography variant="subtitle1">{year}</Typography>
                 </Stack>
               ))}
               {/* <Typography>Sales: {currencyFormatter.format(calculateSales(salesTotal, year))}</Typography>
@@ -328,7 +323,6 @@ export default function SalesDataGrid() {
             </Stack>
           </Box>
         ))}
-      </Box>
 
       {/* <div
         style={{

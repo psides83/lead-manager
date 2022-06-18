@@ -8,17 +8,28 @@ import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
 import AddLead from "./add-lead";
-import { Alert, Snackbar, Tooltip } from "@mui/material";
+import {
+  Alert,
+  ListItemIcon,
+  Menu,
+  MenuItem,
+  Snackbar,
+  Tooltip,
+} from "@mui/material";
 import { useStateValue } from "../../state-management/state-provider";
 import {
   AccountCircleRounded,
   AgricultureRounded,
   InsertChartRounded,
+  LogoutRounded,
+  MenuRounded,
+  PeopleAltRounded,
 } from "@mui/icons-material";
 import Slide from "@mui/material/Slide";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import { auth } from "../../services/firebase";
 import { Link, useNavigate } from "react-router-dom";
+import { useViewport } from "../../utils/viewport-provider";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -82,6 +93,10 @@ export default function MainAppBar(props) {
   const [{ searchText, user }, dispatch] = useStateValue();
   const [openSuccess, setOpenSuccess] = React.useState(false);
   const [openError, setOpenError] = useState(false);
+  const [isShowingMenu, setIsShowingMenu] = useState(false);
+  const navigate = useNavigate();
+  const { width } = useViewport();
+  const breakpoint = 900;
   var [validationMessage, setValidationMessage] = useState("");
 
   // Handle closing of the alerts.
@@ -126,6 +141,16 @@ export default function MainAppBar(props) {
     }
   };
 
+  // Menu button
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <HideOnScroll {...props}>
@@ -152,7 +177,7 @@ export default function MainAppBar(props) {
               Lead Manager
             </Typography>
             <Box sx={{ flexGrow: 4 }} />
-            <Search>
+            <Search sx={{ mr: 2 }}>
               <SearchIconWrapper>
                 <SearchIcon />
               </SearchIconWrapper>
@@ -168,31 +193,122 @@ export default function MainAppBar(props) {
               setOpenError={setOpenError}
               setOpenSuccess={setOpenSuccess}
             />
-            <Tooltip title="View Sales">
-              <Link to="/sales" style={{ color: "white" }}>
-                <IconButton
-                  size="large"
-                  color="inherit"
-                  aria-label="open drawer"
-                  // component={<Link to="/sales" />}
-                >
-                  <InsertChartRounded />
-                </IconButton>
-              </Link>
-            </Tooltip>
-            <Tooltip title={user ? "Log Out" : "Log In"}>
+            {width > breakpoint ? (
+              <>
+                <Tooltip title="View Sales">
+                  <Link to="/sales" style={{ color: "white" }}>
+                    <IconButton
+                      size="large"
+                      color="inherit"
+                      aria-label="open drawer"
+                    >
+                      <InsertChartRounded />
+                    </IconButton>
+                  </Link>
+                </Tooltip>
+                <Tooltip title="Salesmen List">
+                  <Link to="/salesmen-list" style={{ color: "white" }}>
+                    <IconButton
+                      size="large"
+                      color="inherit"
+                      aria-label="open drawer"
+                    >
+                      <PeopleAltRounded />
+                    </IconButton>
+                  </Link>
+                </Tooltip>
+                <Tooltip title={user ? "Log Out" : "Log In"}>
+                  <IconButton
+                    size="large"
+                    color="inherit"
+                    aria-label="open drawer"
+                    onClick={logout}
+                  >
+                    <LogoutRounded />
+                  </IconButton>
+                </Tooltip>
+              </>
+            ) : (
               <IconButton
                 size="large"
                 color="inherit"
                 aria-label="open drawer"
-                onClick={logout}
+                onClick={handleClick}
+                aria-controls={open ? "account-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? "true" : undefined}
               >
-                <AccountCircleRounded />
+                <MenuRounded />
               </IconButton>
-            </Tooltip>
+            )}
           </Toolbar>
         </AppBar>
       </HideOnScroll>
+
+      <Menu
+        anchorEl={anchorEl}
+        id="account-menu"
+        open={open}
+        onClose={handleMenuClose}
+        onClick={handleMenuClose}
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            overflow: "visible",
+            filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+            mt: 1.5,
+            "& .MuiAvatar-root": {
+              width: 32,
+              height: 32,
+              ml: -0.5,
+              mr: 1,
+            },
+            "&:before": {
+              content: '""',
+              display: "block",
+              position: "absolute",
+              top: 0,
+              right: 14,
+              width: 10,
+              height: 10,
+              bgcolor: "background.paper",
+              transform: "translateY(-50%) rotate(45deg)",
+              zIndex: 0,
+            },
+          },
+        }}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+      >
+        <MenuItem
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("/sales");
+          }}
+        >
+          <ListItemIcon>
+            <InsertChartRounded fontSize="small" />
+          </ListItemIcon>
+          Sales
+        </MenuItem>
+        <MenuItem
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("/salesmen-list");
+          }}
+        >
+          <ListItemIcon>
+            <PeopleAltRounded fontSize="small" />
+          </ListItemIcon>
+          Salesmen
+        </MenuItem>
+        <MenuItem onClick={logout}>
+          <ListItemIcon>
+            <LogoutRounded fontSize="small" />
+          </ListItemIcon>
+          Logout
+        </MenuItem>
+      </Menu>
 
       <Snackbar
         open={openSuccess}
