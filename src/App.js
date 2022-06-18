@@ -26,6 +26,7 @@ import CustomerSignUp from "./components/customer-components/customer-sign-up";
 import toast, { Toaster } from "react-hot-toast";
 import SalesDataGrid from "./components/sales-components/sales-data-grid";
 import {ViewportProvider} from "./utils/viewport-provider"
+import SalesmenList from "./components/salesmen-list/salesmen-list";
 
 const theme = createTheme({
   palette: {
@@ -151,6 +152,10 @@ export default function App() {
           {user && <MainAppBar />}
           <Box style={{ marginTop: user && "75px" }}>
             <Routes>
+            <Route
+                path="/salesmen-list"
+                element={user ? <SalesmenList /> : <SignIn />}
+              />
               <Route
                 path="/sales"
                 element={user ? <SalesDataGrid /> : <SignIn />}
