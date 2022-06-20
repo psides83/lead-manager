@@ -262,6 +262,7 @@ export default function AddLead(props) {
     const id = moment().format("yyyyMMDDHHmmss");
     const changeLog = [
       {
+        id: id,
         change: `Equipment added to lead`,
         timestamp: moment().format("DD-MMM-yyyy hh:mmA"),
       },

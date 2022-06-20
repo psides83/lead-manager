@@ -14,7 +14,7 @@ import {
   Tooltip,
   Button,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 function StatusHistory(props) {
   const { events } = props;

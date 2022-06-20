@@ -35,7 +35,7 @@ function CustomerContactDialog({ lead }) {
   const logCall = async (e) => {
     e.preventDefault();
 
-    window.location.href = `tel:3347349544`;
+    window.location.href = `tel:+13347349544`;
   };
 
   const logText = async (e) => {

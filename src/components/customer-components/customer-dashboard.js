@@ -60,11 +60,13 @@ function CustomerDashboard() {
 
   //    Fetch leads from firestore
   const fetchLeads = useCallback(async () => {
-    const leadsQuery = query(
-      collection(db, "leads"),
-      where("uid", "==", userProfile?.id),
-      where("status", "!=", "Closed")
-    );
+    if (userProfile != undefined) {
+
+      const leadsQuery = query(
+        collection(db, "leads"),
+        where("uid", "==", userProfile?.id),
+        where("status", "!=", "Closed")
+      );
 
     onSnapshot(leadsQuery, (querySnapshot) => {
       setLeads(
@@ -84,9 +86,11 @@ function CustomerDashboard() {
           changeLog: doc.data().changeLog,
           contactLog: doc.data().contactLog,
           equipment: doc.data().equipment,
+          quoteLink: doc.data().quoteLink
         }))
       );
     });
+  };
     endLoading();
   }, [userProfile]);
 
