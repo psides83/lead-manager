@@ -7,6 +7,7 @@ import {
   AttachMoneyRounded,
   ExpandLessRounded,
   ExpandMoreRounded,
+  LinkRounded,
   MailRounded,
 } from "@mui/icons-material";
 import ContactHistory from "./contact-history";
@@ -275,8 +276,6 @@ export default function LeadCard(props) {
     window.location.href = `mailto:${lead.email}`;
   };
 
-
-
   const relativeTime = (date) => {
     return moment(date, "DD-MMM-YYYY hh:mmA").fromNow();
   };
@@ -300,7 +299,16 @@ export default function LeadCard(props) {
         >
           <Typography variant="h4">{name}</Typography>
           <Stack direction="row" justifyContent="flex-end">
+
+          <Tooltip title="Copy Customer Link" >
+
+            <IconButton onClick={() => navigator.clipboard.writeText(`localhost:3000/customer-view/${lead.id}`)} >
+              <LinkRounded/>
+            </IconButton>
+          </Tooltip>
+          
             <ContactDialog lead={lead} />
+            
             <Tooltip title="Email Lead">
               <IconButton aria-label="edit" onClick={logEmail}>
                 <MailRounded />

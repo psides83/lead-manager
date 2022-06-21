@@ -49,87 +49,52 @@ function LeadMessagingDialog(props) {
     setOpenSuccess,
   } = props;
   const [{ loading, userProfile }, dispatch] = useStateValue("");
-  const [task, setTask] = useState("");
   const [isShowingDialog, setIsShowingDialog] = useState(false);
 
   const handleCloseDialog = () => {
     setIsShowingDialog(false);
-    setTask("");
   };
 
   const handleToggleDialog = () => {
     setIsShowingDialog(!isShowingDialog);
+    markAsRead();
   };
 
-  const addTask = async (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
-    const id = moment().format("yyyyMMDDHHmmss");
+  const markAsRead = async () => {
+    unreadMessages(lead.messages)?.map((message) => (message.unread = false));
+    const leadDoc = doc(db, "leads", lead.id);
+    await setDoc(leadDoc, { messages: lead.messages }, { merge: true })
+  }
 
-    if (task !== "") {
-      const taskRef = doc(db, "tasks", id);
-      await setDoc(
-        taskRef,
-        {
-          id: id,
-          timestamp: timestamp,
-          leadID: lead.id,
-          leadName: lead.name,
-          task: task,
-          isComplete: false,
-          order: tasksCount + 1,
-        },
-        { merge: true }
-      );
-      setValidationMessage("Task successfully added");
-      setOpenSuccess(true);
-      handleCloseDialog();
-      setTask("");
-    } else {
-      setValidationMessage("Please enter a task.");
-      setOpenError(true);
-    }
+  const unreadMessages = () => {
+    return lead.messages.filter((item) => {
+      if (item.unread === true) {
+        return item;
+      }
+      return null;
+    });
   };
 
   return (
     <>
-      {/* <Button
-        variant="contained"
-        size="small"
-        onClick={handleToggleDialog}
-        startIcon={<AddTask />}
-      >
-        Add Task
-      </Button> */}
       <Tooltip title="Internal Messaging">
-        {/* <IconButton
-          size="large"
-          edge="start"
-          color="primary"
-          onClick={handleToggleDialog}
-          sx={{ ml: 2 }}
-        >
-          <AddTask />
-        </IconButton> */}
         <Button
-              variant="contained"
-              size="small"
-              onClick={handleToggleDialog}
-              startIcon={<TextsmsRounded />}
-            >
-              Message
-            </Button>
+          variant="contained"
+          size="small"
+          onClick={handleToggleDialog}
+          startIcon={<TextsmsRounded />}
+        >
+          Message
+        </Button>
       </Tooltip>
 
       <Dialog
         onClose={handleCloseDialog}
         open={isShowingDialog}
         style={{ backdropFilter: "blur(5px)" }}
-        PaperProps={{ style: { borderRadius: 8 }, elevation: 24}}
+        PaperProps={{ style: { borderRadius: 8 }, elevation: 24 }}
       >
-        
-          <CustomerMessenger user={userProfile} lead={lead} />
+        <CustomerMessenger user={userProfile} lead={lead} />
       </Dialog>
     </>
   );

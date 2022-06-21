@@ -102,11 +102,6 @@ function EquipmentSection(props) {
 
 export default function CustomerCard(props) {
   const { lead } = props;
-  const name = lead.name;
-  const dateCreated = lead.timestamp;
-  const lastChange = lead.changeLog.length - 1;
-  const status = lead.status;
-  const notes = lead.notes;
   const [openSuccess, setOpenSuccess] = React.useState(false);
   const [openError, setOpenError] = useState(false);
   var [validationMessage, setValidationMessage] = useState("");
@@ -129,28 +124,39 @@ export default function CustomerCard(props) {
   const equipmentStatusArray = () => {
     var array = []
 
-    lead.equipment.map((unit) => {
-      unit.changeLog.map((log) => {
-        array.push(log)
-      })
-    })
+    if(lead != undefined) {
 
-    console.log(array)
-    return array
+      console.log(lead)
+
+      lead?.equipment.map((unit) => {
+        unit?.changeLog.map((log) => {
+          array.push(log)
+        })
+      })
+  
+      console.log(array)
+      return array
+    }
+    return []
   };
 
   const goToLink = (e) => {
     e.preventDefault()
   
-    window.open(lead.quoteLink, "_blank")
+    window.open(lead?.quoteLink, "_blank")
     sendQuoteLinkOpenedEmail(lead)
   }
 
   const quoteLinkAvailable = () => {
-    if (lead.quoteLink == undefined) return false
-    if (lead.quoteLink == null) return false
-    if (lead.quoteLink === "") return false
+    if (lead?.quoteLink == undefined) return false
+    if (lead?.quoteLink == null) return false
+    if (lead?.quoteLink === "") return false
     return true
+  }
+
+  const shortenedTimestamp = () => {
+    if (lead.timestamp != undefined || lead.timestamp != null || lead.timestamp !== "") return moment(lead?.timestamp, "DD-MMM-yyyy hh:mmA").format('ll')
+    return "customer no loaded"
   }
 
   return (
@@ -170,9 +176,9 @@ export default function CustomerCard(props) {
           alignItems="center"
           // spacing={2}
         >
-          <Typography variant="h4">{name}</Typography>
+          <Typography variant="h4">{lead?.name}</Typography>
           <Stack direction="row" justifyContent="flex-end">
-            <CustomerContactDialog lead={lead} />
+            <CustomerContactDialog />
             <Tooltip title="Email Salesman">
               <IconButton aria-label="edit" onClick={logEmail}>
                 <MailRounded />
@@ -182,15 +188,15 @@ export default function CustomerCard(props) {
         </Stack>
         <Stack direction="row" spacing={1}>
           <Typography variant="caption" color="text.secondary" gutterBottom>
-            {`Created ${dateCreated.slice(0, dateCreated.length - 8)}`}
+            {`Created ${shortenedTimestamp()}`}
           </Typography>
 
-          {lead.willFinance ? (
+          {lead?.willFinance ? (
             <Tooltip title="Financed">
               <AccountBalanceRounded color="primary" fontSize="10px" />
             </Tooltip>
           ) : null}
-          {lead.hasTrade ? (
+          {lead?.hasTrade ? (
             <Tooltip title="Has Trade">
               <AgricultureRounded color="primary" fontSize="10px" />
             </Tooltip>
@@ -204,7 +210,7 @@ export default function CustomerCard(props) {
         >
           <Stack direction="column">
 
-          <Typography color="text.secondary">{`Status: ${status}`}</Typography>
+          <Typography color="text.secondary">{`Status: ${lead?.status}`}</Typography>
           { quoteLinkAvailable() ?
 
           <Tooltip title="View Quote">
@@ -232,7 +238,7 @@ export default function CustomerCard(props) {
           // spacing={2}
         >
           <Typography variant="caption" color="text.secondary">
-            {`Updated ${lead.changeLog[0].timestamp}`}
+            {`Updated ${lead?.changeLog[0].timestamp}`}
           </Typography>
         </Stack>
       </CardContent>

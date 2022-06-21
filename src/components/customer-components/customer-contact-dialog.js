@@ -21,7 +21,7 @@ import moment from "moment";
 import React, { useState } from "react";
 import { db } from "../../services/firebase";
 
-function CustomerContactDialog({ lead }) {
+function CustomerContactDialog() {
   const [isShowingDialog, setIsShowingDialog] = useState(false);
 
   const handleCloseDialog = () => {

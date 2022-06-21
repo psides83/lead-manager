@@ -9,6 +9,7 @@ import {
   auth,
   db,
   onMessageListener,
+  useParams,
   requestForToken,
 } from "./services/firebase";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -161,8 +162,8 @@ export default function App() {
                 element={user ? <SalesDataGrid /> : <SignIn />}
               />
               <Route
-                path="/customer-view"
-                element={customerUser ? <CustomerAppBar /> : <CustomerSignUp />}
+                path="/customer-view/:leadId"
+                element={<CustomerAppBar />}
               />
               <Route path="/" element={user ? <LeadDashboard /> : <SignIn />} />
             </Routes>

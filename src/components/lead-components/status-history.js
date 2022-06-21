@@ -69,8 +69,8 @@ function StatusHistory(props) {
           <List
             sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
           >
-            {events.sort(compare)?.map((event) => (
-              <ListItem key={event.id}>
+            {events.sort(compare)?.map((event, index) => (
+              <ListItem key={index}>
                 <ListItemAvatar>
                   <Avatar style={{ backgroundColor: "#FFDE00" }}>
                     <Agriculture color="primary" />

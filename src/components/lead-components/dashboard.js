@@ -92,12 +92,14 @@ function LeadDashboard() {
           phone: doc.data().phone,
           status: doc.data().status,
           notes: doc.data().notes,
+          quoteLink: doc.data().quoteLink,
           willFinance: doc.data().willFinance,
           hasTrade: doc.data().hasTrade,
           willPurchase: doc.data().willPurchase,
           changeLog: doc.data().changeLog,
           contactLog: doc.data().contactLog,
           equipment: doc.data().equipment,
+          messages: doc.data().messages
         }))
       );
     });
