@@ -101,7 +101,10 @@ export default function EditLead(props) {
       setWillPurchase(lead.willPurchase);
       setStatus(lead.status);
       setNotes(lead.notes);
-      setQuoteLink(lead.quoteLink);
+      if (lead.quoteLink != undefined) {
+
+        setQuoteLink(lead.quoteLink);
+      }
       setChangeLog(lead.changeLog);
       setImportedData({
         name: lead.name,

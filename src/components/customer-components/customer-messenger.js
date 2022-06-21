@@ -102,7 +102,7 @@ function CustomerMessenger(props) {
         senderID: senderID(),
         recipiantID: recipiantID(),
         threadID: threadID(),
-        unread: true
+        unread: sender() === "customer" ? true : false
       };
 
       var messagesArray = [];
