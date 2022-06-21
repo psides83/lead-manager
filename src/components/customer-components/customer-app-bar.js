@@ -133,7 +133,7 @@ export default function CustomerAppBar(props) {
                 variant="h6"
                 noWrap
                 component="div"
-                sx={{ flexGrow: 1, display: { xs: "none", sm: "block" } }}
+                sx={{ flexGrow: 1 }}
               >
                 SunSouth Customer Portal
               </Typography>
