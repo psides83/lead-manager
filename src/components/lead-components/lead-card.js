@@ -302,7 +302,7 @@ export default function LeadCard(props) {
 
           <Tooltip title="Copy Customer Link" >
 
-            <IconButton onClick={() => navigator.clipboard.writeText(`localhost:3000/customer-view/${lead.id}`)} >
+            <IconButton onClick={() => navigator.clipboard.writeText(`https://leadmanager-44f57.web.app/customer-view/${lead.id}`)} >
               <LinkRounded/>
             </IconButton>
           </Tooltip>
