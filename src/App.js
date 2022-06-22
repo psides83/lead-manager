@@ -5,7 +5,13 @@ import {
   Route,
   useNavigate,
 } from "react-router-dom";
-import { auth, db, onMessageListener, requestForToken } from "./services/firebase";
+import {
+  auth,
+  db,
+  onMessageListener,
+  useParams,
+  requestForToken,
+} from "./services/firebase";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
 import { Box } from "@mui/system";
@@ -19,6 +25,8 @@ import SignIn from "./components/lead-components/sign-in";
 import Loading from "./components/loading";
 import CustomerSignUp from "./components/customer-components/customer-sign-up";
 import toast, { Toaster } from "react-hot-toast";
+import SalesDataGrid from "./components/sales-components/sales-data-grid";
+import SalesmenList from "./components/salesmen-list/salesmen-list";
 
 const theme = createTheme({
   palette: {
@@ -47,17 +55,19 @@ const theme = createTheme({
 export default function App() {
   const [{ user, customerUser, loading }, dispatch] = useStateValue();
   const [userProfile, setProfile] = useState({});
-  const [notification, setNotification] = useState({title: '', body: ''});
+  const [notification, setNotification] = useState({ title: "", body: "" });
 
-  const notify = () =>  toast(<ToastDisplay/>);
+  const notify = () => toast(<ToastDisplay />);
   function ToastDisplay() {
     return (
       <div>
-        <p><b>{notification?.title}</b></p>
+        <p>
+          <b>{notification?.title}</b>
+        </p>
         <p>{notification?.body}</p>
       </div>
     );
-  };
+  }
 
   const fetchProfile = (user) => {
     if (user) {
@@ -113,39 +123,50 @@ export default function App() {
         });
       }
     });
-  }, [onAuthStateChanged]);
+  }, [auth]);
 
   useEffect(() => {
     updateAuth();
-    if (notification?.title ){
-      notify()
-     }
+    if (notification?.title) {
+      notify();
+    }
   }, [dispatch, updateAuth, notification]);
 
-  requestForToken();
+  // requestForToken();
 
   onMessageListener()
     .then((payload) => {
-      setNotification({title: payload?.notification?.title, body: payload?.notification?.body});     
+      setNotification({
+        title: payload?.notification?.title,
+        body: payload?.notification?.body,
+      });
     })
-    .catch((err) => console.log('failed: ', err));
+    .catch((err) => console.log("failed: ", err));
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Toaster /> 
-      {user && <MainAppBar />}
-      <Box style={{ marginTop: user && "75px" }}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Toaster />
         <Router>
-          <Routes>
+          {user && <MainAppBar />}
+          <Box style={{ marginTop: user && "75px" }}>
+            <Routes>
             <Route
-              path="/customer-view"
-              element={customerUser ? <CustomerAppBar /> : <CustomerSignUp />}
-            />
-            <Route path="/" element={user ? <LeadDashboard /> : <SignIn />} />
-          </Routes>
+                path="/salesmen-list"
+                element={user ? <SalesmenList /> : <SignIn />}
+              />
+              <Route
+                path="/sales"
+                element={user ? <SalesDataGrid /> : <SignIn />}
+              />
+              <Route
+                path="/customer-view/:leadId"
+                element={<CustomerAppBar />}
+              />
+              <Route path="/" element={user ? <LeadDashboard /> : <SignIn />} />
+            </Routes>
+          </Box>
         </Router>
-      </Box>
-    </ThemeProvider>
+      </ThemeProvider>
   );
 }

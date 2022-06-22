@@ -19,6 +19,9 @@ import CustomerDashboard from "./customer-dashboard";
 import { onAuthStateChanged } from "firebase/auth";
 import CustomerSignUp from "./customer-sign-up";
 import Loading from "../loading";
+import {
+  useParams
+} from "react-router-dom";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -80,6 +83,7 @@ function HideOnScroll(props) {
 
 export default function CustomerAppBar(props) {
   const { leads } = props
+  const { leadId } = useParams();
   const [{ userProfile, customerUser, loading }, dispatch] = useStateValue();
   const [openSuccess, setOpenSuccess] = React.useState(false);
   const [openError, setOpenError] = useState(false);
@@ -90,7 +94,7 @@ export default function CustomerAppBar(props) {
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
       return;
-    }
+    };
 
     setOpenSuccess(false);
     setOpenError(false);
@@ -111,31 +115,27 @@ export default function CustomerAppBar(props) {
 
   return (
     <>
-      {loading && <Loading/>}
-    {!customerUser ? <CustomerSignUp />
-    :
+      {/* {loading && <Loading/>} */}
+    {/* {!customerUser ? <CustomerSignUp />
+    : */}
     <>
       <Box sx={{ flexGrow: 1 }}>
         <HideOnScroll {...props}>
           <AppBar elevation={8}>
             <Toolbar>
-              <IconButton
+              
+                <AgricultureRounded 
                 size="large"
                 edge="start"
                 color="inherit"
-                aria-label="open drawer"
-                sx={{ mr: 2 }}
-                // onClick={useNavigate("/")}
-              >
-                <AgricultureRounded />
-              </IconButton>
+                sx={{ mr: 2 }} />
               <Typography
                 variant="h6"
                 noWrap
                 component="div"
-                sx={{ flexGrow: 1, display: { xs: "none", sm: "block" } }}
+                sx={{ flexGrow: 1 }}
               >
-                Customer Dashboard
+                SunSouth Customer Portal
               </Typography>
 
               <Box sx={{ flexGrow: 4 }} />
@@ -169,9 +169,9 @@ export default function CustomerAppBar(props) {
           </Alert>
         </Snackbar>
       </Box>
-      <CustomerDashboard leads={leads} />
+      <CustomerDashboard leadId={leadId} />
       </>
-    }
+    {/* } */}
     </>
   );
-}
+};
