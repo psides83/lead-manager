@@ -8,12 +8,27 @@ import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
 import AddLead from "./add-lead";
-import { Alert, Snackbar, Tooltip } from "@mui/material";
+import {
+  Alert,
+  ListItemIcon,
+  Menu,
+  MenuItem,
+  Snackbar,
+  Tooltip,
+} from "@mui/material";
 import { useStateValue } from "../../state-management/state-provider";
-import { AccountCircleRounded, AgricultureRounded } from "@mui/icons-material";
+import {
+  AccountCircleRounded,
+  AgricultureRounded,
+  InsertChartRounded,
+  LogoutRounded,
+  MenuRounded,
+  PeopleAltRounded,
+} from "@mui/icons-material";
 import Slide from "@mui/material/Slide";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import { auth } from "../../services/firebase";
+import { Link, useNavigate } from "react-router-dom";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -77,6 +92,8 @@ export default function MainAppBar(props) {
   const [{ searchText, user }, dispatch] = useStateValue();
   const [openSuccess, setOpenSuccess] = React.useState(false);
   const [openError, setOpenError] = useState(false);
+  const [isShowingMenu, setIsShowingMenu] = useState(false);
+  const navigate = useNavigate();
   var [validationMessage, setValidationMessage] = useState("");
 
   // Handle closing of the alerts.
@@ -111,7 +128,7 @@ export default function MainAppBar(props) {
         type: "SET_CUSTOMER_USER",
         customerUser: null,
       });
-      
+
       // User is signed out
       dispatch({
         type: "SET_USER_PROFILE",
@@ -119,23 +136,35 @@ export default function MainAppBar(props) {
       });
       auth.signOut();
     }
-  }
+  };
+
+  // Menu button
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
     <Box sx={{ flexGrow: 1 }}>
       <HideOnScroll {...props}>
         <AppBar elevation={8}>
           <Toolbar>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              sx={{ mr: 2 }}
-              // onClick={useNavigate("/")}
-            >
-              <AgricultureRounded />
-            </IconButton>
+            <Link to="/" style={{ color: "white" }}>
+              <IconButton
+                size="large"
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                sx={{ mr: 2 }}
+                // onClick={useNavigate("/")}
+              >
+                <AgricultureRounded />
+              </IconButton>
+            </Link>
             <Typography
               variant="h6"
               noWrap
@@ -144,8 +173,8 @@ export default function MainAppBar(props) {
             >
               Lead Manager
             </Typography>
-              <Box sx={{ flexGrow: 4 }} />
-            <Search>
+            <Box sx={{ flexGrow: 4 }} />
+            <Search sx={{ mr: 2 }}>
               <SearchIconWrapper>
                 <SearchIcon />
               </SearchIconWrapper>
@@ -161,20 +190,86 @@ export default function MainAppBar(props) {
               setOpenError={setOpenError}
               setOpenSuccess={setOpenSuccess}
             />
-            <Tooltip title={user ? "Log Out" : "Log In"}>
-
-            <IconButton
-              size="large"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={logout}
-            >
-              <AccountCircleRounded />
-            </IconButton>
-            </Tooltip>
+            
+              <IconButton
+                size="large"
+                color="inherit"
+                aria-label="open drawer"
+                onClick={handleClick}
+                aria-controls={open ? "account-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? "true" : undefined}
+              >
+                <MenuRounded />
+              </IconButton>
           </Toolbar>
         </AppBar>
       </HideOnScroll>
+
+      <Menu
+        anchorEl={anchorEl}
+        id="account-menu"
+        open={open}
+        onClose={handleMenuClose}
+        onClick={handleMenuClose}
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            overflow: "visible",
+            filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+            mt: 1.5,
+            "& .MuiAvatar-root": {
+              width: 32,
+              height: 32,
+              ml: -0.5,
+              mr: 1,
+            },
+            "&:before": {
+              content: '""',
+              display: "block",
+              position: "absolute",
+              top: 0,
+              right: 14,
+              width: 10,
+              height: 10,
+              bgcolor: "background.paper",
+              transform: "translateY(-50%) rotate(45deg)",
+              zIndex: 0,
+            },
+          },
+        }}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+      >
+        <MenuItem
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("/sales");
+          }}
+        >
+          <ListItemIcon>
+            <InsertChartRounded fontSize="small" />
+          </ListItemIcon>
+          Sales
+        </MenuItem>
+        <MenuItem
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("/salesmen-list");
+          }}
+        >
+          <ListItemIcon>
+            <PeopleAltRounded fontSize="small" />
+          </ListItemIcon>
+          Salesmen
+        </MenuItem>
+        <MenuItem onClick={logout}>
+          <ListItemIcon>
+            <LogoutRounded fontSize="small" />
+          </ListItemIcon>
+          Logout
+        </MenuItem>
+      </Menu>
 
       <Snackbar
         open={openSuccess}

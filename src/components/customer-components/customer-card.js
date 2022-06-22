@@ -19,11 +19,13 @@ import {
   AccountBalanceRounded,
   AgricultureRounded,
   AttachMoneyRounded,
+  ContentCutOutlined,
   MailRounded,
 } from "@mui/icons-material";
 import StatusHistory from "../lead-components/status-history";
 import {
   Alert,
+  Button,
   Link,
   List,
   ListItem,
@@ -35,6 +37,7 @@ import {
 } from "@mui/material";
 import moment from "moment";
 import CustomerContactDialog from "./customer-contact-dialog";
+import { sendQuoteLinkOpenedEmail } from "../../services/email-service";
 
 const bull = (
   <Box
@@ -99,11 +102,6 @@ function EquipmentSection(props) {
 
 export default function CustomerCard(props) {
   const { lead } = props;
-  const name = lead.name;
-  const dateCreated = lead.timestamp;
-  const lastChange = lead.changeLog.length - 1;
-  const status = lead.status;
-  const notes = lead.notes;
   const [openSuccess, setOpenSuccess] = React.useState(false);
   const [openError, setOpenError] = useState(false);
   var [validationMessage, setValidationMessage] = useState("");
@@ -120,8 +118,46 @@ export default function CustomerCard(props) {
 
   const logEmail = async (e) => {
     e.preventDefault();
-    window.location.href = `mailto:${lead.email}`;
+    window.location.href = `mailto:psides@sunsouth.com`;
   };
+
+  const equipmentStatusArray = () => {
+    var array = []
+
+    if(lead != undefined) {
+
+      console.log(lead)
+
+      lead?.equipment.map((unit) => {
+        unit?.changeLog.map((log) => {
+          array.push(log)
+        })
+      })
+  
+      console.log(array)
+      return array
+    }
+    return []
+  };
+
+  const goToLink = (e) => {
+    e.preventDefault()
+  
+    window.open(lead?.quoteLink, "_blank")
+    sendQuoteLinkOpenedEmail(lead)
+  }
+
+  const quoteLinkAvailable = () => {
+    if (lead?.quoteLink == undefined) return false
+    if (lead?.quoteLink == null) return false
+    if (lead?.quoteLink === "") return false
+    return true
+  }
+
+  const shortenedTimestamp = () => {
+    if (lead.timestamp != undefined || lead.timestamp != null || lead.timestamp !== "") return moment(lead?.timestamp, "DD-MMM-yyyy hh:mmA").format('ll')
+    return "customer no loaded"
+  }
 
   return (
     <Card
@@ -140,32 +176,27 @@ export default function CustomerCard(props) {
           alignItems="center"
           // spacing={2}
         >
-          <Typography variant="h4">{name}</Typography>
+          <Typography variant="h4">{lead?.name}</Typography>
           <Stack direction="row" justifyContent="flex-end">
-            <CustomerContactDialog lead={lead} />
+            <CustomerContactDialog />
             <Tooltip title="Email Salesman">
               <IconButton aria-label="edit" onClick={logEmail}>
                 <MailRounded />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="View Quote">
-              <IconButton aria-label="edit" >
-                <AttachMoneyRounded />
               </IconButton>
             </Tooltip>
           </Stack>
         </Stack>
         <Stack direction="row" spacing={1}>
           <Typography variant="caption" color="text.secondary" gutterBottom>
-            {`Created ${dateCreated.slice(0, dateCreated.length - 8)}`}
+            {`Created ${shortenedTimestamp()}`}
           </Typography>
 
-          {lead.willFinance ? (
+          {lead?.willFinance ? (
             <Tooltip title="Financed">
               <AccountBalanceRounded color="primary" fontSize="10px" />
             </Tooltip>
           ) : null}
-          {lead.hasTrade ? (
+          {lead?.hasTrade ? (
             <Tooltip title="Has Trade">
               <AgricultureRounded color="primary" fontSize="10px" />
             </Tooltip>
@@ -177,8 +208,21 @@ export default function CustomerCard(props) {
           alignItems="center"
           // spacing={2}
         >
-          <Typography color="text.secondary">{`Status: ${status}`}</Typography>
-          <StatusHistory events={lead.changeLog} />
+          <Stack direction="column">
+
+          <Typography color="text.secondary">{`Status: ${lead?.status}`}</Typography>
+          { quoteLinkAvailable() ?
+
+          <Tooltip title="View Quote">
+              <Button aria-label="edit" onClick={goToLink} endIcon={<AttachMoneyRounded />} >
+                View Quote
+              </Button>
+            </Tooltip>
+            :
+            null
+          }
+          </Stack>
+          <StatusHistory events={equipmentStatusArray()} />
         </Stack>
         <EquipmentSection
           lead={lead}
@@ -194,7 +238,7 @@ export default function CustomerCard(props) {
           // spacing={2}
         >
           <Typography variant="caption" color="text.secondary">
-            {`Updated ${lead.changeLog[0].timestamp}`}
+            {`Updated ${lead?.changeLog[0].timestamp}`}
           </Typography>
         </Stack>
       </CardContent>

@@ -55,6 +55,7 @@ export default function EditLead(props) {
   var [willPurchase, setWillPurchase] = useState(false);
   var [status, setStatus] = useState("Lead Created");
   var [notes, setNotes] = useState("");
+  var [quoteLink, setQuoteLink] = useState("");
   var [changeLog, setChangeLog] = useState([]);
   var [change, setChange] = useState([]);
   const [importedData, setImportedData] = useState({});
@@ -100,6 +101,10 @@ export default function EditLead(props) {
       setWillPurchase(lead.willPurchase);
       setStatus(lead.status);
       setNotes(lead.notes);
+      if (lead.quoteLink != undefined) {
+
+        setQuoteLink(lead.quoteLink);
+      }
       setChangeLog(lead.changeLog);
       setImportedData({
         name: lead.name,
@@ -189,7 +194,7 @@ export default function EditLead(props) {
         break;
       default:
         break;
-    }
+    };
   };
 
   const logChanges = () => {
@@ -202,7 +207,7 @@ export default function EditLead(props) {
         )
       );
       console.log("you made it here")
-    }
+    };
 
     if (email !== importedData.email) {
       setChange(
@@ -212,7 +217,7 @@ export default function EditLead(props) {
           } to ${email === "" ? "BLANK" : email}`
         )
       );
-    }
+    };
 
     if (phone !== importedData.phone) {
       setChange(
@@ -222,13 +227,13 @@ export default function EditLead(props) {
           } to ${phone === "" ? "BLANK" : phone}`
         )
       );
-    }
+    };
 
     if (status !== importedData.status) {
       setChange(
         change.push(`status updated from ${importedData.status} to ${status}`)
       );
-    }
+    };
 
     if (notes !== importedData.notes) {
       setChange(
@@ -238,7 +243,17 @@ export default function EditLead(props) {
           } to ${notes === "" ? "BLANK" : notes}`
         )
       );
-    }
+    };
+
+    if (quoteLink !== importedData.quoteLink) {
+      setChange(
+        change.push(
+          `Quote Link edited from ${
+            importedData.quoteLink === "" ? "BLANK" : importedData.quoteLink
+          } to ${quoteLink === "" ? "BLANK" : quoteLink}`
+        )
+      );
+    };
 
     if (willFinance !== importedData.willFinance) {
       setChange(
@@ -246,7 +261,7 @@ export default function EditLead(props) {
           `Fill Finance edited from ${importedData.willFinance} to ${willFinance}`
         )
       );
-    }
+    };
 
     if (hasTrade !== importedData.hasTrade) {
       setChange(
@@ -254,7 +269,7 @@ export default function EditLead(props) {
           `Has Trade edited from ${importedData.hasTrade} to ${hasTrade}`
         )
       );
-    }
+    };
 
     if (willPurchase !== importedData.willPurchase) {
       setChange(
@@ -262,7 +277,7 @@ export default function EditLead(props) {
           `Will Purchase edited from ${importedData.willPurchase} to ${willPurchase}`
         )
       );
-    }
+    };
   };
 
   // Add the lead to the firestore "leads" collection and the equipment to the fire store "equipment" collection.
@@ -274,7 +289,7 @@ export default function EditLead(props) {
 
     if (changeString[0] === ",") {
       changeString = changeString.substring(1).trim();
-    }
+    };
 
     console.log(changeString);
 
@@ -294,6 +309,7 @@ export default function EditLead(props) {
       hasTrade: hasTrade,
       willPurchase: willPurchase,
       changeLog: changeLog,
+      quoteLink: quoteLink
     };
 
     const leadRef = doc(db, "leads", lead.id);
@@ -397,6 +413,17 @@ export default function EditLead(props) {
     if (e.target.value !== importedData.notes) {
       setDataHasChanges(true);
     } else if (e.target.value === importedData.notes) {
+      setDataHasChanges(false);
+    }
+  };
+
+  // Handle lead notes input and capitolize each word
+  const handleQuoteLinkInput = (e) => {
+    setQuoteLink(e.target.value);
+
+    if (e.target.value !== importedData.quoteLink) {
+      setDataHasChanges(true);
+    } else if (e.target.value === importedData.quoteLink) {
       setDataHasChanges(false);
     }
   };
@@ -516,6 +543,20 @@ export default function EditLead(props) {
                   </MenuItem>
                 ))}
               </TextField>
+            </Grid>
+
+            <Grid item xs={12} sm={12}>
+              <TextField
+                fullWidth
+                multiline
+                size="small"
+                id="quoteLink"
+                name="quoteLink"
+                label="Quote Link"
+                variant="outlined"
+                value={quoteLink}
+                onChange={handleQuoteLinkInput}
+              />
             </Grid>
 
             <Grid item xs={12} sm={12}>
