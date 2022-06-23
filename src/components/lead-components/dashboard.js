@@ -31,7 +31,7 @@ function LeadDashboard() {
   const [leads, setLeads] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [{ searchText }, dispatch] = useStateValue("");
-  const [searchParam] = useState(["name"]);
+  const [searchParam] = useState(["name", "phone"]);
   const [filterParam, setFilterParam] = useState("Active");
   const [open, setOpen] = useState(false);
   const [openSuccess, setOpenSuccess] = useState(false);
@@ -51,7 +51,18 @@ function LeadDashboard() {
 
   //    Fetch leads from firestore
   const fetchLeads = useCallback(async () => {
-    const leadsQuery = query(collection(db, "leads"), orderBy("id", "asc"));
+    var leadsQuery;
+    if (filterParam === "Closed") {
+      leadsQuery = query(
+        collection(db, "leads"),
+        where("status", "==", "Closed"),
+      );
+    } else {
+      leadsQuery = query(
+        collection(db, "leads"),
+        where("status", "!=", "Closed"),
+      );
+    }
 
     onSnapshot(leadsQuery, (querySnapshot) => {
       setLeads(
@@ -64,12 +75,14 @@ function LeadDashboard() {
           phone: doc.data().phone,
           status: doc.data().status,
           notes: doc.data().notes,
+          quoteLink: doc.data().quoteLink,
           willFinance: doc.data().willFinance,
           hasTrade: doc.data().hasTrade,
           willPurchase: doc.data().willPurchase,
           changeLog: doc.data().changeLog,
           contactLog: doc.data().contactLog,
           equipment: doc.data().equipment,
+          messages: doc.data().messages
         }))
       );
     });
@@ -105,33 +118,21 @@ function LeadDashboard() {
     fetchTasks();
   }, [fetchLeads, fetchTasks]);
 
-  const search = (leads) => {
-    return leads.filter((item) => {
-      /*
-      // in here we check if our region is equal to our c state
-      // if it's equal to then only return the items that match
-      // if not return All the countries
-      */
-      if (filterParam === "Closed" && item.status === filterParam) {
-        return searchParam.some((newItem) => {
-          return (
-            item[newItem]
-              .toString()
-              .toLowerCase()
-              .indexOf(searchText.toLowerCase()) > -1
-          );
-        });
-      } else if (filterParam !== "Closed" && item.status !== "Closed") {
-        return searchParam.some((newItem) => {
-          return (
-            item[newItem]
-              .toString()
-              .toLowerCase()
-              .indexOf(searchText.toLowerCase()) > -1
-          );
-        });
-      }
-      return null;
+  const searchable = (leads) => {
+    return leads.sort(function (a, b) {
+      return a.id - b.id;
+    }).filter((item) => {
+
+      return searchParam.some((newItem) => {
+        return (
+          item[newItem]
+            .toString()
+            .toLowerCase()
+            .replace(/[^0-9, a-z]/g, "")
+            .replace(/\s/g, "")
+            .indexOf(searchText.toLowerCase().replace(/\s/g, "")) > -1
+        );
+      });
     });
   };
 
@@ -192,7 +193,7 @@ function LeadDashboard() {
           justifyContent={value === "leads" ? "flex-start" : "center"}
         >
           {value === "leads" ? (
-            search(leads).map((lead) => (
+            searchable(leads).map((lead) => (
               <Grid key={lead.id} item xs={12} sm={6} md={6} lg={4}>
                 <LeadCard lead={lead} tasks={tasks} />
               </Grid>

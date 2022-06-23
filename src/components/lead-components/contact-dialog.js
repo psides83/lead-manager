@@ -15,6 +15,7 @@ import {
   ListItemText,
   Stack,
   Tooltip,
+  Badge,
 } from "@mui/material";
 import { doc, setDoc } from "firebase/firestore";
 import moment from "moment";
@@ -74,11 +75,27 @@ function ContactDialog(props) {
     window.location.href = `sms:+1${lead.phone}`;
   };
 
+  const unreadMessageCount = () => {
+    const count = lead.messages?.filter((item) => {
+
+      if (item.unread === true) { return item } 
+      return null;
+    }).length;
+
+    if (count != 0) return count
+    return null
+  };
+
   return (
     <>
       <Tooltip title="Contact Lead">
         <IconButton aria-label="phone" onClick={handleToggleDialog}>
+        <Badge
+            badgeContent={unreadMessageCount()}
+            color="primary"
+          >
           <PhoneIphoneRounded />
+          </Badge>
         </IconButton>
       </Tooltip>
 
@@ -116,6 +133,6 @@ function ContactDialog(props) {
       </Dialog>
     </>
   );
-}
+};
 
 export default ContactDialog;

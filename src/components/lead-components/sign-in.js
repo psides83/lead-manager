@@ -187,11 +187,11 @@ export default function SignIn() {
                 Forgot password?
               </Link> */}
             </Grid>
-            <Grid item>
+            {/* <Grid item>
               <Link to="/sign-up" variant="body2">
                 {"Don't have an account? Sign Up"}
               </Link>
-            </Grid>
+            </Grid> */}
           </Grid>
         </Box>
       </Box>

@@ -21,7 +21,7 @@ import moment from "moment";
 import React, { useState } from "react";
 import { db } from "../../services/firebase";
 
-function CustomerContactDialog({ lead }) {
+function CustomerContactDialog() {
   const [isShowingDialog, setIsShowingDialog] = useState(false);
 
   const handleCloseDialog = () => {
@@ -35,7 +35,7 @@ function CustomerContactDialog({ lead }) {
   const logCall = async (e) => {
     e.preventDefault();
 
-    window.location.href = `tel:3347349544`;
+    window.location.href = `tel:+13347349544`;
   };
 
   const logText = async (e) => {
@@ -85,6 +85,6 @@ function CustomerContactDialog({ lead }) {
       </Dialog>
     </>
   );
-}
+};
 
 export default CustomerContactDialog;
