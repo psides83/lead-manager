@@ -22,6 +22,7 @@ import {
 import { db } from "../../services/firebase";
 import { useStateValue } from "../../state-management/state-provider";
 import Tasks from "./task-list";
+import { Toaster } from "react-hot-toast";
 
 const filters = ["Active", "Closed"];
 
@@ -208,6 +209,7 @@ function LeadDashboard() {
         </Grid>
         }
       </Box>
+      <Toaster position="top-center" reverseOrder={true} />
     </>
   );
 }

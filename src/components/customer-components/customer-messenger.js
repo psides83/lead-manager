@@ -40,10 +40,14 @@ function CustomerMessenger(props) {
 
   const bottomRef = useRef(null);
 
+  const scroll = useCallback(() => {
+    bottomRef.current?.scrollIntoView({behavior: 'smooth'});
+  }, [lead.messages])
+
   useEffect(() => {
     setMessages(lead.messages)
-    bottomRef.current?.scrollIntoView({behavior: 'smooth'});
-  }, [lead.messages]);
+    scroll()
+  }, [scroll]);
   
 
   const recipiantID = useCallback(() => {
@@ -128,10 +132,8 @@ function CustomerMessenger(props) {
         .then
         // sendNotificationToClient(lead.notificationToken, notificationMessage)
         ();
-        setMessages(messagesArray)
       setMessageText("");
       bottomRef.current?.scrollIntoView({behavior: 'smooth'});
-      console.log("scrolled")
     }
   };
 
@@ -145,7 +147,7 @@ function CustomerMessenger(props) {
     <Paper
       elevation={4}
       sx={{
-        postiton: "relative",
+        // postiton: "relative",
         overflow: "hidden",
         // height: "100vh",
         display: "flex",
@@ -154,8 +156,7 @@ function CustomerMessenger(props) {
         padding: "10px 10px 10px 10px",
         backgroundColor: "white",
         borderRadius: 2,
-        // margin: "12px",
-        width: "325px",
+        minWidth: "350px",
       }}
     >
       <div
@@ -193,7 +194,7 @@ function CustomerMessenger(props) {
           flexDirection: "column",
         }}
       >
-        {messages?.map((message) => (
+        {lead.messages?.map((message) => (
           <div
             key={message.id}
             style={{
@@ -241,8 +242,9 @@ function CustomerMessenger(props) {
           placeholder="message..."
           style={{
             // width: "93%",
+            flexGrow: 1,
             fontFamily: "sans-serif",
-            borderRadius: "20px",
+            borderRadius: "20px 0 0 20px",
             border: "none",
             backgroundColor: "white",
             padding: "10px 10px 12px 10px",

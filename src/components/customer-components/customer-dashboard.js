@@ -104,7 +104,13 @@ function CustomerDashboard(props) {
             </Grid>
             <Grid item xs={12} sm={6} md={6} lg={4}>
               {leadId != undefined && (
-                <CustomerMessenger user={userProfile} lead={lead} />
+                <div
+                  style={{
+                    margin: "12px",
+                  }}
+                >
+                  <CustomerMessenger user={userProfile} lead={lead} />
+                </div>
               )}
             </Grid>
           </Grid>

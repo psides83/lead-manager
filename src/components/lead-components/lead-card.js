@@ -35,6 +35,7 @@ import ContactDialog from "./contact-dialog";
 import EditLead from "./edit-lead";
 import AddTaskDialog from "./add-lead-tasks";
 import EquipmentForm from "./equipment-form";
+import toast, { Toaster } from "react-hot-toast";
 
 function TaskList(props) {
   const { lead, tasks, setValidationMessage, setOpenError, setOpenSuccess } =
@@ -280,6 +281,21 @@ export default function LeadCard(props) {
     return moment(date, "DD-MMM-YYYY hh:mmA").fromNow();
   };
 
+  const copyLeadLink = (e) => {
+    e.preventDefault();
+
+    toast.promise(
+      navigator.clipboard.writeText(
+        `https://leadmanager-44f57.web.app/customer-view/${lead.id}`
+      ),
+      {
+        loading: "Saving...",
+        success: <b>Link copied!</b>,
+        error: <b>Could not copy link.</b>,
+      }
+    );
+  };
+
   return (
     <Card
       sx={{
@@ -299,16 +315,14 @@ export default function LeadCard(props) {
         >
           <Typography variant="h4">{name}</Typography>
           <Stack direction="row" justifyContent="flex-end">
+            <Tooltip title="Copy Customer Link">
+              <IconButton onClick={copyLeadLink}>
+                <LinkRounded />
+              </IconButton>
+            </Tooltip>
 
-          <Tooltip title="Copy Customer Link" >
-
-            <IconButton onClick={() => navigator.clipboard.writeText(`https://leadmanager-44f57.web.app/customer-view/${lead.id}`)} >
-              <LinkRounded/>
-            </IconButton>
-          </Tooltip>
-          
             <ContactDialog lead={lead} />
-            
+
             <Tooltip title="Email Lead">
               <IconButton aria-label="edit" onClick={logEmail}>
                 <MailRounded />
