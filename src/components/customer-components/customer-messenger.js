@@ -15,12 +15,13 @@ import {
   where,
 } from "firebase/firestore";
 import moment from "moment";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { db } from "../../services/firebase";
 
 function CustomerMessenger(props) {
   const { user, lead } = props;
   const [messageText, setMessageText] = useState("");
+  var [messages, setMessages] = useState();
   // const [messages, setMessages] = useState([]);
 
   // const getSalesmanUID = useCallback(async () => {
@@ -34,6 +35,16 @@ function CustomerMessenger(props) {
   //     console.log("No such document!");
   //   }
   // }, []);
+
+
+
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    setMessages(lead.messages)
+    bottomRef.current?.scrollIntoView({behavior: 'smooth'});
+  }, [lead.messages]);
+  
 
   const recipiantID = useCallback(() => {
     if (user?.type === "admin") return lead?.id;
@@ -117,7 +128,10 @@ function CustomerMessenger(props) {
         .then
         // sendNotificationToClient(lead.notificationToken, notificationMessage)
         ();
+        setMessages(messagesArray)
       setMessageText("");
+      bottomRef.current?.scrollIntoView({behavior: 'smooth'});
+      console.log("scrolled")
     }
   };
 
@@ -133,7 +147,7 @@ function CustomerMessenger(props) {
       sx={{
         postiton: "relative",
         overflow: "hidden",
-        height: "100vh",
+        // height: "100vh",
         display: "flex",
         flexDirection: "column",
         alignContent: "space-between",
@@ -144,13 +158,13 @@ function CustomerMessenger(props) {
         width: "325px",
       }}
     >
-      <Box
-        sx={{
+      <div
+        style={{
           // position: "absolute",
           // top: "0px",
           // left: "0px",
-          height: "60px",
-          overflow: "hidden",
+          // height: "60px",
+          // overflow: "hidden",
           borderBottom: "solid gray 1px",
           marginBottom: "10px",
         }}
@@ -165,24 +179,24 @@ function CustomerMessenger(props) {
         >
           Messages
         </Typography>
-      </Box>
-      <Box
-        sx={{
+      </div>
+      <div
+        style={{
           // position: "absolute",
-          top: "50px",
-          bottom: "60px",
+          // top: "50px",
+          // bottom: "60px",
           // left: "0px",
-          overflow: "auto",
+          overflow: "scroll",
           minHeight: "150px",
+          maxHeight: "400px",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "flex-end",
         }}
       >
-        {lead.messages?.map((message) => (
-          <Box
+        {messages?.map((message) => (
+          <div
             key={message.id}
-            sx={{
+            style={{
               display: "flex",
               justifyContent: messageSenderCheck(message)
                 ? "flex-end"
@@ -190,30 +204,29 @@ function CustomerMessenger(props) {
               flexGrow: 1,
             }}
           >
-            <Box
-              sx={{
+            <div
+              style={{
                 background: messageSenderCheck(message) ? "#367C2B" : "#e9e9e9",
                 padding: "4px 12px 4px 12px",
                 margin: "0 12px 12px",
-                borderRadius: "30px",
+                borderRadius: "20px",
                 textAlign: "left",
                 alignSelf: "flex-end",
                 color: messageSenderCheck(message) ? "white" : "inherit",
+                maxWidth: "200px"
               }}
             >
               {message.text}
-            </Box>
-          </Box>
+            </div>
+          </div>
         ))}
-      </Box>
+        <div ref={bottomRef} />
+      </div>
 
-      <Box
+      <div
         style={{
           // position: "absolute",
-          bottom: "0px",
-          minHeight: "45px",
           // left: "0px",
-          overflow: "hidden",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-end",
@@ -256,7 +269,7 @@ function CustomerMessenger(props) {
             }}
           />
         </IconButton>
-      </Box>
+      </div>
     </Paper>
   );
 }
