@@ -205,6 +205,7 @@ export default function AddLead(props) {
       phone: phone,
       status: leadStatus,
       notes: leadNotes,
+      quoteLink: "",
       willFinance: willFinance,
       hasTrade: hasTrade,
       willPurchase: willPurchase,
