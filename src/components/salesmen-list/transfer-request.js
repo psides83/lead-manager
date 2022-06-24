@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import { AgricultureRounded, SendRounded } from "@mui/icons-material";
 
-
 export default function TransferRequestView({ emails }) {
   //#region State Properties
   const [openSuccess, setOpenSuccess] = useState(false);

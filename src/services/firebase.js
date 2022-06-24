@@ -2,7 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { getStorage, ref } from "firebase/storage";
+import { getStorage } from "firebase/storage";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -65,4 +65,12 @@ const onMessageListener = () =>
 // Analytics
 // const analytics = getAnalytics(app);
 
-export { app, auth, db, storage, requestForToken, onMessageListener, messaging };
+export {
+  app,
+  auth,
+  db,
+  storage,
+  requestForToken,
+  onMessageListener,
+  messaging,
+};

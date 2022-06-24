@@ -1,18 +1,13 @@
 import { ArrowUpwardRounded } from "@mui/icons-material";
 import {
-  Box,
   IconButton,
   Paper,
   TextareaAutosize,
   Typography,
 } from "@mui/material";
 import {
-  collection,
   doc,
-  onSnapshot,
-  query,
   setDoc,
-  where,
 } from "firebase/firestore";
 import moment from "moment";
 import React, { useCallback, useEffect, useState, useRef } from "react";
@@ -21,75 +16,31 @@ import { db } from "../../services/firebase";
 function CustomerMessenger(props) {
   const { user, lead } = props;
   const [messageText, setMessageText] = useState("");
+  // eslint-disable-next-line
   var [messages, setMessages] = useState();
-  // const [messages, setMessages] = useState([]);
-
-  // const getSalesmanUID = useCallback(async () => {
-  //   const docRef = doc(db, "users");
-  //   const docSnap = await getDoc(docRef);
-
-  //   if (docSnap.exists()) {
-  //     console.log("Document data:", docSnap.data());
-  //   } else {
-  //     // doc.data() will be undefined in this case
-  //     console.log("No such document!");
-  //   }
-  // }, []);
-
-
 
   const bottomRef = useRef(null);
 
   const scroll = useCallback(() => {
-    bottomRef.current?.scrollIntoView({behavior: 'smooth'});
-  }, [lead.messages])
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    // eslint-disable-next-line
+  }, [lead.messages]);
 
   useEffect(() => {
-    setMessages(lead.messages)
-    scroll()
-  }, [scroll]);
-  
+    setMessages(lead.messages);
+    scroll();
+  }, [scroll, lead.messages]);
 
   const recipiantID = useCallback(() => {
     if (user?.type === "admin") return lead?.id;
-    if (user == undefined) return lead?.salesmanID;
+    if (user === undefined) return lead?.salesmanID;
   }, [user, lead]);
 
   const threadID = useCallback(() => {
     if (user?.type === "admin") return user?.id + lead?.id;
-    if (user == undefined) return lead?.salesmanID + lead?.id;
+    if (user === undefined) return lead?.salesmanID + lead?.id;
     return;
   }, [user, lead]);
-
-  //    Fetch leads from firestore
-  // const fetchMessages = useCallback(async () => {
-  //   console.log(threadID());
-  //   const messagesQuery = query(
-  //     collection(db, "messages"),
-  //     where("threadID", "==", threadID())
-  //   );
-
-  //   onSnapshot(messagesQuery, (querySnapshot) => {
-  //     setMessages(
-  //       querySnapshot.docs.map((doc) => ({
-  //         id: doc.data().id,
-  //         timestamp: doc.data().timestamp,
-  //         text: doc.data().text,
-  //         sender: doc.data().sender,
-  //         senderID: doc.data().senderID,
-  //         recipiantID: doc.data().recipiantID,
-  //       }))
-  //     );
-  //   });
-
-  //   // timer.current = window.setTimeout(() => {
-  //   //   setLoading(false);
-  //   // }, 1000);
-  // }, [threadID]);
-
-  // useEffect(() => {
-  //   fetchMessages();
-  // }, [fetchMessages]);
 
   const submitMessage = async (e) => {
     e.preventDefault();
@@ -97,12 +48,12 @@ function CustomerMessenger(props) {
     const id = moment().format("yyyyMMDDHHmmss");
 
     const sender = () => {
-      if (user == undefined) return "customer";
+      if (user === undefined) return "customer";
       return "admin";
     };
 
     const senderID = () => {
-      if (user == undefined) return lead?.id;
+      if (user === undefined) return lead?.id;
       return user?.id;
     };
 
@@ -120,7 +71,7 @@ function CustomerMessenger(props) {
 
       var messagesArray = [];
 
-      if (lead.messages != undefined) {
+      if (lead.messages !== undefined) {
         lead.messages.push(messageData);
         messagesArray = lead.messages;
       } else {
@@ -130,16 +81,15 @@ function CustomerMessenger(props) {
       const leadDoc = doc(db, "leads", lead.id);
       await setDoc(leadDoc, { messages: messagesArray }, { merge: true })
         .then
-        // sendNotificationToClient(lead.notificationToken, notificationMessage)
         ();
       setMessageText("");
-      bottomRef.current?.scrollIntoView({behavior: 'smooth'});
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   };
 
   const messageSenderCheck = (message) => {
-    if (user == undefined && message.senderID === lead.id) return true;
-    if (user != undefined && message.senderID === user?.id) return true;
+    if (user === undefined && message.senderID === lead.id) return true;
+    if (user !== undefined && message.senderID === user?.id) return true;
     return false;
   };
 
@@ -147,9 +97,7 @@ function CustomerMessenger(props) {
     <Paper
       elevation={4}
       sx={{
-        // postiton: "relative",
         overflow: "hidden",
-        // height: "100vh",
         display: "flex",
         flexDirection: "column",
         alignContent: "space-between",
@@ -161,11 +109,6 @@ function CustomerMessenger(props) {
     >
       <div
         style={{
-          // position: "absolute",
-          // top: "0px",
-          // left: "0px",
-          // height: "60px",
-          // overflow: "hidden",
           borderBottom: "solid gray 1px",
           marginBottom: "10px",
         }}
@@ -183,10 +126,6 @@ function CustomerMessenger(props) {
       </div>
       <div
         style={{
-          // position: "absolute",
-          // top: "50px",
-          // bottom: "60px",
-          // left: "0px",
           overflow: "scroll",
           minHeight: "150px",
           maxHeight: "400px",
@@ -214,7 +153,7 @@ function CustomerMessenger(props) {
                 textAlign: "left",
                 alignSelf: "flex-end",
                 color: messageSenderCheck(message) ? "white" : "inherit",
-                maxWidth: "200px"
+                maxWidth: "200px",
               }}
             >
               {message.text}
@@ -226,8 +165,6 @@ function CustomerMessenger(props) {
 
       <div
         style={{
-          // position: "absolute",
-          // left: "0px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-end",
@@ -241,7 +178,6 @@ function CustomerMessenger(props) {
         <TextareaAutosize
           placeholder="message..."
           style={{
-            // width: "93%",
             flexGrow: 1,
             fontFamily: "sans-serif",
             borderRadius: "20px 0 0 20px",
@@ -253,7 +189,6 @@ function CustomerMessenger(props) {
             fontSize: "16px",
           }}
           value={messageText}
-          // minRows={8}
           onChange={(e) =>
             setMessageText(
               e.target.value.replace(/^\w/, (c) => c.toUpperCase())

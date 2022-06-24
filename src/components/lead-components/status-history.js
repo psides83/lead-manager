@@ -1,5 +1,4 @@
-// import { DialogContent } from "@material-ui/core";
-import { Agriculture, EscalatorWarning, History } from "@mui/icons-material";
+import { Agriculture, History } from "@mui/icons-material";
 import {
   Avatar,
   Dialog,
@@ -9,12 +8,10 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  Typography,
   DialogContent,
   Tooltip,
-  Button,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 function StatusHistory(props) {
   const { events } = props;

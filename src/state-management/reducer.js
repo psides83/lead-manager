@@ -3,7 +3,7 @@ export const initialState = {
   searchText: "",
   user: null,
   customerUser: null,
-  userProfile: null
+  userProfile: null,
 };
 
 const reducer = (state, action) => {

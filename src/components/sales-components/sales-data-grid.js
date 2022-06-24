@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
+// eslint-disable-next-line
 import { DataGrid } from "@mui/x-data-grid";
 import {
   collection,
+  // eslint-disable-next-line
   doc,
   onSnapshot,
   orderBy,
@@ -10,9 +12,11 @@ import {
 import { db } from "../../services/firebase";
 import { currencyFormatter } from "../../utils/utils";
 import moment from "moment";
+// eslint-disable-next-line
 import { Box, Button, Paper, Stack, Typography } from "@mui/material";
 import { ArrowDownwardRounded, ArrowUpwardRounded } from "@mui/icons-material";
 
+// eslint-disable-next-line
 const columns = [
   {
     field: "saleDate",
@@ -60,7 +64,6 @@ const columns = [
     width: 100,
     editable: false,
     type: "select",
-    editable: true,
     valueGetter: (params) =>
       params.row.tradeAttached ? params.row.tradeAttached : null,
   },
@@ -78,7 +81,9 @@ const columns = [
 
 export default function SalesDataGrid() {
   const [sales, setSales] = useState([]);
+  // eslint-disable-next-line
   const [filterParam, setFilterParam] = useState("All");
+  // eslint-disable-next-line
   const [salesData, setSalesData] = useState({});
   const dataTypes = ["Gross Revenue", "Margin", "Commission", "Bonus"];
   const years = [
@@ -87,6 +92,8 @@ export default function SalesDataGrid() {
     moment().subtract(1, "years").format("yyyy"),
     moment().format("yyyy"),
   ];
+
+  // eslint-disable-next-line
   const months = [
     "1",
     "2",
@@ -123,6 +130,7 @@ export default function SalesDataGrid() {
         }))
       );
     });
+    // eslint-disable-next-line
   }, [filterParam]);
 
   const calculateSales = (type, year) => {
@@ -138,6 +146,7 @@ export default function SalesDataGrid() {
         if (sale.year === year) {
           return sale;
         }
+        return null;
       })
       .forEach((value) => {
         salesDollars += value.sales;
@@ -173,6 +182,7 @@ export default function SalesDataGrid() {
     sales
       ?.filter((sale) => {
         if (sale.year === currentYear) return sale;
+        return null;
       })
       .forEach((value) => {
         if (type === "Gross Revenue") currentYearTotal += value.sales;
@@ -189,6 +199,7 @@ export default function SalesDataGrid() {
           sale.month <= currentMonth
         )
           return sale;
+        return null;
       })
       .forEach((value) => {
         if (type === "Gross Revenue") previousYearToDate += value.sales;
@@ -240,89 +251,87 @@ export default function SalesDataGrid() {
 
   useEffect(() => {
     fetchSales();
-    console.table(sales);
   }, [fetchSales]);
 
   return (
     <Box
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          // height: 680,
-          width: "98vw",
-          // background: "white",
-          // border: "solid black 2px",
-          // borderRadius: "10px",
-          alignItems: "center",
-          alignContent: "center",
-          justifyContent: "center",
-        }}
-      >
-      
-        {dataTypes.map((type) => (
-          <Box
-            key={type}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              alignContent: "center",
-              maxWidth: "500px",
-              margin: "20px",
-            }}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        // height: 680,
+        width: "98vw",
+        // background: "white",
+        // border: "solid black 2px",
+        // borderRadius: "10px",
+        alignItems: "center",
+        alignContent: "center",
+        justifyContent: "center",
+      }}
+    >
+      {dataTypes.map((type) => (
+        <Box
+          key={type}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            alignContent: "center",
+            maxWidth: "500px",
+            margin: "20px",
+          }}
+        >
+          <Typography
+            variant="h5"
+            color="primary"
+            sx={{ fontWeight: "medium" }}
+            alignSelf="center"
           >
-            <Typography
-              variant="h5"
-              color="primary"
-              sx={{ fontWeight: "medium" }}
-              alignSelf="center"
-            >
-              {type}
-            </Typography>
-            <Typography>
-              Your <strong>{type}</strong> is
-            </Typography>
-            {trend(type)}
-            <Stack
-              component={Paper}
-              elevation={5}
-              direction="row"
-              alignItems="flex-end"
-              justifyContent="space-around"
-              sx={{  borderRadius: "10px", minWidth: "350px" }}
-            >
-              {years.map((year) => (
-                <Stack
-                  key={year}
-                  direction="column"
-                  justifyContent="center"
-                  alignItems="center"
-                  sx={{ margin: "8px" }}
-                >
-                  <Typography variant="caption">
-                    {currencyFormatter.format(calculateSales(type, year))}
-                  </Typography>
+            {type}
+          </Typography>
+          <Typography>
+            Your <strong>{type}</strong> is
+          </Typography>
+          {trend(type)}
+          <Stack
+            component={Paper}
+            elevation={5}
+            direction="row"
+            alignItems="flex-end"
+            justifyContent="space-around"
+            sx={{ borderRadius: "10px", minWidth: "350px" }}
+          >
+            {years.map((year) => (
+              <Stack
+                key={year}
+                direction="column"
+                justifyContent="center"
+                alignItems="center"
+                sx={{ margin: "8px" }}
+              >
+                <Typography variant="caption">
+                  {currencyFormatter.format(calculateSales(type, year))}
+                </Typography>
 
-                  <Box
-                    sx={{
-                      width: "25px",
-                      height: barHeight(type, year),
-                      backgroundColor: "#367C2B",
-                      borderRadius: "4px 4px 0 0",
-                    }}
-                  />
-                  <Typography variant="subtitle1">{year}</Typography>
-                </Stack>
-              ))}
-              {/* <Typography>Sales: {currencyFormatter.format(calculateSales(salesTotal, year))}</Typography>
+                <Box
+                  sx={{
+                    width: "25px",
+                    height: barHeight(type, year),
+                    backgroundColor: "#367C2B",
+                    borderRadius: "4px 4px 0 0",
+                  }}
+                />
+                <Typography variant="subtitle1">{year}</Typography>
+              </Stack>
+            ))}
+            {/* <Typography>Sales: {currencyFormatter.format(calculateSales(salesTotal, year))}</Typography>
             <Typography>Margin: {currencyFormatter.format(calculateSales(marginTotal, year))}</Typography>
             <Typography>
               Commission: {currencyFormatter.format(calculateSales(commissionTotal, year))}
             </Typography> */}
-            </Stack>
-          </Box>
-        ))}
+          </Stack>
+        </Box>
+      ))}
 
       {/* <div
         style={{

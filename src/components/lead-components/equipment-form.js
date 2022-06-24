@@ -226,22 +226,6 @@ export default function EquipmentForm(props) {
       { equipment: lead.equipment, changeLog: lead.changeLog },
       { merge: true }
     );
-
-    // setIsShowingDialog(false);
-    setLoading(false);
-    setSuccess(true);
-    setValidationMessage("lead successfully edited");
-    setOpenSuccess(true);
-    handleCloseDialog();
-
-    // sendNewleadEmail(
-    //   timestamp,
-    //   equipmentList,
-    //   fullName,
-    //   userProfile,
-    //   salesman
-    // );
-    // resetLeadForm();
   };
 
   // Reset the Lead form
@@ -269,6 +253,11 @@ export default function EquipmentForm(props) {
       return;
     } else {
       await setEquipmentToFirestore();
+      setLoading(false);
+      setSuccess(true);
+      setValidationMessage("lead successfully edited");
+      setOpenSuccess(true);
+      handleCloseDialog();
     }
   };
 

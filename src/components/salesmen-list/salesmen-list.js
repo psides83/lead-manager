@@ -1,10 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useStateValue } from "../../state-management/state-provider";
 import {
-  collection,
-  query,
-  getDocs,
-  orderBy,
   getDoc,
   doc,
 } from "firebase/firestore";

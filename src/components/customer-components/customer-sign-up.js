@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import {
   Avatar,
   Box,
@@ -11,12 +11,10 @@ import {
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { auth, db } from "../../services/firebase";
 import { LockOutlined } from "@mui/icons-material";
-import { useStateValue } from "../../state-management/state-provider";
 import {
   collection,
   doc,
   getDocs,
-  onSnapshot,
   query,
   setDoc,
   where,
@@ -24,7 +22,6 @@ import {
 import { formatPhoneNumber } from "../../utils/utils";
 
 function CustomerSignUp() {
-  const [{ customerUser }, dispatch] = useStateValue();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [expandForm, setExpandForm] = useState(false);
   const [code, setCode] = useState("");

@@ -1,12 +1,9 @@
 //Imports
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { db } from "../../services/firebase";
 import { setDoc, doc, deleteDoc } from "@firebase/firestore";
-// import { useStateValue } from "../state-management/StateProvider";
 import moment from "moment";
 import { leadStatusArray } from "../../models/arrays";
-// import { sendNewleadEmail } from "../services/email-service";
-import { styled } from "@mui/material/styles";
 import {
   Box,
   Grid,
@@ -22,12 +19,6 @@ import {
   Checkbox,
   FormControlLabel,
   CircularProgress,
-  // Container,
-  // Avatar,
-  // FormGroup,
-  // Alert,
-  // Chip,
-  // Snackbar,
 } from "@mui/material";
 import {
   CheckRounded,
@@ -38,15 +29,9 @@ import {
 } from "@mui/icons-material";
 import { PhoneNumberMask } from "./phone-number-mask";
 
-const ListItem = styled("li")(({ theme }) => ({
-  margin: theme.spacing(0.5),
-}));
-
 export default function EditLead(props) {
   //#region State Properties
   const { lead, setValidationMessage, setOpenSuccess, setOpenError } = props;
-  // const [openSuccess, setOpenSuccess] = useState(false);
-  // const [openError, setOpenError] = useState(false);
   var [name, setName] = useState("");
   var [email, setEmail] = useState("");
   var [phone, setPhone] = useState("");
@@ -64,16 +49,12 @@ export default function EditLead(props) {
   const [isShowingConfirmDialog, setIsShowingConfirmDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const timer = useRef();
-
-  // var [validationMessage, setValidationMessage] = useState("");
   //#endregion
 
   const handleCloseDialog = () => {
     setIsShowingDialog(false);
     setIsShowingConfirmDialog(false);
     resetLeadForm();
-    // setSuccess(false);
   };
 
   const handleToggleDialog = () => {
@@ -101,8 +82,7 @@ export default function EditLead(props) {
       setWillPurchase(lead.willPurchase);
       setStatus(lead.status);
       setNotes(lead.notes);
-      if (lead.quoteLink != undefined) {
-
+      if (lead.quoteLink !== undefined) {
         setQuoteLink(lead.quoteLink);
       }
       setChangeLog(lead.changeLog);
@@ -117,6 +97,7 @@ export default function EditLead(props) {
         notes: lead.notes,
       });
     }
+    // eslint-disable-next-line
   }, [isShowingDialog]);
 
   useEffect(() => {
@@ -194,9 +175,10 @@ export default function EditLead(props) {
         break;
       default:
         break;
-    };
+    }
   };
 
+  // builds chang log data for values that have changed
   const logChanges = () => {
     if (name !== importedData.name) {
       setChange(
@@ -206,8 +188,8 @@ export default function EditLead(props) {
           } to ${name === "" ? "BLANK" : name}`
         )
       );
-      console.log("you made it here")
-    };
+      console.log("you made it here");
+    }
 
     if (email !== importedData.email) {
       setChange(
@@ -217,7 +199,7 @@ export default function EditLead(props) {
           } to ${email === "" ? "BLANK" : email}`
         )
       );
-    };
+    }
 
     if (phone !== importedData.phone) {
       setChange(
@@ -227,13 +209,13 @@ export default function EditLead(props) {
           } to ${phone === "" ? "BLANK" : phone}`
         )
       );
-    };
+    }
 
     if (status !== importedData.status) {
       setChange(
         change.push(`status updated from ${importedData.status} to ${status}`)
       );
-    };
+    }
 
     if (notes !== importedData.notes) {
       setChange(
@@ -243,7 +225,7 @@ export default function EditLead(props) {
           } to ${notes === "" ? "BLANK" : notes}`
         )
       );
-    };
+    }
 
     if (quoteLink !== importedData.quoteLink) {
       setChange(
@@ -253,7 +235,7 @@ export default function EditLead(props) {
           } to ${quoteLink === "" ? "BLANK" : quoteLink}`
         )
       );
-    };
+    }
 
     if (willFinance !== importedData.willFinance) {
       setChange(
@@ -261,7 +243,7 @@ export default function EditLead(props) {
           `Fill Finance edited from ${importedData.willFinance} to ${willFinance}`
         )
       );
-    };
+    }
 
     if (hasTrade !== importedData.hasTrade) {
       setChange(
@@ -269,7 +251,7 @@ export default function EditLead(props) {
           `Has Trade edited from ${importedData.hasTrade} to ${hasTrade}`
         )
       );
-    };
+    }
 
     if (willPurchase !== importedData.willPurchase) {
       setChange(
@@ -277,7 +259,7 @@ export default function EditLead(props) {
           `Will Purchase edited from ${importedData.willPurchase} to ${willPurchase}`
         )
       );
-    };
+    }
   };
 
   // Add the lead to the firestore "leads" collection and the equipment to the fire store "equipment" collection.
@@ -289,7 +271,7 @@ export default function EditLead(props) {
 
     if (changeString[0] === ",") {
       changeString = changeString.substring(1).trim();
-    };
+    }
 
     console.log(changeString);
 
@@ -309,29 +291,12 @@ export default function EditLead(props) {
       hasTrade: hasTrade,
       willPurchase: willPurchase,
       changeLog: changeLog,
-      quoteLink: quoteLink
+      quoteLink: quoteLink,
     };
 
     const leadRef = doc(db, "leads", lead.id);
 
     await setDoc(leadRef, firestoreLead, { merge: true });
-
-    setLoading(false);
-    setSuccess(true);
-    setValidationMessage("lead successfully edited");
-    setOpenSuccess(true);
-    // timer.current = window.setTimeout(() => {
-      handleCloseDialog();
-      resetLeadForm();
-    // }, 1000);
-
-    // sendNewleadEmail(
-    //   timestamp,
-    //   equipmentList,
-    //   fullName,
-    //   userProfile,
-    //   salesman
-    // );
   };
 
   // Reset the Lead form
@@ -355,15 +320,18 @@ export default function EditLead(props) {
     event.preventDefault();
     setLoading(true);
 
-    const lowerCaseLetters = /[a-z]/g;
-    const upperCaseLetters = /[A-Z]/g;
-
     if (name === "") {
       setValidationMessage("Lead must have a name to be created");
       setOpenError(true);
       return;
     } else {
       await setLeadToFirestore();
+      setLoading(false);
+      setSuccess(true);
+      setValidationMessage("lead successfully edited");
+      setOpenSuccess(true);
+      handleCloseDialog();
+      resetLeadForm();
     }
   };
 

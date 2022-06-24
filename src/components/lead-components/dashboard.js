@@ -3,9 +3,6 @@ import LeadCard from "./lead-card";
 import {
   Box,
   Grid,
-  Button,
-  Snackbar,
-  Alert,
   Tabs,
   Tab,
   TextField,
@@ -31,16 +28,18 @@ function LeadDashboard() {
   const [loading, setLoading] = useState(true);
   const [leads, setLeads] = useState([]);
   const [tasks, setTasks] = useState([]);
+  // eslint-disable-next-line
   const [{ searchText }, dispatch] = useStateValue("");
   const [searchParam] = useState(["name", "phone"]);
   const [filterParam, setFilterParam] = useState("Active");
-  const [open, setOpen] = useState(false);
+  // eslint-disable-next-line
   const [openSuccess, setOpenSuccess] = useState(false);
+  // eslint-disable-next-line
   const [openError, setOpenError] = useState(false);
-  var [validationMessage, setValidationMessage] = useState("");
   const [value, setValue] = useState("leads");
 
   // Handle closing of the alerts.
+  // eslint-disable-next-line
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -56,12 +55,12 @@ function LeadDashboard() {
     if (filterParam === "Closed") {
       leadsQuery = query(
         collection(db, "leads"),
-        where("status", "==", "Closed"),
+        where("status", "==", "Closed")
       );
     } else {
       leadsQuery = query(
         collection(db, "leads"),
-        where("status", "!=", "Closed"),
+        where("status", "!=", "Closed")
       );
     }
 
@@ -83,12 +82,12 @@ function LeadDashboard() {
           changeLog: doc.data().changeLog,
           contactLog: doc.data().contactLog,
           equipment: doc.data().equipment,
-          messages: doc.data().messages
+          messages: doc.data().messages,
         }))
       );
     });
     timer.current = window.setTimeout(() => {
-      setLoading(false)
+      setLoading(false);
     }, 1000);
   }, [filterParam]);
 
@@ -120,21 +119,22 @@ function LeadDashboard() {
   }, [fetchLeads, fetchTasks]);
 
   const searchable = (leads) => {
-    return leads.sort(function (a, b) {
-      return a.id - b.id;
-    }).filter((item) => {
-
-      return searchParam.some((newItem) => {
-        return (
-          item[newItem]
-            .toString()
-            .toLowerCase()
-            .replace(/[^0-9, a-z]/g, "")
-            .replace(/\s/g, "")
-            .indexOf(searchText.toLowerCase().replace(/\s/g, "")) > -1
-        );
+    return leads
+      .sort(function (a, b) {
+        return a.id - b.id;
+      })
+      .filter((item) => {
+        return searchParam.some((newItem) => {
+          return (
+            item[newItem]
+              .toString()
+              .toLowerCase()
+              .replace(/[^0-9, a-z]/g, "")
+              .replace(/\s/g, "")
+              .indexOf(searchText.toLowerCase().replace(/\s/g, "")) > -1
+          );
+        });
       });
-    });
   };
 
   const handleChange = (event, newValue) => {
@@ -146,7 +146,7 @@ function LeadDashboard() {
       <Box
         sx={{
           display: "flex",
-          flexDirection: 'column'
+          flexDirection: "column",
         }}
       >
         <Box
@@ -184,30 +184,37 @@ function LeadDashboard() {
           </div>
         </Box>
         {loading && (
-          <Box sx={{ display: "flex", justifyContent: 'center', alignItems: 'center', height: "60vh" }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "60vh",
+            }}
+          >
             <CircularProgress />
           </Box>
         )}
-        {!loading &&
-        <Grid
-          container
-          justifyContent={value === "leads" ? "flex-start" : "center"}
-        >
-          {value === "leads" ? (
-            searchable(leads).map((lead) => (
-              <Grid key={lead.id} item xs={12} sm={6} md={6} lg={4}>
-                <LeadCard lead={lead} tasks={tasks} />
+        {!loading && (
+          <Grid
+            container
+            justifyContent={value === "leads" ? "flex-start" : "center"}
+          >
+            {value === "leads" ? (
+              searchable(leads).map((lead) => (
+                <Grid key={lead.id} item xs={12} sm={6} md={6} lg={4}>
+                  <LeadCard lead={lead} tasks={tasks} />
+                </Grid>
+              ))
+            ) : (
+              <Grid item xs={12} sm={6} md={6} lg={4} sx={{ mt: "10px" }}>
+                <Box display="flex" justifyContent="center">
+                  <Tasks />
+                </Box>
               </Grid>
-            ))
-          ) : (
-            <Grid item xs={12} sm={6} md={6} lg={4} sx={{ mt: "10px" }}>
-              <Box display="flex" justifyContent="center">
-                <Tasks />
-              </Box>
-            </Grid>
-          )}
-        </Grid>
-        }
+            )}
+          </Grid>
+        )}
       </Box>
       <Toaster position="top-center" reverseOrder={true} />
     </>

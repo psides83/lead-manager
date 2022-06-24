@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+// eslint-disable-next-line
 import { Link, useNavigate } from "react-router-dom";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { onSnapshot, doc } from "firebase/firestore";
@@ -16,7 +17,6 @@ import {
   Grid,
   Typography,
   Container,
-  CssBaseline,
   Snackbar,
   Box,
 } from "@mui/material";
@@ -34,7 +34,6 @@ export default function SignIn() {
     try {
       onSnapshot(doc(db, "users", user?.uid), (doc) => {
         console.log("Current data: ", doc.data());
-        // setProfile(doc.data());
         dispatch({
           type: "SET_USER_PROFILE",
           userProfile: doc.data(),
@@ -51,19 +50,17 @@ export default function SignIn() {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed in
-        // const user = userCredential.user;
         fetchProfile();
         navigate("/");
       })
       .catch((error) => {
         setValidationMessage("The email and/or password do not match");
         setOpenError(true);
-        // const errorCode = error.code;
-        // const errorMessage = error.message;
       });
   };
 
   // Forgot password.
+  // eslint-disable-next-line
   const forgotPassword = async () => {
     await sendPasswordResetEmail(auth, email)
       .then(() => {

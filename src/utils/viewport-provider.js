@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState, useContext } from "react"
+import React, { createContext, useEffect, useState, useContext } from "react";
 
 const viewportContext = createContext({});
 
@@ -11,7 +11,7 @@ export const ViewportProvider = ({ children }) => {
   const handleWindowResize = () => {
     setWidth(window.innerWidth);
     setHeight(window.innerHeight);
-  }
+  };
 
   useEffect(() => {
     window.addEventListener("resize", handleWindowResize);
@@ -35,4 +35,4 @@ export const useViewport = () => {
      another Hook, remember, Hooks are composable! */
   const { width, height } = useContext(viewportContext);
   return { width, height };
-}
+};

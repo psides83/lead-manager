@@ -1,32 +1,8 @@
 import React, { useState } from "react";
-import {
-  AddTask,
-  ArrowUpward,
-  Check,
-  Close,
-  Message,
-  Send,
-  TextsmsRounded,
-} from "@mui/icons-material";
-import {
-  Box,
-  Grid,
-  Button,
-  TextareaAutosize,
-  Dialog,
-  DialogTitle,
-  IconButton,
-  Stack,
-  ListItem,
-  Chip,
-  Typography,
-  Tooltip,
-} from "@mui/material";
-import { setDoc, collection, doc } from "@firebase/firestore";
+import { TextsmsRounded } from "@mui/icons-material";
+import { Button, Dialog, Tooltip } from "@mui/material";
+import { setDoc, doc } from "@firebase/firestore";
 import { db } from "../../services/firebase";
-// import { UpArrow } from "../../icons";
-import { borderRadius, color, style } from "@mui/system";
-import moment from "moment";
 import CustomerMessenger from "../customer-components/customer-messenger";
 import { useStateValue } from "../../state-management/state-provider";
 
@@ -41,13 +17,8 @@ import { useStateValue } from "../../state-management/state-provider";
  * setValidationMessage, setOpenError, setOpenSuccess
  */
 function LeadMessagingDialog(props) {
-  const {
-    lead,
-    tasksCount,
-    setValidationMessage,
-    setOpenError,
-    setOpenSuccess,
-  } = props;
+  const { lead } = props;
+  // eslint-disable-next-line
   const [{ loading, userProfile }, dispatch] = useStateValue("");
   const [isShowingDialog, setIsShowingDialog] = useState(false);
 
@@ -63,8 +34,8 @@ function LeadMessagingDialog(props) {
   const markAsRead = async () => {
     unreadMessages(lead.messages)?.map((message) => (message.unread = false));
     const leadDoc = doc(db, "leads", lead.id);
-    await setDoc(leadDoc, { messages: lead.messages }, { merge: true })
-  }
+    await setDoc(leadDoc, { messages: lead.messages }, { merge: true });
+  };
 
   const unreadMessages = () => {
     return lead.messages.filter((item) => {

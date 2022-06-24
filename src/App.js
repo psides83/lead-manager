@@ -3,13 +3,12 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  useNavigate,
 } from "react-router-dom";
 import {
   auth,
   db,
   onMessageListener,
-  useParams,
+  // eslint-disable-next-line
   requestForToken,
 } from "./services/firebase";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -22,7 +21,9 @@ import MainAppBar from "./components/lead-components/app-bar";
 import LeadDashboard from "./components/lead-components/dashboard";
 import CustomerAppBar from "./components/customer-components/customer-app-bar";
 import SignIn from "./components/lead-components/sign-in";
+// eslint-disable-next-line
 import Loading from "./components/loading";
+// eslint-disable-next-line
 import CustomerSignUp from "./components/customer-components/customer-sign-up";
 import toast, { Toaster } from "react-hot-toast";
 import SalesDataGrid from "./components/sales-components/sales-data-grid";
@@ -53,8 +54,8 @@ const theme = createTheme({
 });
 
 export default function App() {
-  const [{ user, customerUser, loading }, dispatch] = useStateValue();
-  const [userProfile, setProfile] = useState({});
+  // eslint-disable-next-line
+  const [{ user, loading }, dispatch] = useStateValue();
   const [notification, setNotification] = useState({ title: "", body: "" });
 
   const notify = () => toast(<ToastDisplay />);
@@ -123,7 +124,8 @@ export default function App() {
         });
       }
     });
-  }, [auth]);
+    // eslint-disable-next-line
+  }, [auth, dispatch]);
 
   useEffect(() => {
     updateAuth();
@@ -144,29 +146,26 @@ export default function App() {
     .catch((err) => console.log("failed: ", err));
 
   return (
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Toaster />
-        <Router>
-          {user && <MainAppBar />}
-          <Box style={{ marginTop: user && "75px" }}>
-            <Routes>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Toaster />
+      <Router>
+        {user && <MainAppBar />}
+        <Box style={{ marginTop: user && "75px" }}>
+          <Routes>
             <Route
-                path="/salesmen-list"
-                element={user ? <SalesmenList /> : <SignIn />}
-              />
-              <Route
-                path="/sales"
-                element={user ? <SalesDataGrid /> : <SignIn />}
-              />
-              <Route
-                path="/customer-view/:leadId"
-                element={<CustomerAppBar />}
-              />
-              <Route path="/" element={user ? <LeadDashboard /> : <SignIn />} />
-            </Routes>
-          </Box>
-        </Router>
-      </ThemeProvider>
+              path="/salesmen-list"
+              element={user ? <SalesmenList /> : <SignIn />}
+            />
+            <Route
+              path="/sales"
+              element={user ? <SalesDataGrid /> : <SignIn />}
+            />
+            <Route path="/customer-view/:leadId" element={<CustomerAppBar />} />
+            <Route path="/" element={user ? <LeadDashboard /> : <SignIn />} />
+          </Routes>
+        </Box>
+      </Router>
+    </ThemeProvider>
   );
 }

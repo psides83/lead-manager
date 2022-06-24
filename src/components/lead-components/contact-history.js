@@ -1,6 +1,5 @@
 // import { DialogContent } from "@material-ui/core";
 import {
-  EscalatorWarning,
   History,
   PhoneIphoneRounded,
 } from "@mui/icons-material";
@@ -8,12 +7,10 @@ import {
   Avatar,
   Dialog,
   DialogTitle,
-  IconButton,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
-  Typography,
   DialogContent,
   Tooltip,
   Button,
@@ -33,6 +30,7 @@ function ContactHistory(props) {
     setIsShowingDialog(!isShowingDialog);
   };
 
+  // eslint-disable-next-line
   const compare = (a, b) => {
     let comparison = 0;
     if (a.timestamp < b.timestamp) {

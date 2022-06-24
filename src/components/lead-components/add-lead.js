@@ -2,14 +2,12 @@
 import React, { useRef, useState } from "react";
 import { db } from "../../services/firebase";
 import { setDoc, doc } from "@firebase/firestore";
-// import { useStateValue } from "../state-management/StateProvider";
 import moment from "moment";
 import {
   equipmentAvailabilityArray,
   equipmentStatusArray,
   leadStatusArray,
 } from "../../models/arrays";
-// import { sendNewleadEmail } from "../services/email-service";
 import { styled } from "@mui/material/styles";
 import {
   Box,
@@ -25,24 +23,13 @@ import {
   Tooltip,
   Checkbox,
   FormControlLabel,
-  Container,
-  Avatar,
-  FormGroup,
-  Alert,
   Chip,
-  Snackbar,
   CircularProgress,
 } from "@mui/material";
 import {
   Close,
-  DeleteRounded,
-  EditRounded,
-  Groups,
-  Save,
-  SendRounded,
   Agriculture,
   AddCircleOutlined,
-  Add,
   PersonAddAltRounded,
   CheckRounded,
   SaveRounded,
@@ -59,8 +46,6 @@ export default function AddLead(props) {
   //#region State Properties
   const { setValidationMessage, setOpenSuccess, setOpenError } = props;
   const [{ userProfile }] = useStateValue();
-  // const [openSuccess, setOpenSuccess] = useState(false);
-  // const [openError, setOpenError] = useState(false);
   var [name, setName] = useState("");
   var [email, setEmail] = useState("");
   var [phone, setPhone] = useState("");
@@ -82,8 +67,6 @@ export default function AddLead(props) {
   const [loadingEquipment, setLoadingEquipment] = useState(false);
   const [equipmentSuccess, setEquipmentSuccess] = useState(false);
   const timer = useRef();
-  // const [isShowingConfirmDialog, setIsShowingConfirmDialog] = useState(false);
-  // var [validationMessage, setValidationMessage] = useState("");
   //#endregion
 
   const handleCloseDialog = () => {
@@ -96,14 +79,6 @@ export default function AddLead(props) {
     setIsShowingDialog(!isShowingDialog);
     console.log(equipmentList);
   };
-
-  // const handleCloseConfirmDialog = () => {
-  //   setIsShowingConfirmDialog(false);
-  // };
-
-  // const handleToggleConfirmDialog = () => {
-  //   setIsShowingConfirmDialog(!isShowingConfirmDialog);
-  // };
 
   // Handle lead name input and capitolize each word
   const handleNameInput = (e) => {
@@ -198,7 +173,7 @@ export default function AddLead(props) {
 
     const firestoreLead = {
       id: id,
-      salesmanID: userProfile.id, 
+      salesmanID: userProfile.id,
       timestamp: timestamp,
       name: name,
       email: email,
@@ -217,11 +192,6 @@ export default function AddLead(props) {
     const leadRef = doc(db, "leads", firestoreLead.id);
 
     await setDoc(leadRef, firestoreLead, { merge: true });
-    setLoadingLead(false);
-    setLeadSuccess(true);
-    setValidationMessage("lead successfully submitted");
-    setOpenSuccess(true);
-    handleCloseDialog();
   };
 
   // Reset complete form
@@ -245,8 +215,7 @@ export default function AddLead(props) {
 
   // Reset the Equipment form
   const resetEquipmentForm = async () => {
-    setLoadingEquipment(false);
-    setEquipmentSuccess(true);
+   
     timer.current = window.setTimeout(() => {
       setEquipmentSuccess(false);
       setModel("");
@@ -286,15 +255,14 @@ export default function AddLead(props) {
     console.log(equipmentList);
 
     await resetEquipmentForm();
+    setLoadingEquipment(false);
+    setEquipmentSuccess(true);
   };
 
   // Squipment submission validation.
   const equipmentSubmitValidation = async (event) => {
     event.preventDefault();
     setLoadingEquipment(true);
-
-    const lowerCaseLetters = /[a-z]/g;
-    const upperCaseLetters = /[A-Z]/g;
 
     if (model === "") {
       setValidationMessage("Equipment must have a model to be added to a lead");
@@ -313,9 +281,6 @@ export default function AddLead(props) {
     event.preventDefault();
     setLoadingLead(true);
 
-    const lowerCaseLetters = /[a-z]/g;
-    const upperCaseLetters = /[A-Z]/g;
-
     if (model === "" && equipmentList.length === 0) {
       setValidationMessage("Equipment must have a model to be added to a lead");
       setOpenError(true);
@@ -331,6 +296,11 @@ export default function AddLead(props) {
         await pushEquipmentToLead();
       }
       await setLeadToFirestore();
+      setLoadingLead(false);
+      setLeadSuccess(true);
+      setValidationMessage("lead successfully submitted");
+      setOpenSuccess(true);
+      handleCloseDialog();
     }
   };
 
@@ -346,7 +316,9 @@ export default function AddLead(props) {
           endIcon={<PersonAddAltRounded color="inherit" />}
           // sx={{ ml: 2 }}
         >
-          <Typography sx={{ display: { xs: "none", sm: "block" } }}>Add Lead</Typography>
+          <Typography sx={{ display: { xs: "none", sm: "block" } }}>
+            Add Lead
+          </Typography>
         </Button>
         {/* <Button
           color="secondary"

@@ -9,17 +9,10 @@ import {
   DialogTitle,
   DialogContent,
   IconButton,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Stack,
   Tooltip,
 } from "@mui/material";
-import { doc, setDoc } from "firebase/firestore";
-import moment from "moment";
 import React, { useState } from "react";
-import { db } from "../../services/firebase";
 
 function CustomerContactDialog() {
   const [isShowingDialog, setIsShowingDialog] = useState(false);
@@ -85,6 +78,6 @@ function CustomerContactDialog() {
       </Dialog>
     </>
   );
-};
+}
 
 export default CustomerContactDialog;

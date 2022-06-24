@@ -1,36 +1,21 @@
-import React, { useCallback, useEffect, useState } from "react";
-import Box from "@mui/material/Box";
+import React, { useState } from "react";
 import Card from "@mui/material/Card";
 import Stack from "@mui/material/Stack";
-import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import {
-  collection,
-  doc,
-  onSnapshot,
-  orderBy,
-  query,
-  setDoc,
-} from "firebase/firestore";
-import { db } from "../../services/firebase";
-import {
   AccountBalanceRounded,
   AgricultureRounded,
   AttachMoneyRounded,
-  ContentCutOutlined,
   MailRounded,
 } from "@mui/icons-material";
 import StatusHistory from "../lead-components/status-history";
 import {
   Alert,
   Button,
-  Link,
   List,
   ListItem,
-  ListItemButton,
-  ListItemIcon,
   ListItemText,
   Snackbar,
   Tooltip,
@@ -38,30 +23,18 @@ import {
 import moment from "moment";
 import CustomerContactDialog from "./customer-contact-dialog";
 import { sendQuoteLinkOpenedEmail } from "../../services/email-service";
-
-const bull = (
-  <Box
-    component="span"
-    sx={{ display: "inline-block", mx: "2px", transform: "scale(0.8)" }}
-  >
-    •
-  </Box>
-);
+import { relativeTime } from "../../utils/utils";
 
 function EquipmentSection(props) {
-  const { lead, setValidationMessage, setOpenError, setOpenSuccess } = props;
-  const [showingEquipment, setShowingEquipment] = useState(false);
-
-  const showEquipment = (event) => {
-    event.preventDefault();
-    showingEquipment ? setShowingEquipment(false) : setShowingEquipment(true);
-  };
+  const { lead } = props;
 
   return (
     <>
       <Stack direction="row" justifyContent="space-between">
         <Stack direction="row" alignItems="center" spacing={2}>
-          <Typography variant="subtitle1" style={{fontWeight: "bold"}}>Equipment</Typography>
+          <Typography variant="subtitle1" style={{ fontWeight: "bold" }}>
+            Equipment
+          </Typography>
         </Stack>
       </Stack>
       <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
@@ -122,42 +95,44 @@ export default function CustomerCard(props) {
   };
 
   const equipmentStatusArray = () => {
-    var array = []
+    var array = [];
 
-    if(lead != undefined) {
+    if (lead !== undefined) {
+      console.log(lead);
 
-      console.log(lead)
+      lead?.equipment.map((unit) =>
+        unit?.changeLog.map((log) => array.push(log))
+      );
 
-      lead?.equipment.map((unit) => {
-        unit?.changeLog.map((log) => {
-          array.push(log)
-        })
-      })
-  
-      console.log(array)
-      return array
+      console.log(array);
+      return array;
     }
-    return []
+    return [];
   };
 
   const goToLink = (e) => {
-    e.preventDefault()
-  
-    window.open(lead?.quoteLink, "_blank")
-    sendQuoteLinkOpenedEmail(lead)
-  }
+    e.preventDefault();
+
+    window.open(lead?.quoteLink, "_blank");
+    sendQuoteLinkOpenedEmail(lead);
+  };
 
   const quoteLinkAvailable = () => {
-    if (lead?.quoteLink == undefined) return false
-    if (lead?.quoteLink == null) return false
-    if (lead?.quoteLink === "") return false
-    return true
-  }
+    if (lead?.quoteLink === undefined) return false;
+    if (lead?.quoteLink === null) return false;
+    if (lead?.quoteLink === "") return false;
+    return true;
+  };
 
   const shortenedTimestamp = () => {
-    if (lead.timestamp != undefined || lead.timestamp != null || lead.timestamp !== "") return moment(lead?.timestamp, "DD-MMM-yyyy hh:mmA").format('ll')
-    return "customer no loaded"
-  }
+    if (
+      lead.timestamp !== undefined ||
+      lead.timestamp !== null ||
+      lead.timestamp !== ""
+    )
+      return moment(lead?.timestamp, "DD-MMM-yyyy hh:mmA").format("ll");
+    return "customer no loaded";
+  };
 
   return (
     <Card
@@ -209,18 +184,18 @@ export default function CustomerCard(props) {
           // spacing={2}
         >
           <Stack direction="column">
-
-          <Typography color="text.secondary">{`Status: ${lead?.status}`}</Typography>
-          { quoteLinkAvailable() ?
-
-          <Tooltip title="View Quote">
-              <Button aria-label="edit" onClick={goToLink} endIcon={<AttachMoneyRounded />} >
-                View Quote
-              </Button>
-            </Tooltip>
-            :
-            null
-          }
+            <Typography color="text.secondary">{`Status: ${lead?.status}`}</Typography>
+            {quoteLinkAvailable() ? (
+              <Tooltip title="View Quote">
+                <Button
+                  aria-label="edit"
+                  onClick={goToLink}
+                  endIcon={<AttachMoneyRounded />}
+                >
+                  View Quote
+                </Button>
+              </Tooltip>
+            ) : null}
           </Stack>
           <StatusHistory events={equipmentStatusArray()} />
         </Stack>
@@ -238,7 +213,7 @@ export default function CustomerCard(props) {
           // spacing={2}
         >
           <Typography variant="caption" color="text.secondary">
-            {`Updated ${lead?.changeLog[0].timestamp}`}
+            {`Updated ${relativeTime(lead.changeLog[0].timestamp)}`}
           </Typography>
         </Stack>
       </CardContent>

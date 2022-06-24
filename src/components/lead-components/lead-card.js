@@ -35,7 +35,8 @@ import ContactDialog from "./contact-dialog";
 import EditLead from "./edit-lead";
 import AddTaskDialog from "./add-lead-tasks";
 import EquipmentForm from "./equipment-form";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
+import { relativeTime } from "../../utils/utils";
 
 function TaskList(props) {
   const { lead, tasks, setValidationMessage, setOpenError, setOpenSuccess } =
@@ -275,10 +276,6 @@ export default function LeadCard(props) {
     await setDoc(leadRef, { contactLog: lead.contactLog }, { merge: true });
 
     window.location.href = `mailto:${lead.email}`;
-  };
-
-  const relativeTime = (date) => {
-    return moment(date, "DD-MMM-YYYY hh:mmA").fromNow();
   };
 
   const copyLeadLink = (e) => {

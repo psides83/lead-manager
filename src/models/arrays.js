@@ -40,29 +40,34 @@ const equipmentAvailabilityArray = [
   "Unavailable",
 ];
 
-  // SunSouth branches
-  const branches = [
-    "Abbeville",
-    "Andalusia",
-    "Auburn",
-    "Barnesville",
-    "Blakely",
-    "Brundidge",
-    "Carrollton",
-    "Carthage",
-    "Clanton",
-    "Columbus",
-    "Demopolis",
-    "Donalsonville",
-    "Dothan",
-    "Foley",
-    "Gulfport",
-    "Lucedale",
-    "Meridian",
-    "Mobile",
-    "Montgomery",
-    "Samson",
-    "Tuscaloosa"
-  ]
+// SunSouth branches
+const branches = [
+  "Abbeville",
+  "Andalusia",
+  "Auburn",
+  "Barnesville",
+  "Blakely",
+  "Brundidge",
+  "Carrollton",
+  "Carthage",
+  "Clanton",
+  "Columbus",
+  "Demopolis",
+  "Donalsonville",
+  "Dothan",
+  "Foley",
+  "Gulfport",
+  "Lucedale",
+  "Meridian",
+  "Mobile",
+  "Montgomery",
+  "Samson",
+  "Tuscaloosa",
+];
 
-export { leadStatusArray, equipmentStatusArray, equipmentAvailabilityArray, branches };
+export {
+  leadStatusArray,
+  equipmentStatusArray,
+  equipmentAvailabilityArray,
+  branches,
+};

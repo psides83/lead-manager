@@ -14,11 +14,9 @@ import {
   Menu,
   MenuItem,
   Snackbar,
-  Tooltip,
 } from "@mui/material";
 import { useStateValue } from "../../state-management/state-provider";
 import {
-  AccountCircleRounded,
   AgricultureRounded,
   InsertChartRounded,
   LogoutRounded,
@@ -92,7 +90,6 @@ export default function MainAppBar(props) {
   const [{ searchText, user }, dispatch] = useStateValue();
   const [openSuccess, setOpenSuccess] = React.useState(false);
   const [openError, setOpenError] = useState(false);
-  const [isShowingMenu, setIsShowingMenu] = useState(false);
   const navigate = useNavigate();
   var [validationMessage, setValidationMessage] = useState("");
 
@@ -190,18 +187,18 @@ export default function MainAppBar(props) {
               setOpenError={setOpenError}
               setOpenSuccess={setOpenSuccess}
             />
-            
-              <IconButton
-                size="large"
-                color="inherit"
-                aria-label="open drawer"
-                onClick={handleClick}
-                aria-controls={open ? "account-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? "true" : undefined}
-              >
-                <MenuRounded />
-              </IconButton>
+
+            <IconButton
+              size="large"
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleClick}
+              aria-controls={open ? "account-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={open ? "true" : undefined}
+            >
+              <MenuRounded />
+            </IconButton>
           </Toolbar>
         </AppBar>
       </HideOnScroll>

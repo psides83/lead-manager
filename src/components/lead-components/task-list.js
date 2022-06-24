@@ -24,10 +24,7 @@ import {
   where,
 } from "@firebase/firestore";
 import { db } from "../../services/firebase";
-import {
-  EditRounded,
-  Menu,
-} from "@mui/icons-material";
+import { EditRounded, Menu } from "@mui/icons-material";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import moment from "moment";
 
@@ -99,9 +96,9 @@ const RowText = (props) => {
           />
         ) : (
           <Stack
-            // direction="row"
-            // alignItems="center"
-            // justifyContent="space-between"
+          // direction="row"
+          // alignItems="center"
+          // justifyContent="space-between"
           >
             <Typography variant="subtitle1">{item.task}</Typography>
             <Typography
