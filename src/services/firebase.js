@@ -11,13 +11,13 @@ import { getMessaging, getToken, onMessage } from "firebase/messaging";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCRMGtjzGBy6wbtOKH2t4rXQs7k67yiaFA",
+  apiKey: process.env.REACT_APP_FB_API_KEY,
   authDomain: "leadmanager-44f57.firebaseapp.com",
   databaseURL: "https://leadmanager-44f57-default-rtdb.firebaseio.com",
   projectId: "leadmanager-44f57",
   storageBucket: "leadmanager-44f57.appspot.com",
-  messagingSenderId: "170699049221",
-  appId: "1:170699049221:web:069c378b4d8af108e2cf6c",
+  messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_APP_ID,
   measurementId: "G-1NEHPSSTRQ",
 };
 
@@ -38,8 +38,7 @@ const messaging = getMessaging();
 const requestForToken = async () => {
   try {
     const currentToken = await getToken(messaging, {
-      vapidKey:
-        "BKByNCe3kO06qbYnYrvD3Ix9InuE2e1HN0qp4wxEdpvPzDQ8HHkmOuVvRuK2YVngxRTU21La5nUyTbA8zU6jxM0",
+      vapidKey: process.env.REACT_APP_MESSAGIN_VAPID_KEY,
     });
     if (currentToken) {
       console.log("current token for client: ", currentToken);
