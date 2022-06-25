@@ -1,9 +1,11 @@
 //Imports
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { db } from "../../services/firebase";
 import { setDoc, doc } from "@firebase/firestore";
 import moment from "moment";
 import {
+  addEquipmentInputs,
+  addLeadInputs,
   equipmentAvailabilityArray,
   equipmentStatusArray,
   leadStatusArray,
@@ -35,7 +37,6 @@ import {
   SaveRounded,
   CheckCircleOutlineRounded,
 } from "@mui/icons-material";
-import { PhoneNumberMask } from "./phone-number-mask";
 import { useStateValue } from "../../state-management/state-provider";
 
 const ListItem = styled("li")(({ theme }) => ({
@@ -46,27 +47,31 @@ export default function AddLead(props) {
   //#region State Properties
   const { setValidationMessage, setOpenSuccess, setOpenError } = props;
   const [{ userProfile }] = useStateValue();
-  var [name, setName] = useState("");
-  var [email, setEmail] = useState("");
-  var [phone, setPhone] = useState("");
-  var [willFinance, setWillFinance] = useState(false);
-  var [hasTrade, setHasTrade] = useState(false);
-  var [willPurchase, setWillPurchase] = useState(false);
-  var [leadStatus, setLeadStatus] = useState("Lead Created");
-  var [leadNotes, setLeadNotes] = useState("");
-  var [model, setModel] = useState("");
-  var [stock, setStock] = useState("");
-  var [serial, setSerial] = useState("");
-  var [availability, setAvailability] = useState("Availability Unknown");
-  var [equipmentStatus, setEquipmentStatus] = useState("Equipment added");
-  var [equipmentNotes, setEquipmentNotes] = useState("");
+  var [leadData, setLeadData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    status: "Lead Created",
+    notes: "",
+    willFinance: false,
+    hasTrade: false,
+    willPurchase: false,
+  });
+
+  var [equipment, setEquipment] = useState({
+    model: "",
+    stock: "",
+    serial: "",
+    availability: "Availability Unknown",
+    status: "Equipment added",
+    notes: "",
+  });
   var [equipmentList, setEquepmentList] = useState([]);
   const [isShowingDialog, setIsShowingDialog] = useState(false);
   const [loadingLead, setLoadingLead] = useState(false);
   const [leadSuccess, setLeadSuccess] = useState(false);
   const [loadingEquipment, setLoadingEquipment] = useState(false);
   const [equipmentSuccess, setEquipmentSuccess] = useState(false);
-  const timer = useRef();
   //#endregion
 
   const handleCloseDialog = () => {
@@ -80,17 +85,6 @@ export default function AddLead(props) {
     console.log(equipmentList);
   };
 
-  // Handle lead name input and capitolize each word
-  const handleNameInput = (e) => {
-    const names = e.target.value;
-
-    const finalName = names.replace(/(^\w{1})|(\s+\w{1})/g, (letter) =>
-      letter.toUpperCase()
-    );
-
-    setName(finalName);
-  };
-
   // Dynamic heading for the form.
   const heading =
     equipmentList.length === 0 ? "Add Equipment" : "Equipment on Lead";
@@ -98,19 +92,19 @@ export default function AddLead(props) {
   // Array of work options that populate the checkbox setion of the form.
   var checkBoxes = [
     {
-      id: "1",
+      id: "willFinance",
       title: "Financed",
-      checkedState: willFinance,
+      checkedState: leadData.willFinance,
     },
     {
-      id: "2",
+      id: "hasTrade",
       title: "Has trade",
-      checkedState: hasTrade,
+      checkedState: leadData.hasTrade,
     },
     {
-      id: "3",
+      id: "willPurchase",
       title: "Will Purchase",
-      checkedState: willPurchase,
+      checkedState: leadData.willPurchase,
     },
   ];
 
@@ -123,26 +117,27 @@ export default function AddLead(props) {
 
   // Handle changes in the checkboxes.
   const handleChange = (event) => {
-    switch (event.target.id) {
-      case "1":
-        if (!willFinance) {
-          setWillFinance(true);
+    const id = event.target.id;
+    switch (id) {
+      case "willFinance":
+        if (!leadData.willFinance) {
+          setLeadData({ ...leadData, [id]: true });
         } else {
-          setWillFinance(false);
+          setLeadData({ ...leadData, [id]: false });
         }
         break;
-      case "2":
-        if (!hasTrade) {
-          setHasTrade(true);
+      case "hasTrade":
+        if (!leadData.hasTrade) {
+          setLeadData({ ...leadData, [id]: true });
         } else {
-          setHasTrade(false);
+          setLeadData({ ...leadData, [id]: false });
         }
         break;
-      case "3":
-        if (!willPurchase) {
-          setWillPurchase(true);
+      case "willPurchase":
+        if (!leadData.willPurchase) {
+          setLeadData({ ...leadData, [id]: true });
         } else {
-          setWillPurchase(false);
+          setLeadData({ ...leadData, [id]: false });
         }
         break;
       default:
@@ -154,14 +149,16 @@ export default function AddLead(props) {
   const setLeadToFirestore = async () => {
     const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
     const id = moment().format("yyyyMMDDHHmmss");
-    const changeLog = [
+
+    leadData.changeLog = [
       {
         id: id,
         change: `Lead created`,
         timestamp: timestamp,
       },
     ];
-    const contactLog = [
+
+    leadData.contactLog = [
       {
         id: id,
         event: "not contacted since added",
@@ -171,27 +168,17 @@ export default function AddLead(props) {
 
     console.log(equipmentList);
 
-    const firestoreLead = {
-      id: id,
-      salesmanID: userProfile.id,
-      timestamp: timestamp,
-      name: name,
-      email: email,
-      phone: phone,
-      status: leadStatus,
-      notes: leadNotes,
-      quoteLink: "",
-      willFinance: willFinance,
-      hasTrade: hasTrade,
-      willPurchase: willPurchase,
-      changeLog: changeLog,
-      contactLog: contactLog,
-      equipment: equipmentList,
-    };
+    leadData.id = id;
+    leadData.timestamp = timestamp;
+    leadData.salesmanID = userProfile.id;
+    leadData.quoteLink = "";
+    leadData.equipment = equipmentList;
 
-    const leadRef = doc(db, "leads", firestoreLead.id);
+    console.table(leadData);
 
-    await setDoc(leadRef, firestoreLead, { merge: true });
+    const leadRef = doc(db, "leads", leadData.id);
+
+    await setDoc(leadRef, leadData, { merge: true });
   };
 
   // Reset complete form
@@ -203,28 +190,29 @@ export default function AddLead(props) {
 
   // Reset the Lead form
   const resetLeadForm = async () => {
-    setName("");
-    setEmail("");
-    setPhone("");
-    setLeadStatus("Lead Created");
-    setLeadNotes("");
-    setWillFinance(false);
-    setHasTrade(false);
-    setWillPurchase(false);
+    setLeadData({
+      name: "",
+      email: "",
+      phone: "",
+      status: "Lead Created",
+      notes: "",
+      willFinance: false,
+      hasTrade: false,
+      willPurchase: false,
+    });
   };
 
   // Reset the Equipment form
   const resetEquipmentForm = async () => {
-   
-    timer.current = window.setTimeout(() => {
-      setEquipmentSuccess(false);
-      setModel("");
-      setStock("");
-      setSerial("");
-      setEquipmentNotes("");
-      setAvailability("Availability Unknown");
-      setEquipmentStatus("Equipment added");
-    }, 1000);
+    setEquipmentSuccess(false);
+    setEquipment({
+      model: "",
+      stock: "",
+      serial: "",
+      availability: "Availability Unknown",
+      status: "Equipment added",
+      notes: "",
+    });
   };
 
   // Push equipment to a state array to later be set to firestore "equipment" collection with the "leads" collection.
@@ -238,16 +226,8 @@ export default function AddLead(props) {
       },
     ];
 
-    var equipment = {
-      id: id,
-      model: model,
-      stock: stock,
-      serial: serial,
-      availability: availability,
-      status: equipmentStatus,
-      notes: equipmentNotes,
-      changeLog: changeLog,
-    };
+    equipment.id = id;
+    equipment.changeLog = changeLog;
 
     equipmentList.push(equipment);
     setEquepmentList(equipmentList);
@@ -264,7 +244,7 @@ export default function AddLead(props) {
     event.preventDefault();
     setLoadingEquipment(true);
 
-    if (model === "") {
+    if (equipment.model === "") {
       setValidationMessage("Equipment must have a model to be added to a lead");
       setOpenError(true);
       return;
@@ -281,17 +261,17 @@ export default function AddLead(props) {
     event.preventDefault();
     setLoadingLead(true);
 
-    if (model === "" && equipmentList.length === 0) {
+    if (equipment.model === "" && equipmentList.length === 0) {
       setValidationMessage("Equipment must have a model to be added to a lead");
       setOpenError(true);
       return false;
-    } else if (name === "") {
+    } else if (leadData.name === "") {
       setValidationMessage("Lead must have a name to be created");
       setOpenError(true);
       return false;
     } else {
       console.log("eq added directly from submit");
-      if (model !== "") {
+      if (equipment.model !== "") {
         console.log("another eq added first");
         await pushEquipmentToLead();
       }
@@ -304,32 +284,102 @@ export default function AddLead(props) {
     }
   };
 
+  // handle the onChange for the lead inputs
+  const handleInput = (e, id) => {
+    var value = e.target.value;
+
+    if (id === "name") {
+      const names = e.target.value;
+
+      value = names.replace(/(^\w{1})|(\s+\w{1})/g, (letter) =>
+        letter.toUpperCase()
+      );
+    }
+
+    setLeadData({ ...leadData, [id]: value });
+    console.table(leadData);
+  };
+
+  //  handles the leadData object values for the lead inputs
+  const handleLeadValues = (id) => {
+    switch (id) {
+      case "name":
+        return leadData.name;
+      case "phone":
+        return leadData.phone;
+      case "email":
+        return leadData.email;
+      case "status":
+        return leadData.status;
+      case "notes":
+        return leadData.notes;
+      default:
+        return "";
+    }
+  };
+
+  // handles the onChange of the equipment inputs
+  const handleEquipmentInput = (e, id) => {
+    var value = e.target.value;
+
+    if (id === "model" || id === "serial") {
+      const newValue = e.target.value;
+      value = newValue.toUpperCase();
+    }
+
+    if (id === "stock") {
+      const newValue = e.target.value;
+      value = newValue.replace(/[^0-9]/g, "");
+    }
+
+    setEquipment({ ...equipment, [id]: value });
+  };
+
+  // handles equipment object values for the inputs
+  const handleEquipmentValues = (id) => {
+    switch (id) {
+      case "model":
+        return equipment.model;
+      case "stock":
+        return equipment.stock;
+      case "serial":
+        return equipment.serial;
+      case "status":
+        return equipment.status;
+      case "availability":
+        return equipment.availability;
+      case "notes":
+        return equipment.notes;
+      default:
+        return "";
+    }
+  };
+
+  // sets the array for the equipment select inputs
+  const equipmentSelectArray = (id) => {
+    switch (id) {
+      case "status":
+        return equipmentStatusArray;
+      case "availability":
+        return equipmentAvailabilityArray;
+      default:
+        return null;
+    }
+  };
+
   // UI view of the submission form
   return (
     <>
       <Tooltip title="Add New Lead">
         <Button
-          // size="small"
-          // edge="start"
           color="inherit"
           onClick={handleToggleDialog}
           endIcon={<PersonAddAltRounded color="inherit" />}
-          // sx={{ ml: 2 }}
         >
           <Typography sx={{ display: { xs: "none", sm: "block" } }}>
             Add Lead
           </Typography>
         </Button>
-        {/* <Button
-          color="secondary"
-          size="small"
-          variant="outlined"
-          startIcon={<Add />}
-          onClick={handleToggleDialog}
-          sx={{ mx: 4, mb: 1, mt: 1 }}
-        >
-          Submit Lead
-        </Button> */}
       </Tooltip>
 
       <Dialog
@@ -354,97 +404,34 @@ export default function AddLead(props) {
             </IconButton>
           </Stack>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                required
-                fullWidth
-                autoFocus
-                size="small"
-                id="name"
-                name="name"
-                label="Name"
-                variant="outlined"
-                value={name}
-                onChange={handleNameInput}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                type="email"
-                size="small"
-                id="email"
-                name="email"
-                label="Email"
-                variant="outlined"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                type="tel"
-                size="small"
-                id="phone"
-                name="phone"
-                label="Phone"
-                variant="outlined"
-                value={phone}
-                InputProps={{
-                  inputComponent: PhoneNumberMask,
-                }}
-                onChange={(e) =>
-                  setPhone(e.target.value.replace(/[^0-9\-()" "]/g, ""))
-                }
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                size="small"
-                id="leadStatus"
-                variant="outlined"
-                labelid="leadStatus"
-                sx={{
-                  "&:before": {
-                    borderColor: (theme) => theme.palette.secondary.main,
-                  },
-                  "&:after": {
-                    borderColor: (theme) => theme.palette.secondary.main,
-                  },
-                  "&:not(.Mui-disabled):hover::before": {
-                    borderColor: (theme) => theme.palette.secondary.main,
-                  },
-                }}
-                select
-                label="Status"
-                value={leadStatus}
-                onChange={(e) => setLeadStatus(e.target.value)}
-              >
-                {leadStatusArray.map((status) => (
-                  <MenuItem key={status} value={status}>
-                    {status}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-
-            <Grid item xs={12} sm={12}>
-              <TextField
-                fullWidth
-                multiline
-                size="small"
-                id="leadNotes"
-                name="leadNotes"
-                label="Lead Notes"
-                variant="outlined"
-                value={leadNotes}
-                onChange={(e) => setLeadNotes(e.target.value)}
-              />
-            </Grid>
+            {addLeadInputs.map((input) => (
+              <Grid item key={input.id} xs={input.gridXS} sm={input.gridSM}>
+                <TextField
+                  required={input.required}
+                  fullWidth
+                  autoFocus={input.autoFocus}
+                  size="small"
+                  id={input.id}
+                  name={input.id}
+                  label={input.label}
+                  type={input.type}
+                  labelid={input.id}
+                  variant="outlined"
+                  select={input.select}
+                  value={handleLeadValues(input.id)}
+                  onChange={(e) => handleInput(e, input.id)}
+                  InputProps={input.inputProps}
+                >
+                  {input.id === "status"
+                    ? leadStatusArray.map((status, index) => (
+                        <MenuItem key={index} value={status}>
+                          {status}
+                        </MenuItem>
+                      ))
+                    : null}
+                </TextField>
+              </Grid>
+            ))}
 
             <Grid item>
               <Stack direction="row">
@@ -469,17 +456,6 @@ export default function AddLead(props) {
                 ))}
               </Stack>
             </Grid>
-
-            {/* <Grid item xs={12} sm={6}>
-              <Button
-                fullWidth
-                color="error"
-                onClick={handleToggleConfirmDialog}
-                startIcon={<DeleteRounded />}
-              >
-                Delete
-              </Button>
-            </Grid> */}
 
             <Grid
               item
@@ -529,127 +505,40 @@ export default function AddLead(props) {
               </Box>
             </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <TextField
-                required
-                fullWidth
-                size="small"
-                id="model"
-                name="model"
-                label="Model"
-                variant="outlined"
-                onChange={(e) => setModel(e.target.value.toUpperCase())}
-                value={model}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                size="small"
-                id="stock"
-                name="stock"
-                label="Stock"
-                variant="outlined"
-                onChange={(e) => setStock(e.target.value)}
-                value={stock}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                size="small"
-                id="serial"
-                name="serial"
-                label="Serial"
-                variant="outlined"
-                onChange={(e) => setSerial(e.target.value.toUpperCase())}
-                value={serial}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                size="small"
-                id="equipStatus"
-                variant="outlined"
-                labelid="equipStatus"
-                sx={{
-                  "&:before": {
-                    borderColor: (theme) => theme.palette.secondary.main,
-                  },
-                  "&:after": {
-                    borderColor: (theme) => theme.palette.secondary.main,
-                  },
-                  "&:not(.Mui-disabled):hover::before": {
-                    borderColor: (theme) => theme.palette.secondary.main,
-                  },
-                }}
-                select
-                label="Status"
-                value={equipmentStatus}
-                onChange={(e) => setEquipmentStatus(e.target.value)}
-              >
-                {equipmentStatusArray.map((status) => (
-                  <MenuItem key={status} value={status}>
-                    {status}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                size="small"
-                id="equipAvailability"
-                variant="outlined"
-                labelid="equipAvailability"
-                sx={{
-                  "&:before": {
-                    borderColor: (theme) => theme.palette.secondary.main,
-                  },
-                  "&:after": {
-                    borderColor: (theme) => theme.palette.secondary.main,
-                  },
-                  "&:not(.Mui-disabled):hover::before": {
-                    borderColor: (theme) => theme.palette.secondary.main,
-                  },
-                }}
-                select
-                label="Availabitly"
-                value={availability}
-                onChange={(e) => setAvailability(e.target.value)}
-              >
-                {equipmentAvailabilityArray.map((status) => (
-                  <MenuItem key={status} value={status}>
-                    {status}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                multiline
-                type="text"
-                size="small"
-                id="eqNotes"
-                name="eqNotes"
-                label="Equipment Notes"
-                variant="outlined"
-                value={equipmentNotes}
-                onChange={(e) => setEquipmentNotes(e.target.value)}
-              />
-            </Grid>
+            {addEquipmentInputs.map((input) => (
+              <Grid item key={input.id} xs={input.gridXS} sm={input.gridSM}>
+                <TextField
+                  required={input.required}
+                  fullWidth
+                  select={input.select}
+                  type={input.type}
+                  size="small"
+                  id={input.id}
+                  name={input.id}
+                  label={input.label}
+                  labelid={input.id}
+                  inputProps={input.inputProps}
+                  variant="outlined"
+                  onChange={(e) => handleEquipmentInput(e, input.id)}
+                  value={handleEquipmentValues(input.id)}
+                >
+                  {input.select === true
+                    ? equipmentSelectArray(input.id)?.map((status, index) => (
+                        <MenuItem key={index} value={status}>
+                          {status}
+                        </MenuItem>
+                      ))
+                    : null}
+                </TextField>
+              </Grid>
+            ))}
 
             <Grid item xs={12} sm={8}>
               <Box sx={{ position: "relative" }}>
                 <Button
                   variant="outlined"
                   size="small"
-                  disabled={model === "" || loadingEquipment}
+                  disabled={equipment.model === "" || loadingEquipment}
                   color="primary"
                   startIcon={
                     equipmentSuccess ? (
@@ -665,7 +554,6 @@ export default function AddLead(props) {
                       size={24}
                       color="primary"
                       sx={{
-                        // color: green[500],
                         position: "absolute",
                         top: "50%",
                         left: "50%",
@@ -686,8 +574,8 @@ export default function AddLead(props) {
                   fullWidth
                   size="small"
                   disabled={
-                    name === "" ||
-                    (model === "" && equipmentList.length === 0) ||
+                    leadData.name === "" ||
+                    (equipment.model === "" && equipmentList.length === 0) ||
                     loadingLead
                   }
                   variant="contained"
@@ -699,7 +587,6 @@ export default function AddLead(props) {
                       size={24}
                       color="primary"
                       sx={{
-                        // color: green[500],
                         position: "absolute",
                         top: "50%",
                         left: "50%",
@@ -716,26 +603,5 @@ export default function AddLead(props) {
         </Box>
       </Dialog>
     </>
-
-    // <Container component="main" maxWidth="xs" sx={{ margin: 20 }}>
-    //   <Box>
-    //
-    //     <form noValidate>
-    //
-    //       <Grid container spacing={2}>
-    //
-    //           <div className="checkBoxes">
-
-    //           </div>
-
-    //         <Grid item xs={12}>
-    //         </Grid>
-    //
-    //       </Grid>
-
-    //
-    //     </form>
-    //   </Box>
-    // </Container>
   );
 }
