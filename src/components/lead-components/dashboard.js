@@ -68,7 +68,6 @@ function LeadDashboard() {
       setLeads(
         querySnapshot.docs.map((doc) => ({
           id: doc.data().id,
-          uid: doc.data().uid,
           timestamp: doc.data().timestamp,
           name: doc.data().name,
           email: doc.data().email,

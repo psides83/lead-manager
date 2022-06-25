@@ -126,6 +126,17 @@ const addLeadInputs = [
     select: false,
     multiline: true,
   },
+  {
+    id: "quoteLink",
+    label: "Quote Link",
+    type: "text",
+    gridXS: 12,
+    gridSM: 12,
+    required: false,
+    autoFocus: false,
+    select: false,
+    multiline: false,
+  },
 ];
 
 const addEquipmentInputs = [

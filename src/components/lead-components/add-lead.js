@@ -404,34 +404,41 @@ export default function AddLead(props) {
             </IconButton>
           </Stack>
           <Grid container spacing={2}>
-            {addLeadInputs.map((input) => (
-              <Grid item key={input.id} xs={input.gridXS} sm={input.gridSM}>
-                <TextField
-                  required={input.required}
-                  fullWidth
-                  autoFocus={input.autoFocus}
-                  size="small"
-                  id={input.id}
-                  name={input.id}
-                  label={input.label}
-                  type={input.type}
-                  labelid={input.id}
-                  variant="outlined"
-                  select={input.select}
-                  value={handleLeadValues(input.id)}
-                  onChange={(e) => handleInput(e, input.id)}
-                  InputProps={input.inputProps}
-                >
-                  {input.id === "status"
-                    ? leadStatusArray.map((status, index) => (
-                        <MenuItem key={index} value={status}>
-                          {status}
-                        </MenuItem>
-                      ))
-                    : null}
-                </TextField>
-              </Grid>
-            ))}
+            {addLeadInputs
+              .filter((input) => {
+                if (input.id !== "quoteLink") {
+                  return input;
+                }
+                return null;
+              })
+              .map((input) => (
+                <Grid item key={input.id} xs={input.gridXS} sm={input.gridSM}>
+                  <TextField
+                    required={input.required}
+                    fullWidth
+                    autoFocus={input.autoFocus}
+                    size="small"
+                    id={input.id}
+                    name={input.id}
+                    label={input.label}
+                    type={input.type}
+                    labelid={input.id}
+                    variant="outlined"
+                    select={input.select}
+                    value={handleLeadValues(input.id)}
+                    onChange={(e) => handleInput(e, input.id)}
+                    InputProps={input.inputProps}
+                  >
+                    {input.id === "status"
+                      ? leadStatusArray.map((status, index) => (
+                          <MenuItem key={index} value={status}>
+                            {status}
+                          </MenuItem>
+                        ))
+                      : null}
+                  </TextField>
+                </Grid>
+              ))}
 
             <Grid item>
               <Stack direction="row">

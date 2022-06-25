@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { db } from "../../services/firebase";
 import { setDoc, doc, deleteDoc } from "@firebase/firestore";
 import moment from "moment";
-import { leadStatusArray } from "../../models/arrays";
+import { addLeadInputs, leadStatusArray } from "../../models/arrays";
 import {
   Box,
   Grid,
@@ -27,27 +27,27 @@ import {
   EditRounded,
   SaveRounded,
 } from "@mui/icons-material";
-import { PhoneNumberMask } from "./phone-number-mask";
 
 export default function EditLead(props) {
   //#region State Properties
   const { lead, setValidationMessage, setOpenSuccess, setOpenError } = props;
-  var [name, setName] = useState("");
-  var [email, setEmail] = useState("");
-  var [phone, setPhone] = useState("");
-  var [willFinance, setWillFinance] = useState(false);
-  var [hasTrade, setHasTrade] = useState(false);
-  var [willPurchase, setWillPurchase] = useState(false);
-  var [status, setStatus] = useState("Lead Created");
-  var [notes, setNotes] = useState("");
-  var [quoteLink, setQuoteLink] = useState("");
-  var [changeLog, setChangeLog] = useState([]);
   var [change, setChange] = useState([]);
+  var [leadData, setLeadData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    status: "Lead Created",
+    notes: "",
+    quoteLink: "",
+    willFinance: false,
+    hasTrade: false,
+    willPurchase: false,
+    changeLog: [],
+  });
   const [importedData, setImportedData] = useState({});
-  const [dataHasChanges, setDataHasChanges] = useState(false);
   const [isShowingDialog, setIsShowingDialog] = useState(false);
   const [isShowingConfirmDialog, setIsShowingConfirmDialog] = useState(false);
-  const [loading, setLoading] = useState(false);
+  var [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   //#endregion
 
@@ -59,7 +59,7 @@ export default function EditLead(props) {
 
   const handleToggleDialog = () => {
     setSuccess(false);
-    setLoading(false);
+    setButtonState(ButtonState.unedited);
     setIsShowingDialog(!isShowingDialog);
   };
 
@@ -73,32 +73,32 @@ export default function EditLead(props) {
 
   // load data from lead
   const loadLeadData = useCallback(() => {
-    if (lead) {
-      setName(lead.name);
-      setPhone(lead.phone);
-      setEmail(lead.email);
-      setWillFinance(lead.willFinance);
-      setHasTrade(lead.hasTrade);
-      setWillPurchase(lead.willPurchase);
-      setStatus(lead.status);
-      setNotes(lead.notes);
-      if (lead.quoteLink !== undefined) {
-        setQuoteLink(lead.quoteLink);
-      }
-      setChangeLog(lead.changeLog);
-      setImportedData({
+    if (lead && isShowingDialog) {
+      setLeadData({
         name: lead.name,
-        phone: lead.phone,
         email: lead.email,
+        phone: lead.phone,
+        status: lead.status,
+        notes: lead.notes,
+        quoteLink: lead.quoteLink === undefined ? "" : lead.quoteLink,
         willFinance: lead.willFinance,
         hasTrade: lead.hasTrade,
         willPurchase: lead.willPurchase,
+        changeLog: lead.changeLog,
+      });
+      setImportedData({
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
         status: lead.status,
         notes: lead.notes,
+        willFinance: lead.willFinance,
+        hasTrade: lead.hasTrade,
+        willPurchase: lead.willPurchase,
+        changeLog: lead.changeLog,
       });
     }
-    // eslint-disable-next-line
-  }, [isShowingDialog]);
+  }, [isShowingDialog, lead]);
 
   useEffect(() => {
     loadLeadData();
@@ -115,62 +115,46 @@ export default function EditLead(props) {
   // Array of work options that populate the checkbox setion of the form.
   var checkBoxes = [
     {
-      id: "1",
+      id: "willFinance",
       title: "Financed",
-      checkedState: willFinance,
+      checkedState: leadData.willFinance,
     },
     {
-      id: "2",
+      id: "hasTrade",
       title: "Has trade",
-      checkedState: hasTrade,
+      checkedState: leadData.hasTrade,
     },
     {
-      id: "3",
+      id: "willPurchase",
       title: "Will Purchase",
-      checkedState: willPurchase,
+      checkedState: leadData.willPurchase,
     },
   ];
 
   // Handle changes in the checkboxes.
   const handleChange = (event) => {
-    switch (event.target.id) {
-      case "1":
-        if (!willFinance) {
-          setWillFinance(true);
-        } else {
-          setWillFinance(false);
-        }
+    const id = event.target.id;
 
-        if (event.target.value !== importedData.willFinance) {
-          setDataHasChanges(true);
-        } else if (event.target.value === importedData.willFinance) {
-          setDataHasChanges(false);
+    switch (id) {
+      case "willFinance":
+        if (!leadData.willFinance) {
+          setLeadData({ ...leadData, [id]: true });
+        } else {
+          setLeadData({ ...leadData, [id]: false });
         }
         break;
-      case "2":
-        if (!hasTrade) {
-          setHasTrade(true);
+      case "hasTrade":
+        if (!leadData.hasTrade) {
+          setLeadData({ ...leadData, [id]: true });
         } else {
-          setHasTrade(false);
-        }
-
-        if (event.target.value !== importedData.hasTrade) {
-          setDataHasChanges(true);
-        } else if (event.target.value === importedData.hasTrade) {
-          setDataHasChanges(false);
+          setLeadData({ ...leadData, [id]: false });
         }
         break;
-      case "3":
-        if (!willPurchase) {
-          setWillPurchase(true);
+      case "willPurchase":
+        if (!leadData.willPurchase) {
+          setLeadData({ ...leadData, [id]: true });
         } else {
-          setWillPurchase(false);
-        }
-
-        if (event.target.value !== importedData.willPurchase) {
-          setDataHasChanges(true);
-        } else if (event.target.value === importedData.willPurchase) {
-          setDataHasChanges(false);
+          setLeadData({ ...leadData, [id]: false });
         }
         break;
       default:
@@ -180,83 +164,84 @@ export default function EditLead(props) {
 
   // builds chang log data for values that have changed
   const logChanges = () => {
-    if (name !== importedData.name) {
+    if (leadData.name !== importedData.name) {
       setChange(
         change.push(
           `Name edited from ${
             importedData.name === "" ? "BLANK" : importedData.name
-          } to ${name === "" ? "BLANK" : name}`
+          } to ${leadData.name === "" ? "BLANK" : leadData.name}`
         )
       );
-      console.log("you made it here");
     }
 
-    if (email !== importedData.email) {
+    if (leadData.email !== importedData.email) {
       setChange(
         change.push(
           `Email edited from ${
             importedData.email === "" ? "BLANK" : importedData.email
-          } to ${email === "" ? "BLANK" : email}`
+          } to ${leadData.email === "" ? "BLANK" : leadData.email}`
         )
       );
     }
 
-    if (phone !== importedData.phone) {
+    if (leadData.phone !== importedData.phone) {
       setChange(
         change.push(
           `Phone # edited from ${
             importedData.phone === "" ? "BLANK" : importedData.phone
-          } to ${phone === "" ? "BLANK" : phone}`
+          } to ${leadData.phone === "" ? "BLANK" : leadData.phone}`
         )
       );
     }
 
-    if (status !== importedData.status) {
+    if (leadData.status !== importedData.status) {
       setChange(
-        change.push(`status updated from ${importedData.status} to ${status}`)
+        change.push(
+          `status updated from ${importedData.status} to ${leadData.status}`
+        )
       );
     }
 
-    if (notes !== importedData.notes) {
+    if (leadData.notes !== importedData.notes) {
       setChange(
         change.push(
           `Notes edited from ${
             importedData.notes === "" ? "BLANK" : importedData.notes
-          } to ${notes === "" ? "BLANK" : notes}`
+          } to ${leadData.notes === "" ? "BLANK" : leadData.notes}`
         )
       );
     }
 
-    if (quoteLink !== importedData.quoteLink) {
+    if (leadData.quoteLink !== importedData.quoteLink) {
       setChange(
         change.push(
           `Quote Link edited from ${
             importedData.quoteLink === "" ? "BLANK" : importedData.quoteLink
-          } to ${quoteLink === "" ? "BLANK" : quoteLink}`
+          } to ${leadData.quoteLink === "" ? "BLANK" : leadData.quoteLink}`
         )
       );
     }
 
-    if (willFinance !== importedData.willFinance) {
+    if (leadData.willFinance !== importedData.willFinance) {
       setChange(
         change.push(
-          `Fill Finance edited from ${importedData.willFinance} to ${willFinance}`
+          `Fill Finance edited from ${importedData.willFinance} to ${leadData.willFinance}`
         )
       );
     }
 
-    if (hasTrade !== importedData.hasTrade) {
+    if (leadData.hasTrade !== importedData.hasTrade) {
       setChange(
         change.push(
-          `Has Trade edited from ${importedData.hasTrade} to ${hasTrade}`
+          `Has Trade edited from ${importedData.hasTrade} to ${leadData.hasTrade}`
         )
       );
     }
 
-    if (willPurchase !== importedData.willPurchase) {
+    if (leadData.willPurchase !== importedData.willPurchase) {
       setChange(
         change.push(
-          `Will Purchase edited from ${importedData.willPurchase} to ${willPurchase}`
+          `Will Purchase edited from ${importedData.willPurchase} to ${leadData.willPurchase}`
         )
       );
     }
@@ -273,60 +258,46 @@ export default function EditLead(props) {
       changeString = changeString.substring(1).trim();
     }
 
-    console.log(changeString);
-
-    changeLog.push({
+    leadData.changeLog.push({
       id: id,
       change: changeString,
       timestamp: timestamp,
     });
 
-    const firestoreLead = {
-      name: name,
-      email: email,
-      phone: phone,
-      status: status,
-      notes: notes,
-      willFinance: willFinance,
-      hasTrade: hasTrade,
-      willPurchase: willPurchase,
-      changeLog: changeLog,
-      quoteLink: quoteLink,
-    };
-
     const leadRef = doc(db, "leads", lead.id);
 
-    await setDoc(leadRef, firestoreLead, { merge: true });
+    await setDoc(leadRef, leadData, { merge: true });
   };
 
   // Reset the Lead form
   const resetLeadForm = async () => {
-    setName("");
-    setEmail("");
-    setPhone("");
-    setStatus("Lead Created");
-    setNotes("");
-    setWillFinance(false);
-    setHasTrade(false);
-    setWillPurchase(false);
-    setChangeLog([]);
+    setLeadData({
+      name: "",
+      email: "",
+      phone: "",
+      status: "Lead Created",
+      notes: "",
+      quoteLink: "",
+      willFinance: false,
+      hasTrade: false,
+      willPurchase: false,
+    });
     setChange([]);
     setImportedData({});
-    setDataHasChanges(false);
   };
 
   // Requst submission validation.
   const leadSubmitValidation = async (event) => {
     event.preventDefault();
-    setLoading(true);
+    setButtonState(ButtonState.saving);
 
-    if (name === "") {
+    if (leadData.name === "") {
       setValidationMessage("Lead must have a name to be created");
       setOpenError(true);
       return;
     } else {
       await setLeadToFirestore();
-      setLoading(false);
+      setButtonState(ButtonState.success);
       setSuccess(true);
       setValidationMessage("lead successfully edited");
       setOpenSuccess(true);
@@ -335,76 +306,127 @@ export default function EditLead(props) {
     }
   };
 
-  // Handle lead name input and capitolize each word
-  const handleNameInput = (e) => {
-    const names = e.target.value;
+  // sets the state of the save button based on whether data in the form has changed or is being saved
+  const buttonIsDisabled = () => {
+    if (loading) return true;
 
-    const finalName = names.replace(/(^\w{1})|(\s+\w{1})/g, (letter) =>
-      letter.toUpperCase()
-    );
+    if (leadData.name !== importedData.name) return false;
+    if (leadData.email !== importedData.email) return false;
+    if (leadData.phone !== importedData.phone) return false;
+    if (leadData.status !== importedData.status) return false;
+    if (leadData.quoteLink !== importedData.quoteLink) return false;
+    if (leadData.notes !== importedData.notes) return false;
+    if (leadData.willFinance !== importedData.willFinance) return false;
+    if (leadData.hasTrade !== importedData.hasTrade) return false;
+    if (leadData.willPurchase !== importedData.willPurchase) return false;
+    return true;
+  };
 
-    setName(finalName);
+  // handle the onChange for the lead inputs
+  const handleInput = (e, id) => {
+    var value = e.target.value;
 
-    if (e.target.value !== importedData.name) {
-      setDataHasChanges(true);
-    } else if (e.target.value === importedData.name) {
-      setDataHasChanges(false);
+    if (id === "name") {
+      const names = e.target.value;
+
+      value = names.replace(/(^\w{1})|(\s+\w{1})/g, (letter) =>
+        letter.toUpperCase()
+      );
+    }
+
+    setLeadData({ ...leadData, [id]: value });
+  };
+
+  //  handles the leadData object values for the lead inputs
+  const handleLeadValues = (id) => {
+    switch (id) {
+      case "name":
+        return leadData.name;
+      case "phone":
+        return leadData.phone;
+      case "email":
+        return leadData.email;
+      case "status":
+        return leadData.status;
+      case "notes":
+        return leadData.notes;
+      case "quoteLink":
+        return leadData.quoteLink;
+      default:
+        return "";
     }
   };
 
-  // Handle lead email input and capitolize each word
-  const handleEmailInput = (e) => {
-    setEmail(e.target.value);
+  const [buttonState, setButtonState] = useState(ButtonState.idle);
 
-    if (e.target.value !== importedData.email) {
-      setDataHasChanges(true);
-    } else if (e.target.value === importedData.email) {
-      setDataHasChanges(false);
+  //  save button
+  const SaveButton = () => {
+    switch (buttonState) {
+      case ButtonState.unedited:
+        return (
+          <Button
+            fullWidth
+            disabled
+            variant="contained"
+            endIcon={<SaveRounded />}
+          >
+            Save
+          </Button>
+        );
+      case ButtonState.edited:
+        return (
+          <Button
+            fullWidth
+            variant="contained"
+            endIcon={<SaveRounded />}
+            onClick={leadSubmitValidation}
+          >
+            Save
+          </Button>
+        );
+      case ButtonState.saving:
+        return (
+          <Button
+            fullWidth
+            disabled
+            variant="contained"
+            endIcon={<SaveRounded />}
+          >
+            {loading && (
+              <CircularProgress
+                size={24}
+                color="primary"
+                sx={{
+                  // color: green[500],
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  marginTop: "-12px",
+                  marginLeft: "-12px",
+                }}
+              />
+            )}
+            Saving
+          </Button>
+        );
+      case ButtonState.success:
+        return (
+          <Button
+            fullWidth
+            variant="contained"
+            endIcon={success ? <CheckRounded /> : <SaveRounded />}
+          >
+            Success
+          </Button>
+        );
     }
   };
 
-  // Handle lead phone input and capitolize each word
-  const handlePhoneInput = (e) => {
-    setPhone(e.target.value);
-
-    if (e.target.value !== importedData.phone) {
-      setDataHasChanges(true);
-    } else if (e.target.value === importedData.phone) {
-      setDataHasChanges(false);
-    }
-  };
-
-  // Handle lead notes input and capitolize each word
-  const handleNotesInput = (e) => {
-    setNotes(e.target.value);
-
-    if (e.target.value !== importedData.notes) {
-      setDataHasChanges(true);
-    } else if (e.target.value === importedData.notes) {
-      setDataHasChanges(false);
-    }
-  };
-
-  // Handle lead notes input and capitolize each word
-  const handleQuoteLinkInput = (e) => {
-    setQuoteLink(e.target.value);
-
-    if (e.target.value !== importedData.quoteLink) {
-      setDataHasChanges(true);
-    } else if (e.target.value === importedData.quoteLink) {
-      setDataHasChanges(false);
-    }
-  };
-
-  // Handle lead status input and capitolize each word
-  const handleStatusChange = (e) => {
-    setStatus(e.target.value);
-
-    if (e.target.value !== importedData.status) {
-      setDataHasChanges(true);
-    } else if (e.target.value === importedData.status) {
-      setDataHasChanges(false);
-    }
+  const ButtonState = {
+    unedited: "unedited",
+    edited: "edited",
+    saving: "saving",
+    success: "success",
   };
 
   // UI view of the submission form
@@ -438,108 +460,34 @@ export default function EditLead(props) {
             </IconButton>
           </Stack>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                required
-                fullWidth
-                size="small"
-                id="name"
-                name="name"
-                label="Name"
-                variant="outlined"
-                value={name}
-                onChange={handleNameInput}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                type="email"
-                size="small"
-                id="email"
-                name="email"
-                label="Email"
-                variant="outlined"
-                value={email}
-                onChange={handleEmailInput}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                type="tel"
-                size="small"
-                id="phone"
-                name="phone"
-                label="Phone"
-                variant="outlined"
-                value={phone}
-                InputProps={{
-                  inputComponent: PhoneNumberMask,
-                }}
-                onChange={handlePhoneInput}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                size="small"
-                id="status"
-                variant="outlined"
-                labelid="status"
-                sx={{
-                  "&:before": {
-                    borderColor: (theme) => theme.palette.secondary.main,
-                  },
-                  "&:after": {
-                    borderColor: (theme) => theme.palette.secondary.main,
-                  },
-                  "&:not(.Mui-disabled):hover::before": {
-                    borderColor: (theme) => theme.palette.secondary.main,
-                  },
-                }}
-                select
-                label="Status"
-                value={status}
-                onChange={handleStatusChange}
-              >
-                {leadStatusArray.map((status) => (
-                  <MenuItem key={status} value={status}>
-                    {status}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-
-            <Grid item xs={12} sm={12}>
-              <TextField
-                fullWidth
-                multiline
-                size="small"
-                id="quoteLink"
-                name="quoteLink"
-                label="Quote Link"
-                variant="outlined"
-                value={quoteLink}
-                onChange={handleQuoteLinkInput}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={12}>
-              <TextField
-                fullWidth
-                multiline
-                size="small"
-                id="notes"
-                name="notes"
-                label="Notes"
-                variant="outlined"
-                value={notes}
-                onChange={handleNotesInput}
-              />
-            </Grid>
+            {addLeadInputs.map((input) => (
+              <Grid item key={input.id} xs={input.gridXS} sm={input.gridSM}>
+                <TextField
+                  required={input.required}
+                  fullWidth
+                  autoFocus={input.autoFocus}
+                  size="small"
+                  id={input.id}
+                  name={input.id}
+                  label={input.label}
+                  type={input.type}
+                  labelid={input.id}
+                  variant="outlined"
+                  select={input.select}
+                  value={handleLeadValues(input.id)}
+                  onChange={(e) => handleInput(e, input.id)}
+                  InputProps={input.inputProps}
+                >
+                  {input.id === "status"
+                    ? leadStatusArray.map((status, index) => (
+                        <MenuItem key={index} value={status}>
+                          {status}
+                        </MenuItem>
+                      ))
+                    : null}
+                </TextField>
+              </Grid>
+            ))}
 
             <Grid item>
               <Stack direction="row">
@@ -580,7 +528,7 @@ export default function EditLead(props) {
               <Box sx={{ position: "relative" }}>
                 <Button
                   fullWidth
-                  disabled={!dataHasChanges || loading}
+                  disabled={buttonIsDisabled()}
                   variant="contained"
                   endIcon={success ? <CheckRounded /> : <SaveRounded />}
                   onClick={leadSubmitValidation}

@@ -254,6 +254,7 @@ export default function EquipmentForm(props) {
     }
   };
 
+  // sets the state of the save button based on whether data in the form has changed or is being saved
   const buttonIsDisabled = () => {
     if (loading) return true;
 
