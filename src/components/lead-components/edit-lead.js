@@ -59,7 +59,7 @@ export default function EditLead(props) {
 
   const handleToggleDialog = () => {
     setSuccess(false);
-    setButtonState(ButtonState.unedited);
+    setLoading(false);
     setIsShowingDialog(!isShowingDialog);
   };
 
@@ -92,6 +92,7 @@ export default function EditLead(props) {
         phone: lead.phone,
         status: lead.status,
         notes: lead.notes,
+        quoteLink: lead.quoteLink === undefined ? "" : lead.quoteLink,
         willFinance: lead.willFinance,
         hasTrade: lead.hasTrade,
         willPurchase: lead.willPurchase,
@@ -289,7 +290,7 @@ export default function EditLead(props) {
   // Requst submission validation.
   const leadSubmitValidation = async (event) => {
     event.preventDefault();
-    setButtonState(ButtonState.saving);
+    setLoading(true);
 
     if (leadData.name === "") {
       setValidationMessage("Lead must have a name to be created");
@@ -297,7 +298,7 @@ export default function EditLead(props) {
       return;
     } else {
       await setLeadToFirestore();
-      setButtonState(ButtonState.success);
+      setLoading(false);
       setSuccess(true);
       setValidationMessage("lead successfully edited");
       setOpenSuccess(true);
@@ -308,18 +309,21 @@ export default function EditLead(props) {
 
   // sets the state of the save button based on whether data in the form has changed or is being saved
   const buttonIsDisabled = () => {
-    if (loading) return true;
+    if (isShowingDialog && lead) {
 
-    if (leadData.name !== importedData.name) return false;
-    if (leadData.email !== importedData.email) return false;
-    if (leadData.phone !== importedData.phone) return false;
-    if (leadData.status !== importedData.status) return false;
-    if (leadData.quoteLink !== importedData.quoteLink) return false;
-    if (leadData.notes !== importedData.notes) return false;
-    if (leadData.willFinance !== importedData.willFinance) return false;
-    if (leadData.hasTrade !== importedData.hasTrade) return false;
-    if (leadData.willPurchase !== importedData.willPurchase) return false;
-    return true;
+      if (loading) return true;
+  
+      if (leadData.name !== importedData.name) return false;
+      if (leadData.email !== importedData.email) return false;
+      if (leadData.phone !== importedData.phone) return false;
+      if (leadData.status !== importedData.status) return false;
+      if (leadData.quoteLink !== importedData.quoteLink) return false;
+      if (leadData.notes !== importedData.notes) return false;
+      if (leadData.willFinance !== importedData.willFinance) return false;
+      if (leadData.hasTrade !== importedData.hasTrade) return false;
+      if (leadData.willPurchase !== importedData.willPurchase) return false;
+      return true;
+    }
   };
 
   // handle the onChange for the lead inputs
@@ -355,78 +359,6 @@ export default function EditLead(props) {
       default:
         return "";
     }
-  };
-
-  const [buttonState, setButtonState] = useState(ButtonState.idle);
-
-  //  save button
-  const SaveButton = () => {
-    switch (buttonState) {
-      case ButtonState.unedited:
-        return (
-          <Button
-            fullWidth
-            disabled
-            variant="contained"
-            endIcon={<SaveRounded />}
-          >
-            Save
-          </Button>
-        );
-      case ButtonState.edited:
-        return (
-          <Button
-            fullWidth
-            variant="contained"
-            endIcon={<SaveRounded />}
-            onClick={leadSubmitValidation}
-          >
-            Save
-          </Button>
-        );
-      case ButtonState.saving:
-        return (
-          <Button
-            fullWidth
-            disabled
-            variant="contained"
-            endIcon={<SaveRounded />}
-          >
-            {loading && (
-              <CircularProgress
-                size={24}
-                color="primary"
-                sx={{
-                  // color: green[500],
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  marginTop: "-12px",
-                  marginLeft: "-12px",
-                }}
-              />
-            )}
-            Saving
-          </Button>
-        );
-      case ButtonState.success:
-        return (
-          <Button
-            fullWidth
-            variant="contained"
-            endIcon={success ? <CheckRounded /> : <SaveRounded />}
-          >
-            Success
-          </Button>
-        );
-    }
-  };
-
-  const ButtonState = {
-    unedited: "unedited",
-    edited: "edited",
-    saving: "saving",
-    success: "success",
   };
 
   // UI view of the submission form
@@ -526,7 +458,7 @@ export default function EditLead(props) {
 
             <Grid item xs={12} sm={6}>
               <Box sx={{ position: "relative" }}>
-                <Button
+              <Button
                   fullWidth
                   disabled={buttonIsDisabled()}
                   variant="contained"
@@ -547,7 +479,7 @@ export default function EditLead(props) {
                       }}
                     />
                   )}
-                  {success ? "Success" : loading ? "Saving" : "Save"}
+                  {loading ? "Saving" : success ? "Success" : "Save"}
                 </Button>
               </Box>
             </Grid>
