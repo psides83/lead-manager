@@ -143,7 +143,7 @@ const addEquipmentInputs = [
     id: "stock",
     label: "Stock",
     type: "tel",
-    inputProps: { maxlength: "6" },
+    inputProps: { maxLength: "6" },
     gridXS: 12,
     gridSM: 6,
     required: false,
