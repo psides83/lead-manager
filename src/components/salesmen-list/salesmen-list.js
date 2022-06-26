@@ -26,6 +26,7 @@ import TransferRequestView from "./transfer-request";
 import HomeSkeleton from "../loading-views/home-skeleton";
 import "../salesmen-list/salesmen-list.css";
 import { AuthContext } from "../../state-management/auth-context-provider";
+import { SearchContext } from "../../state-management/search-provider";
 
 // Header for the sub-table of equipment
 function SalesmenTableHeaderView() {
@@ -74,6 +75,7 @@ function Row({ salesman }) {
 export default function SalesmenList() {
   // #region State Properties
   const { userProfile } = useContext(AuthContext);
+  const { searchText } = useContext(SearchContext)
   const [salesmen, setSalesmen] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchParam] = useState(["branch", "firstName", "lastName"]);
@@ -131,7 +133,7 @@ export default function SalesmenList() {
               item[newItem]
                 .toString()
                 .toLowerCase()
-                // .indexOf(searchText.toLowerCase()) > -1
+                .indexOf(searchText.toLowerCase()) > -1
             );
           });
         } else if (filterParam === "All") {
@@ -140,7 +142,7 @@ export default function SalesmenList() {
               item[newItem]
                 .toString()
                 .toLowerCase()
-                // .indexOf(searchText.toLowerCase()) > -1
+                .indexOf(searchText.toLowerCase()) > -1
             );
           });
         }
