@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useRef } from "react";
+import React, { useCallback, useState, useEffect, useRef, useContext } from "react";
 import LeadCard from "./lead-card";
 import {
   Box,
@@ -17,9 +17,9 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../../services/firebase";
-import { useStateValue } from "../../state-management/state-provider";
 import Tasks from "./task-list";
 import { Toaster } from "react-hot-toast";
+import { SearchContext } from "../../state-management/search-provider";
 
 const filters = ["Active", "Closed"];
 
@@ -29,7 +29,7 @@ function LeadDashboard() {
   const [leads, setLeads] = useState([]);
   const [tasks, setTasks] = useState([]);
   // eslint-disable-next-line
-  const [{ searchText }, dispatch] = useStateValue("");
+  const {searchText} = useContext(SearchContext)
   const [searchParam] = useState(["name", "phone"]);
   const [filterParam, setFilterParam] = useState("Active");
   // eslint-disable-next-line

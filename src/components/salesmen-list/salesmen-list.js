@@ -1,5 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { useStateValue } from "../../state-management/state-provider";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   getDoc,
   doc,
@@ -26,6 +25,7 @@ import { CancelOutlined, LocalShippingRounded } from "@mui/icons-material";
 import TransferRequestView from "./transfer-request";
 import HomeSkeleton from "../loading-views/home-skeleton";
 import "../salesmen-list/salesmen-list.css";
+import { AuthContext } from "../../state-management/auth-context-provider";
 
 // Header for the sub-table of equipment
 function SalesmenTableHeaderView() {
@@ -73,7 +73,7 @@ function Row({ salesman }) {
 // Whole table view:
 export default function SalesmenList() {
   // #region State Properties
-  const [{ userProfile, searchText }] = useStateValue();
+  const { userProfile } = useContext(AuthContext);
   const [salesmen, setSalesmen] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchParam] = useState(["branch", "firstName", "lastName"]);
@@ -131,7 +131,7 @@ export default function SalesmenList() {
               item[newItem]
                 .toString()
                 .toLowerCase()
-                .indexOf(searchText.toLowerCase()) > -1
+                // .indexOf(searchText.toLowerCase()) > -1
             );
           });
         } else if (filterParam === "All") {
@@ -140,7 +140,7 @@ export default function SalesmenList() {
               item[newItem]
                 .toString()
                 .toLowerCase()
-                .indexOf(searchText.toLowerCase()) > -1
+                // .indexOf(searchText.toLowerCase()) > -1
             );
           });
         }

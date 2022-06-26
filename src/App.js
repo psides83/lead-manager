@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
+  Navigate,
 } from "react-router-dom";
 import {
   auth,
@@ -28,6 +29,7 @@ import CustomerSignUp from "./components/customer-components/customer-sign-up";
 import toast, { Toaster } from "react-hot-toast";
 import SalesDataGrid from "./components/sales-components/sales-data-grid";
 import SalesmenList from "./components/salesmen-list/salesmen-list";
+import { AuthContext } from "./state-management/auth-context-provider";
 
 const theme = createTheme({
   palette: {
@@ -55,114 +57,83 @@ const theme = createTheme({
 
 export default function App() {
   // eslint-disable-next-line
-  const [{ user, loading }, dispatch] = useStateValue();
-  const [notification, setNotification] = useState({ title: "", body: "" });
+  const { currentUser } = useContext(AuthContext);
+  // const [notification, setNotification] = useState({ title: "", body: "" });
 
-  const notify = () => toast(<ToastDisplay />);
-  function ToastDisplay() {
-    return (
-      <div>
-        <p>
-          <b>{notification?.title}</b>
-        </p>
-        <p>{notification?.body}</p>
-      </div>
-    );
-  }
+  const RequireAuth = ({ children }) => {
+    if(!currentUser) {
 
-  const fetchProfile = (user) => {
-    if (user) {
-      try {
-        onSnapshot(doc(db, "users", user?.uid), (doc) => {
-          console.log("Current User: ", doc.data());
-          dispatch({
-            type: "SET_USER_PROFILE",
-            userProfile: doc.data(),
-          });
-        });
-      } catch (error) {
-        console.log("error", error);
-      }
+      console.log("do not pass go")
     }
+    return currentUser ? children : <Navigate to="/sign-in" />;
   };
 
-  const updateAuth = useCallback(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/firebase.User
-        // setTimeout( function() { setLoading(false); }, 2000);
-        if (user.email == null) {
-          dispatch({
-            type: "SET_CUSTOMER_USER",
-            customerUser: user,
-          });
-          fetchProfile(user);
-          return;
-        }
-        dispatch({
-          type: "SET_USER",
-          user: user,
-        });
-        fetchProfile(user);
-      } else {
-        // User is signed out
-        dispatch({
-          type: "SET_USER",
-          user: null,
-        });
-        // User is signed out
-        dispatch({
-          type: "SET_CUSTOMER_USER",
-          customerUser: null,
-        });
+  // const notify = () => toast(<ToastDisplay />);
+  // function ToastDisplay() {
+  //   return (
+  //     <div>
+  //       <p>
+  //         <b>{notification?.title}</b>
+  //       </p>
+  //       <p>{notification?.body}</p>
+  //     </div>
+  //   );
+  // }
 
-        // User is signed out
-        dispatch({
-          type: "SET_USER_PROFILE",
-          userProfile: null,
-        });
-      }
-    });
-    // eslint-disable-next-line
-  }, [auth, dispatch]);
-
-  useEffect(() => {
-    updateAuth();
-    if (notification?.title) {
-      notify();
-    }
-  }, [dispatch, updateAuth, notification]);
+  // useEffect(() => {
+  // updateAuth();
+  // if (notification?.title) {
+  //   notify();
+  // }
+  // }, [updateAuth]);
 
   // requestForToken();
 
-  onMessageListener()
-    .then((payload) => {
-      setNotification({
-        title: payload?.notification?.title,
-        body: payload?.notification?.body,
-      });
-    })
-    .catch((err) => console.log("failed: ", err));
+  // onMessageListener()
+  //   .then((payload) => {
+  //     setNotification({
+  //       title: payload?.notification?.title,
+  //       body: payload?.notification?.body,
+  //     });
+  //   })
+  //   .catch((err) => console.log("failed: ", err));
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Toaster />
       <Router>
-        {user && <MainAppBar />}
-        <Box style={{ marginTop: user && "75px" }}>
+        {currentUser && <MainAppBar />}
+        <Box style={{ marginTop: currentUser && "75px" }}>
           <Routes>
-            <Route
-              path="/salesmen-list"
-              element={user ? <SalesmenList /> : <SignIn />}
-            />
-            <Route
-              path="/sales"
-              element={user ? <SalesDataGrid /> : <SignIn />}
-            />
+            <Route path="/">
+              <Route path="sign-in" element={<SignIn />} />
+              <Route
+                index
+                element={
+                  <RequireAuth>
+                    <LeadDashboard />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="salesmen-list"
+                element={
+                  <RequireAuth>
+                    <SalesmenList />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/sales"
+                element={
+                  <RequireAuth>
+                    <SalesDataGrid />
+                  </RequireAuth>
+                }
+              />
+            </Route>
             <Route path="/customer-view/:leadId" element={<CustomerAppBar />} />
-            <Route path="/" element={user ? <LeadDashboard /> : <SignIn />} />
           </Routes>
         </Box>
       </Router>

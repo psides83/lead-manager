@@ -41,7 +41,6 @@ import { relativeTime } from "../../utils/utils";
 function TaskList(props) {
   const { lead, tasks, setValidationMessage, setOpenError, setOpenSuccess } =
     props;
-  const [searchText] = useState("");
   const [searchParam] = useState(["leadID", "isComplete"]);
   const [showingTasks, setShowingTasks] = useState(false);
   const onlyCompleted = true;
@@ -65,7 +64,7 @@ function TaskList(props) {
             item[newItem]
               .toString()
               .toLowerCase()
-              .indexOf(searchText.toLowerCase()) > -1
+              // .indexOf(searchText.toLowerCase()) > -1
           );
         });
       } else if (item.leadID === lead.id && item.isComplete !== onlyCompleted) {

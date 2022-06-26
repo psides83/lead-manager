@@ -6,12 +6,18 @@ import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import reportWebVitals from "./reportWebVitals";
 import { StateProvider } from "./state-management/state-provider";
 import reducer, { initialState } from "./state-management/reducer";
+import { AuthContextProvider } from "./state-management/auth-context-provider";
+import { SearchContextProvider } from "./state-management/search-provider";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <StrictMode>
     <StateProvider initialState={initialState} reducer={reducer}>
-      <App />
+      <AuthContextProvider>
+        <SearchContextProvider>
+          <App />
+        </SearchContextProvider>
+      </AuthContextProvider>
     </StateProvider>
   </StrictMode>
 );

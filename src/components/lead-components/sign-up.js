@@ -1,15 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { auth, db } from "../../services/firebase";
 import {
   setDoc,
   doc,
-  getDoc,
-  getDocs,
-  orderBy,
-  query,
-  collection,
 } from "@firebase/firestore";
 import {
   createUserWithEmailAndPassword,
@@ -18,20 +13,12 @@ import {
 } from "firebase/auth";
 import {
   Alert,
-  FormHelperText,
   Typography,
-  OutlinedInput,
-  Checkbox,
-  Select,
-  ListItemText,
-  FormControl,
-  InputLabel,
   Snackbar,
   Button,
   TextField,
   Grid,
   Avatar,
-  MenuItem,
   Container,
   Box,
 } from "@mui/material";
@@ -46,34 +33,36 @@ export default function SignUp() {
   const [openError, setOpenError] = useState(false);
   var [validationMessage, setValidationMessage] = useState("");
 
-  const register = () => {
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in
-        const user = userCredential.user;
+  const register = async () => {
+    try {
+      const res = await createUserWithEmailAndPassword(auth, email, password);
+      const user = res.user;
 
+      if (user) {
         updateProfile(user, { fullName: `${firstName} ${lastName}` });
 
-        if (user) {
-          const newUser = doc(db, "users", user.uid);
-          const userData = {
-            id: user.uid,
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-          };
-          setValidationMessage("Registration successful.");
-          setOpenSuccess(true);
-          setDoc(newUser, userData, { merge: true });
-          navigate("/");
-        }
-      })
-      .catch((error) => {
-        setValidationMessage(
-          "User already registered with this email address."
-        );
-        setOpenError(true);
-      });
+        const newUser = doc(db, "users", user.uid);
+
+        const userData = {
+          id: user.uid,
+          timestamp: serverTimestamp(),
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+        };
+
+        await setDoc(newUser, userData, { merge: true });
+
+        setValidationMessage("Registration successful.");
+        setOpenSuccess(true);
+
+        navigate("/");
+      }
+    } catch {
+
+      setValidationMessage("User already registered with this email address.");
+      setOpenError(true);
+    }
   };
 
   // Squipment submission validation.
@@ -93,7 +82,7 @@ export default function SignUp() {
       setOpenError(true);
       return;
     } else {
-      register();
+      await register();
     }
   };
 
@@ -131,7 +120,6 @@ export default function SignUp() {
           alignItems: "center",
         }}
       >
-        {/* <img style={{ width: "300px" }} src={fbceLogo} alt="" /> */}
         <Avatar
           sx={{
             margin: (theme) => theme.spacing(1),
