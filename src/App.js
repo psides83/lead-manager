@@ -61,10 +61,7 @@ export default function App() {
   // const [notification, setNotification] = useState({ title: "", body: "" });
 
   const RequireAuth = ({ children }) => {
-    if(!currentUser) {
 
-      console.log("do not pass go")
-    }
     return currentUser ? children : <Navigate to="/sign-in" />;
   };
 
