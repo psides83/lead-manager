@@ -139,7 +139,6 @@ export default function SalesDataGrid() {
           id: doc.data().id,
           date: doc.data().date,
           month: doc.data().month,
-          monthForChart: moment(doc.data().month, "MM").format("MMM"),
           year: doc.data().year,
           sales: Number(doc.data().sales),
           margin: Number(doc.data().margin),
@@ -398,6 +397,18 @@ const Chart = (props) => {
     return null;
   });
 
+  const DataFormater = (number) => {
+    if(number > 1000000000){
+      return '$' + (number/1000000000).toString() + 'B';
+    }else if(number > 1000000){
+      return '$' + (number/1000000).toString() + 'M';
+    }else if(number > 1000){
+      return '$' + (number/1000).toString() + 'K';
+    }else{
+      return '$' + number.toString();
+    }
+  }
+
   return (
     <ResponsiveContainer aspect={1.4} width={380}>
       <BarChart
@@ -411,22 +422,22 @@ const Chart = (props) => {
           bottom: 10,
         }}
       >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="monthForChart" />
-        <YAxis />
+        {/* <CartesianGrid strokeDasharray="1 3" /> */}
+        <XAxis dataKey="month" tickFormatter={(value) => moment(value, "MM").format("MMM")} />
+        <YAxis tickFormatter={DataFormater}/>
         <Tooltip
-          formatter={(value, name) => [
+          labelFormatter={(label) => moment(label, "MM").format("MMM")}
+          formatter={(value, name, props) => [
             currencyFormatter.format(value),
             name.replace(/\b\w/g, (c) => c.toUpperCase()),
           ]}
         />
         <Bar
-          type="monotone"
           dataKey={category}
           stackId="1"
           stroke="#367C2B"
           fill="#367C2B"
-          barSize={20}
+          barSize={25}
           radius={[3,3,0,0]}
         />
       </BarChart>
