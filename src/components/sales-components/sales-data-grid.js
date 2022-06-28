@@ -142,6 +142,7 @@ export default function SalesDataGrid() {
           year: doc.data().year,
           sales: Number(doc.data().sales),
           margin: Number(doc.data().margin),
+          cost: Number(doc.data().sales - doc.data().margin),
           commission: Number(doc.data().commission),
           bonus: Number(doc.data().bonus),
         }))
@@ -239,7 +240,6 @@ export default function SalesDataGrid() {
       );
     }
     if (currentVsPreviousYearToDate(type) < 0) {
-      
       return (
         <Stack direction="row">
           <ArrowDownwardRounded color="error" />
@@ -296,9 +296,11 @@ export default function SalesDataGrid() {
         setToggleValue={setSelectedYear}
         selections={years}
       />
-      <Paper elevation={4} sx={{ borderRadius: "10px", minWidth: "350px", marginTop: "8px" }} >
-
-      <Chart data={sales} year={selectedYear} category={selectedCategory} />
+      <Paper
+        elevation={4}
+        sx={{ borderRadius: "10px", minWidth: "350px", marginTop: "8px" }}
+      >
+        <Chart data={sales} year={selectedYear} category={selectedCategory} />
       </Paper>
       {dataTypes.map((type) => (
         <Box
@@ -398,16 +400,16 @@ const Chart = (props) => {
   });
 
   const DataFormater = (number) => {
-    if(number > 1000000000){
-      return '$' + (number/1000000000).toString() + 'B';
-    }else if(number > 1000000){
-      return '$' + (number/1000000).toString() + 'M';
-    }else if(number > 1000){
-      return '$' + (number/1000).toString() + 'K';
-    }else{
-      return '$' + number.toString();
+    if (number > 1000000000) {
+      return "$" + (number / 1000000000).toString() + "B";
+    } else if (number > 1000000) {
+      return "$" + (number / 1000000).toString() + "M";
+    } else if (number > 1000) {
+      return "$" + (number / 1000).toString() + "K";
+    } else {
+      return "$" + number.toString();
     }
-  }
+  };
 
   return (
     <ResponsiveContainer aspect={1.4} width={380}>
@@ -415,6 +417,7 @@ const Chart = (props) => {
         width={380}
         height={300}
         data={filteredData}
+        barGap={category === "sales" ? 0 : 4}
         margin={{
           top: 20,
           right: 20,
@@ -423,23 +426,58 @@ const Chart = (props) => {
         }}
       >
         {/* <CartesianGrid strokeDasharray="1 3" /> */}
-        <XAxis dataKey="month" tickFormatter={(value) => moment(value, "MM").format("MMM")} />
-        <YAxis tickFormatter={DataFormater}/>
+        <XAxis
+          dataKey="month"
+          tickFormatter={(value) => moment(value, "MM").format("MMM")}
+        />
+        <YAxis tickFormatter={DataFormater} />
         <Tooltip
           labelFormatter={(label) => moment(label, "MM").format("MMM")}
-          formatter={(value, name, props) => [
+          formatter={(value, name) => [
             currencyFormatter.format(value),
-            name.replace(/\b\w/g, (c) => c.toUpperCase()),
+            
+              // if (name === "cost") return "Sales"
+              name.replace(/\b\w/g, (c) => c.toUpperCase())
+            ,
           ]}
         />
-        <Bar
-          dataKey={category}
-          stackId="1"
-          stroke="#367C2B"
-          fill="#367C2B"
-          barSize={25}
-          radius={[3,3,0,0]}
-        />
+        {category === "sales" ? (
+          <>
+            <Bar
+              dataKey={"cost"}
+              stackId="1"
+              stroke="#367C2B"
+              fill="#367C2B"
+              barSize={12}
+              // radius={[3, 3, 0, 0]}
+            />
+            <Bar
+              dataKey={"margin"}
+              stackId="1"
+              stroke="#FFDE00"
+              fill="#FFDE00"
+              barSize={12}
+              radius={[3, 0, 0, 0]}
+            />
+            <Bar
+              dataKey={"sales"}
+              stackId="2"
+              stroke="#666666"
+              fill="#666666"
+              barSize={12}
+              radius={[0, 3, 0, 0]}
+            />
+          </>
+        ) : (
+          <Bar
+            dataKey={category}
+            stackId="1"
+            stroke="#FFFFFF"
+            fill="#367C2B"
+            barSize={24}
+            radius={[3, 3, 0, 0]}
+          />
+        )}
       </BarChart>
     </ResponsiveContainer>
   );
