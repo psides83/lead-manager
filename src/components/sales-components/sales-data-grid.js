@@ -15,6 +15,19 @@ import moment from "moment";
 // eslint-disable-next-line
 import { Box, Button, Paper, Stack, Typography } from "@mui/material";
 import { ArrowDownwardRounded, ArrowUpwardRounded } from "@mui/icons-material";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from "recharts";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
 // eslint-disable-next-line
 const columns = [
@@ -79,12 +92,16 @@ const columns = [
   },
 ];
 
+const categories = ["sales", "margin", "commission", "bonus"];
+
 export default function SalesDataGrid() {
   const [sales, setSales] = useState([]);
   // eslint-disable-next-line
   const [filterParam, setFilterParam] = useState("All");
   // eslint-disable-next-line
   const [salesData, setSalesData] = useState({});
+  const [selectedCategory, setSelectedCategory] = useState("sales");
+  const [selectedYear, setSelectedYear] = useState(moment().format("yyyy"));
   const dataTypes = ["Gross Revenue", "Margin", "Commission", "Bonus"];
   const years = [
     moment().subtract(3, "years").format("yyyy"),
@@ -122,6 +139,7 @@ export default function SalesDataGrid() {
           id: doc.data().id,
           date: doc.data().date,
           month: doc.data().month,
+          monthForChart: moment(doc.data().month, "MM").format("MMM"),
           year: doc.data().year,
           sales: Number(doc.data().sales),
           margin: Number(doc.data().margin),
@@ -222,6 +240,7 @@ export default function SalesDataGrid() {
       );
     }
     if (currentVsPreviousYearToDate(type) < 0) {
+      
       return (
         <Stack direction="row">
           <ArrowDownwardRounded color="error" />
@@ -268,6 +287,20 @@ export default function SalesDataGrid() {
         justifyContent: "center",
       }}
     >
+      <ToggleButtons
+        toggleValue={selectedCategory}
+        setToggleValue={setSelectedCategory}
+        selections={categories}
+      />
+      <ToggleButtons
+        toggleValue={selectedYear}
+        setToggleValue={setSelectedYear}
+        selections={years}
+      />
+      <Paper elevation={4} sx={{ borderRadius: "10px", minWidth: "350px", marginTop: "8px" }} >
+
+      <Chart data={sales} year={selectedYear} category={selectedCategory} />
+      </Paper>
       {dataTypes.map((type) => (
         <Box
           key={type}
@@ -354,5 +387,72 @@ export default function SalesDataGrid() {
         />
       </div> */}
     </Box>
+  );
+}
+
+const Chart = (props) => {
+  const { data, year, category } = props;
+
+  const filteredData = data.filter((sale) => {
+    if (sale.year === year) return sale;
+    return null;
+  });
+
+  return (
+    <ResponsiveContainer aspect={1.4} width={380}>
+      <BarChart
+        width={380}
+        height={300}
+        data={filteredData}
+        margin={{
+          top: 20,
+          right: 20,
+          left: 10,
+          bottom: 10,
+        }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="monthForChart" />
+        <YAxis />
+        <Tooltip
+          formatter={(value, name) => [
+            currencyFormatter.format(value),
+            name.replace(/\b\w/g, (c) => c.toUpperCase()),
+          ]}
+        />
+        <Bar
+          type="monotone"
+          dataKey={category}
+          stackId="1"
+          stroke="#367C2B"
+          fill="#367C2B"
+          barSize={20}
+          radius={[3,3,0,0]}
+        />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+};
+
+function ToggleButtons(props) {
+  const { toggleValue, setToggleValue, selections } = props;
+
+  const handleValue = (event, newValue) => {
+    setToggleValue(newValue);
+  };
+
+  return (
+    <ToggleButtonGroup
+      value={toggleValue}
+      exclusive
+      onChange={handleValue}
+      aria-label="text alignment"
+    >
+      {selections?.map((selection) => (
+        <ToggleButton key={selection} value={selection}>
+          {selection}
+        </ToggleButton>
+      ))}
+    </ToggleButtonGroup>
   );
 }
