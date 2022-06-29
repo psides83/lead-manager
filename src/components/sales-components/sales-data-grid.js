@@ -446,8 +446,8 @@ const Chart = (props) => {
             <Bar
               dataKey={"cost"}
               stackId="1"
-              stroke="#367C2B"
-              fill="#367C2B"
+              stroke="#666666"
+              fill="#666666"
               barSize={12}
               // radius={[3, 3, 0, 0]}
             />
@@ -462,8 +462,8 @@ const Chart = (props) => {
             <Bar
               dataKey={"sales"}
               stackId="2"
-              stroke="#666666"
-              fill="#666666"
+              stroke="#367C2B"
+              fill="#367C2B"
               barSize={12}
               radius={[0, 3, 0, 0]}
             />
