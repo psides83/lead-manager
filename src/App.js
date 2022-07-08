@@ -25,11 +25,10 @@ import SignIn from "./components/lead-components/sign-in";
 // eslint-disable-next-line
 import Loading from "./components/loading";
 // eslint-disable-next-line
-import CustomerSignUp from "./components/customer-components/customer-sign-up";
 import toast, { Toaster } from "react-hot-toast";
-import SalesDataGrid from "./components/sales-components/sales-data-grid";
 import SalesmenList from "./components/salesmen-list/salesmen-list";
 import { AuthContext } from "./state-management/auth-context-provider";
+import SalesDashboard from "./components/sales-components/sales-dashboard";
 
 const theme = createTheme({
   palette: {
@@ -125,7 +124,7 @@ export default function App() {
                 path="/sales"
                 element={
                   <RequireAuth>
-                    <SalesDataGrid />
+                    <SalesDashboard />
                   </RequireAuth>
                 }
               />
