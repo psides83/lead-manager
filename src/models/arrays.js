@@ -1,4 +1,5 @@
 import { PhoneNumberMask } from "../components/lead-components/phone-number-mask";
+import moment from "moment";
 
 const leadStatusArray = [
   "Lead Created",
@@ -66,6 +67,33 @@ const branches = [
   "Samson",
   "Tuscaloosa",
 ];
+
+const categories = ["sales", "margin", "commission", "bonus"];
+
+
+const dataTypes = ["Gross Revenue", "Margin", "Commission", "Bonus"];
+
+  const years = [
+    moment().subtract(3, "years").format("yyyy"),
+    moment().subtract(2, "years").format("yyyy"),
+    moment().subtract(1, "years").format("yyyy"),
+    moment().format("yyyy"),
+  ];
+
+  const months = [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+  ];
 
 const addLeadInputs = [
   {
@@ -210,4 +238,8 @@ export {
   branches,
   addLeadInputs,
   addEquipmentInputs,
+  categories,
+  dataTypes,
+  years,
+  months
 };
