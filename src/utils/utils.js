@@ -1,6 +1,6 @@
 import moment from "moment";
 
-export function formatPhoneNumber(phoneNumberString) {
+function formatPhoneNumber(phoneNumberString) {
   var cleaned = ('' + phoneNumberString).replace(/\D/g, '');
   var match = cleaned.match(/^(1|)?(\d{3})(\d{3})(\d{4})$/);
   if (match) {
@@ -12,7 +12,7 @@ export function formatPhoneNumber(phoneNumberString) {
 }
 
 // Create our number formatter.
-export var currencyFormatter = new Intl.NumberFormat('en-US', {
+var currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
 
@@ -21,6 +21,20 @@ export var currencyFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
 });
 
-export const relativeTime = (date) => {
+const relativeTime = (date) => {
   return moment(date, "DD-MMM-YYYY hh:mmA").fromNow();
 };
+
+const ShortenCurrencyFormatter = (number) => {
+  if (number > 1000000000) {
+    return "$" + (number / 1000000000).toString() + "B";
+  } else if (number > 1000000) {
+    return "$" + (number / 1000000).toString() + "M";
+  } else if (number > 1000) {
+    return "$" + (number / 1000).toString() + "K";
+  } else {
+    return "$" + number.toString();
+  }
+};
+
+export { ShortenCurrencyFormatter, relativeTime, currencyFormatter, formatPhoneNumber }

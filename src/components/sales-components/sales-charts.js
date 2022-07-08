@@ -11,7 +11,7 @@ import {
   Bar,
 } from "recharts";
 import moment from 'moment';
-import { currencyFormatter } from '../../utils/utils';
+import { currencyFormatter, ShortenCurrencyFormatter } from '../../utils/utils';
 
 const SalesCharts = (props) => {
   const { data, year, category } = props;
@@ -20,18 +20,6 @@ const SalesCharts = (props) => {
     if (sale.year === year) return sale;
     return null;
   });
-
-  const DataFormater = (number) => {
-    if (number > 1000000000) {
-      return "$" + (number / 1000000000).toString() + "B";
-    } else if (number > 1000000) {
-      return "$" + (number / 1000000).toString() + "M";
-    } else if (number > 1000) {
-      return "$" + (number / 1000).toString() + "K";
-    } else {
-      return "$" + number.toString();
-    }
-  };
 
   return (
     <ResponsiveContainer aspect={1.4} width={380}>
@@ -52,7 +40,7 @@ const SalesCharts = (props) => {
           dataKey="month"
           tickFormatter={(value) => moment(value, "MM").format("MMM")}
         />
-        <YAxis tickFormatter={DataFormater} />
+        <YAxis tickFormatter={ShortenCurrencyFormatter} />
         <Tooltip
           labelFormatter={(label) => moment(label, "MM").format("MMM")}
           formatter={(value, name) => [
