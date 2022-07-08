@@ -1,6 +1,7 @@
-import { PhoneNumberMask } from "../components/lead-components/phone-number-mask";
+import { PhoneNumberMask } from "../utils/phone-number-mask";
 import moment from "moment";
 
+// array of lead status options
 const leadStatusArray = [
   "Lead Created",
   "Quote Requested",
@@ -20,6 +21,7 @@ const leadStatusArray = [
   "Closed",
 ];
 
+// array of equipment status options
 const equipmentStatusArray = [
   "Equipment added",
   "Setup required",
@@ -35,6 +37,7 @@ const equipmentStatusArray = [
   "Delivered",
 ];
 
+// array of equipment availability options
 const equipmentAvailabilityArray = [
   "Availability Unknown",
   "In Stock(Auburn)",
@@ -68,33 +71,30 @@ const branches = [
   "Tuscaloosa",
 ];
 
+// array of categories for sales data
 const categories = ["sales", "margin", "commission", "bonus"];
 
+// const years = () => {
+//   const yearsSinceStarted = Number(moment().format("yyyy")) - Number("2019")
+//   const years =[]
+//   for (var i=yearsSinceStarted; i>0; i++) {
+//     years.push(moment().subtract(i, "years").format("yyyy"))
+//   }
+//   return years.push(moment().format("yyyy"))
+// }
 
-const dataTypes = ["Gross Revenue", "Margin", "Commission", "Bonus"];
+// array of years going three years back
+const years = [
+  moment().subtract(3, "years").format("yyyy"),
+  moment().subtract(2, "years").format("yyyy"),
+  moment().subtract(1, "years").format("yyyy"),
+  moment().format("yyyy"),
+];
 
-  const years = [
-    moment().subtract(3, "years").format("yyyy"),
-    moment().subtract(2, "years").format("yyyy"),
-    moment().subtract(1, "years").format("yyyy"),
-    moment().format("yyyy"),
-  ];
+// array of months in digit form
+const months = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 
-  const months = [
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "11",
-    "12",
-  ];
-
+// array of props for lead inputs
 const addLeadInputs = [
   {
     id: "name",
@@ -167,6 +167,7 @@ const addLeadInputs = [
   },
 ];
 
+// array of props for equipment inputs
 const addEquipmentInputs = [
   {
     id: "model",
@@ -239,7 +240,6 @@ export {
   addLeadInputs,
   addEquipmentInputs,
   categories,
-  dataTypes,
   years,
-  months
+  months,
 };

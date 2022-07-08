@@ -23,16 +23,10 @@ import moment from "moment";
  * It also determines the use of the form. Whether it is for adding a guardian at the initial registration of a child, adding a guardian from the admin children table, or to edit an existing guardian.
  *
  * @param  {} props
- * setValidationMessage, setOpenError, setOpenSuccess
+ * setMessage, setOpenError, setOpenSuccess
  */
 function AddTaskDialog(props) {
-  const {
-    lead,
-    tasksCount,
-    setValidationMessage,
-    setOpenError,
-    setOpenSuccess,
-  } = props;
+  const { lead, tasksCount, setMessage, setOpenError, setOpenSuccess } = props;
   const [task, setTask] = useState("");
   const [isShowingDialog, setIsShowingDialog] = useState(false);
 
@@ -65,27 +59,25 @@ function AddTaskDialog(props) {
           order: tasksCount + 1,
         },
         { merge: true }
-      );
-      setValidationMessage("Task successfully added");
-      setOpenSuccess(true);
-      handleCloseDialog();
-      setTask("");
+      )
+        .then(() => {
+          setMessage("Task successfully added");
+          setOpenSuccess(true);
+          handleCloseDialog();
+          setTask("");
+        })
+        .catch((error) => {
+          setMessage(`${error}`);
+          setOpenError(true);
+        });
     } else {
-      setValidationMessage("Please enter a task.");
+      setMessage("Please enter a task.");
       setOpenError(true);
     }
   };
 
   return (
     <>
-      {/* <Button
-        variant="contained"
-        size="small"
-        onClick={handleToggleDialog}
-        startIcon={<AddTask />}
-      >
-        Add Task
-      </Button> */}
       <Tooltip title="Add task">
         <IconButton
           size="large"
