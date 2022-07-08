@@ -45,7 +45,7 @@ const ListItem = styled("li")(({ theme }) => ({
 
 export default function AddLead(props) {
   //#region State Properties
-  const { setValidationMessage, setOpenSuccess, setOpenError } = props;
+  const { setMessage, setOpenSuccess, setOpenError } = props;
   const { userProfile } = useContext(AuthContext);
   var [leadData, setLeadData] = useState({
     name: "",
@@ -245,13 +245,13 @@ export default function AddLead(props) {
     setLoadingEquipment(true);
 
     if (equipment.model === "") {
-      setValidationMessage("Equipment must have a model to be added to a lead");
+      setMessage("Equipment must have a model to be added to a lead");
       setOpenError(true);
       return;
     } else {
       pushEquipmentToLead();
       const lastIndex = equipmentList[equipmentList.length - 1]?.model;
-      setValidationMessage(lastIndex + " successfully added to the lead");
+      setMessage(lastIndex + " successfully added to the lead");
       setOpenSuccess(true);
     }
   };
@@ -262,11 +262,11 @@ export default function AddLead(props) {
     setLoadingLead(true);
 
     if (equipment.model === "" && equipmentList.length === 0) {
-      setValidationMessage("Equipment must have a model to be added to a lead");
+      setMessage("Equipment must have a model to be added to a lead");
       setOpenError(true);
       return false;
     } else if (leadData.name === "") {
-      setValidationMessage("Lead must have a name to be created");
+      setMessage("Lead must have a name to be created");
       setOpenError(true);
       return false;
     } else {
@@ -275,12 +275,18 @@ export default function AddLead(props) {
         console.log("another eq added first");
         await pushEquipmentToLead();
       }
-      await setLeadToFirestore();
-      setLoadingLead(false);
-      setLeadSuccess(true);
-      setValidationMessage("lead successfully submitted");
-      setOpenSuccess(true);
-      handleCloseDialog();
+      await setLeadToFirestore().then(()=> {
+        setLoadingLead(false);
+        setLeadSuccess(true);
+        setMessage("Lead successfully submitted");
+        setOpenSuccess(true);
+        handleCloseDialog();
+      }).catch((error) => {
+        setLoadingLead(false);
+        setMessage(`${error}. Please try again`);
+        setOpenError(true);
+      });
+      
     }
   };
 

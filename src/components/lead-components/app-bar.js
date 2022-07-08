@@ -22,6 +22,7 @@ import { auth } from "../../services/firebase";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../state-management/auth-context-provider";
 import { SearchContext } from "../../state-management/search-provider";
+import DynamicSnackbar from "../ui-components/snackbar";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -87,7 +88,7 @@ export default function MainAppBar(props) {
   const [openSuccess, setOpenSuccess] = React.useState(false);
   const [openError, setOpenError] = useState(false);
   const navigate = useNavigate();
-  var [validationMessage, setValidationMessage] = useState("");
+  var [message, setMessage] = useState("");
 
   // Handle closing of the alerts.
   const handleClose = (event, reason) => {
@@ -169,7 +170,7 @@ export default function MainAppBar(props) {
               />
             </Search>
             <AddLead
-              setValidationMessage={setValidationMessage}
+              setMessage={setMessage}
               setOpenError={setOpenError}
               setOpenSuccess={setOpenSuccess}
             />
@@ -254,27 +255,12 @@ export default function MainAppBar(props) {
         </MenuItem>
       </Menu>
 
-      <Snackbar
-        open={openSuccess}
-        autoHideDuration={3000}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
-          {validationMessage}
-        </Alert>
-      </Snackbar>
-
-      <Snackbar
-        open={openError}
-        autoHideDuration={3000}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert onClose={handleClose} severity="error" sx={{ width: "100%" }}>
-          {validationMessage}
-        </Alert>
-      </Snackbar>
+      <DynamicSnackbar
+        message={message}
+        openSuccess={openSuccess}
+        openError={openError}
+        handleClose={handleClose}
+      />
     </Box>
   );
 }

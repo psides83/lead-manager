@@ -13,7 +13,6 @@ import {
 import ContactHistory from "./contact-history";
 import StatusHistory from "./status-history";
 import {
-  Alert,
   Badge,
   Card,
   CardContent,
@@ -25,7 +24,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Snackbar,
   Stack,
   Tooltip,
   Typography,
@@ -35,11 +33,11 @@ import ContactDialog from "./contact-dialog";
 import EditLead from "./edit-lead";
 import AddTaskDialog from "./add-lead-tasks";
 import EquipmentForm from "./equipment-form";
-import toast from "react-hot-toast";
 import { relativeTime } from "../../utils/utils";
+import DynamicSnackbar from "../ui-components/snackbar";
 
 function TaskList(props) {
-  const { lead, tasks, setValidationMessage, setOpenError, setOpenSuccess } =
+  const { lead, tasks, setMessage, setOpenError, setOpenSuccess } =
     props;
   const [searchParam] = useState(["leadID", "isComplete"]);
   const [showingTasks, setShowingTasks] = useState(false);
@@ -120,7 +118,7 @@ function TaskList(props) {
           <AddTaskDialog
             lead={lead}
             tasksCount={tasks.length}
-            setValidationMessage={setValidationMessage}
+            setMessage={setMessage}
             setOpenError={setOpenError}
             setOpenSuccess={setOpenSuccess}
           />
@@ -164,7 +162,7 @@ function TaskList(props) {
 }
 
 function EquipmentSection(props) {
-  const { lead, setValidationMessage, setOpenError, setOpenSuccess } = props;
+  const { lead, setMessage, setOpenError, setOpenSuccess } = props;
   const [showingEquipment, setShowingEquipment] = useState(false);
 
   const showEquipment = (event) => {
@@ -193,7 +191,7 @@ function EquipmentSection(props) {
           <Typography variant="subtitle1">Equipment</Typography>
           <EquipmentForm
             lead={lead}
-            setValidationMessage={setValidationMessage}
+            setMessage={setMessage}
             setOpenError={setOpenError}
             setOpenSuccess={setOpenSuccess}
           />
@@ -219,7 +217,7 @@ function EquipmentSection(props) {
                   <EquipmentForm
                     equipment={unit}
                     lead={lead}
-                    setValidationMessage={setValidationMessage}
+                    setMessage={setMessage}
                     setOpenError={setOpenError}
                     setOpenSuccess={setOpenSuccess}
                   />
@@ -245,7 +243,7 @@ export default function LeadCard(props) {
   const status = lead.status;
   const [openSuccess, setOpenSuccess] = React.useState(false);
   const [openError, setOpenError] = useState(false);
-  var [validationMessage, setValidationMessage] = useState("");
+  var [message, setMessage] = useState("");
 
   // Handle closing of the alerts.
   const handleClose = (event, reason) => {
@@ -280,16 +278,15 @@ export default function LeadCard(props) {
   const copyLeadLink = (e) => {
     e.preventDefault();
 
-    toast.promise(
-      navigator.clipboard.writeText(
-        `https://leadmanager-44f57.web.app/customer-view/${lead.id}`
-      ),
-      {
-        loading: "Saving...",
-        success: <b>Link copied!</b>,
-        error: <b>Could not copy link.</b>,
-      }
-    );
+    navigator.clipboard.writeText(
+          `https://leadmanager-44f57.web.app/customer-view/${lead.id}`
+        ).then(() => {
+          setMessage("Link copied!")
+          setOpenSuccess(true)
+        }).catch(() => {
+          setMessage("Could not copy link.")
+          setOpenError(true)
+        })
   };
 
   return (
@@ -326,7 +323,7 @@ export default function LeadCard(props) {
             </Tooltip>
             <EditLead
               lead={lead}
-              setValidationMessage={setValidationMessage}
+              setMessage={setMessage}
               setOpenError={setOpenError}
               setOpenSuccess={setOpenSuccess}
             />
@@ -364,7 +361,7 @@ export default function LeadCard(props) {
         </Stack>
         <EquipmentSection
           lead={lead}
-          setValidationMessage={setValidationMessage}
+          setMessage={setMessage}
           setOpenError={setOpenError}
           setOpenSuccess={setOpenSuccess}
         />
@@ -372,7 +369,7 @@ export default function LeadCard(props) {
         <TaskList
           lead={lead}
           tasks={tasks}
-          setValidationMessage={setValidationMessage}
+          setMessage={setMessage}
           setOpenError={setOpenError}
           setOpenSuccess={setOpenSuccess}
         />
@@ -388,27 +385,12 @@ export default function LeadCard(props) {
           </Typography>
         </Stack>
       </CardContent>
-      <Snackbar
-        open={openSuccess}
-        autoHideDuration={3000}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert onClose={handleClose} severity="success" sx={{ width: "100%" }}>
-          {validationMessage}
-        </Alert>
-      </Snackbar>
-
-      <Snackbar
-        open={openError}
-        autoHideDuration={3000}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert onClose={handleClose} severity="error" sx={{ width: "100%" }}>
-          {validationMessage}
-        </Alert>
-      </Snackbar>
+      <DynamicSnackbar
+        openSuccess={openSuccess}
+        openError={openError}
+        message={message}
+        handleClose={handleClose}
+      />
     </Card>
   );
 }

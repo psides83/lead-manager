@@ -30,7 +30,7 @@ import {
 
 export default function EditLead(props) {
   //#region State Properties
-  const { lead, setValidationMessage, setOpenSuccess, setOpenError } = props;
+  const { lead, setMessage, setOpenSuccess, setOpenError } = props;
   var [change, setChange] = useState([]);
   var [leadData, setLeadData] = useState({
     name: "",
@@ -294,17 +294,23 @@ export default function EditLead(props) {
     setLoading(true);
 
     if (leadData.name === "") {
-      setValidationMessage("Lead must have a name to be created");
+      setMessage("Lead must have a name to be created");
       setOpenError(true);
       return;
     } else {
-      await setLeadToFirestore();
-      setLoading(false);
-      setSuccess(true);
-      setValidationMessage("lead successfully edited");
-      setOpenSuccess(true);
-      handleCloseDialog();
-      resetLeadForm();
+      await setLeadToFirestore().then(() => {
+        setLoading(false);
+        setSuccess(true);
+        setMessage("lead successfully edited");
+        setOpenSuccess(true);
+        handleCloseDialog();
+        resetLeadForm();
+      }).catch((error) => {
+        loadLeadData()
+        setLoading(false);
+        setMessage(`${error}`);
+        setOpenError(true);
+      })
     }
   };
 

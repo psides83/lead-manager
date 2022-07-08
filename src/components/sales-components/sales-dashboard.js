@@ -1,13 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  collection,
-  // eslint-disable-next-line
-  doc,
-  onSnapshot,
-  orderBy,
-  query,
-} from "firebase/firestore";
-import { db } from "../../services/firebase";
 import { currencyFormatter } from "../../utils/utils";
 import moment from "moment";
 // eslint-disable-next-line
@@ -33,6 +24,11 @@ export default function SalesDashboard() {
     await fetch(setSales);
     // eslint-disable-next-line
   }, [filterParam]);
+
+   // fetches sales data from Firestore
+   useEffect(() => {
+    fetchSales();
+  }, [fetchSales]);
 
   // sets the UI for to show the trend is up or down with an appropriately colored arrow
   const trend = () => {
@@ -64,11 +60,6 @@ export default function SalesDashboard() {
       );
     }
   };
-
-  // fetches sales data from Firestore
-  useEffect(() => {
-    fetchSales();
-  }, [fetchSales]);
 
   return (
     <Box
