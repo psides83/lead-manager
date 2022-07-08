@@ -1,5 +1,5 @@
 //Imports
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { db } from "../../services/firebase";
 import { setDoc, doc } from "@firebase/firestore";
 import moment from "moment";
@@ -37,7 +37,7 @@ import {
   SaveRounded,
   CheckCircleOutlineRounded,
 } from "@mui/icons-material";
-import { useStateValue } from "../../state-management/state-provider";
+import { AuthContext } from "../../state-management/auth-context-provider";
 
 const ListItem = styled("li")(({ theme }) => ({
   margin: theme.spacing(0.5),
@@ -46,7 +46,7 @@ const ListItem = styled("li")(({ theme }) => ({
 export default function AddLead(props) {
   //#region State Properties
   const { setValidationMessage, setOpenSuccess, setOpenError } = props;
-  const [{ userProfile }] = useStateValue();
+  const { userProfile } = useContext(AuthContext);
   var [leadData, setLeadData] = useState({
     name: "",
     email: "",

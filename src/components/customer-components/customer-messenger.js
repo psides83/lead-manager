@@ -32,31 +32,37 @@ function CustomerMessenger(props) {
   }, [scroll, lead.messages]);
 
   const recipiantID = useCallback(() => {
-    if (user?.type === "admin") return lead?.id;
-    if (user === undefined) return lead?.salesmanID;
+    return user ? lead?.id : lead?.salesmanID
+    
+    // if (user?.type === "admin") return lead?.id;
+    // if (user === undefined) return lead?.salesmanID;
+    // if (user?.type === null) return lead?.salesmanID;
   }, [user, lead]);
 
   const threadID = useCallback(() => {
-    if (user?.type === "admin") return user?.id + lead?.id;
-    if (user === undefined) return lead?.salesmanID + lead?.id;
-    return;
+    return user ? user?.id + lead?.id : lead?.salesmanID + lead?.id
+    // if (user?.type === "admin") return user?.id + lead?.id;
+    // if (user === undefined) return lead?.salesmanID + lead?.id;
+    // return;
   }, [user, lead]);
-
+  
   const submitMessage = async (e) => {
     e.preventDefault();
     const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
     const id = moment().format("yyyyMMDDHHmmss");
-
+    
     const sender = () => {
-      if (user === undefined) return "customer";
-      return "admin";
+      return user ? "admin" : "customer" 
+      // if (user === undefined) return "customer";
+      // return "admin";
     };
-
+    
     const senderID = () => {
-      if (user === undefined) return lead?.id;
-      return user?.id;
+      return user ? user?.id : lead?.id
+      // if (user === undefined) return lead?.id;
+      // return user?.id;
     };
-
+    
     if (threadID()) {
       const messageData = {
         id: id,
@@ -78,6 +84,8 @@ function CustomerMessenger(props) {
         messagesArray.push(messageData);
       }
 
+      console.log(messagesArray)
+
       const leadDoc = doc(db, "leads", lead.id);
       await setDoc(leadDoc, { messages: messagesArray }, { merge: true })
         .then
@@ -88,8 +96,8 @@ function CustomerMessenger(props) {
   };
 
   const messageSenderCheck = (message) => {
-    if (user === undefined && message.senderID === lead.id) return true;
-    if (user !== undefined && message.senderID === user?.id) return true;
+    if ((user === undefined || user === null) && message.senderID === lead.id) return true;
+    if ((user !== undefined || user !== null) && message.senderID === user?.id) return true;
     return false;
   };
 

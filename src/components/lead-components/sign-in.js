@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 // eslint-disable-next-line
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { onSnapshot, doc } from "firebase/firestore";
-import { useStateValue } from "../../state-management/state-provider";
+import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../services/firebase";
 import {
   signInWithEmailAndPassword,
@@ -20,38 +19,46 @@ import {
   Snackbar,
   Box,
 } from "@mui/material";
+import { AuthContext } from "../../state-management/auth-context-provider";
 
 export default function SignIn() {
   const navigate = useNavigate();
-  const [{ user }, dispatch] = useStateValue();
+  const { dispatch } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [openSuccess, setOpenSuccess] = useState(false);
   const [openError, setOpenError] = useState(false);
   var [validationMessage, setValidationMessage] = useState("");
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (user) => {
     try {
-      onSnapshot(doc(db, "users", user?.uid), (doc) => {
-        console.log("Current data: ", doc.data());
-        dispatch({
-          type: "SET_USER_PROFILE",
-          userProfile: doc.data(),
-        });
-      });
+      if (user) {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          dispatch({
+            type: "LOGIN",
+            currentUser: user,
+            userProfile: docSnap.data(),
+          });
+          navigate("/");
+          console.log("Current data: ");
+        }
+      }
     } catch (error) {
       console.log("error", error);
     }
   };
 
-  const signIn = (e) => {
+  const signIn = async (e) => {
     e.preventDefault();
 
     signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
+      .then(async (userCredential) => {
         // Signed in
-        fetchProfile();
-        navigate("/");
+        const user = userCredential.user;
+        fetchProfile(user);
       })
       .catch((error) => {
         setValidationMessage("The email and/or password do not match");

@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { TextsmsRounded } from "@mui/icons-material";
 import { Button, Dialog, Tooltip } from "@mui/material";
 import { setDoc, doc } from "@firebase/firestore";
 import { db } from "../../services/firebase";
 import CustomerMessenger from "../customer-components/customer-messenger";
-import { useStateValue } from "../../state-management/state-provider";
+import { AuthContext } from "../../state-management/auth-context-provider";
 
 /**
  * This component recieves props for the SnackBar to be dislayed once actions are completed or if an erronious input is received.
@@ -19,7 +19,7 @@ import { useStateValue } from "../../state-management/state-provider";
 function LeadMessagingDialog(props) {
   const { lead } = props;
   // eslint-disable-next-line
-  const [{ loading, userProfile }, dispatch] = useStateValue("");
+  const { userProfile } = useContext(AuthContext);
   const [isShowingDialog, setIsShowingDialog] = useState(false);
 
   const handleCloseDialog = () => {

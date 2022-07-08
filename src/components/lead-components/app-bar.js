@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -8,14 +8,7 @@ import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
 import AddLead from "./add-lead";
-import {
-  Alert,
-  ListItemIcon,
-  Menu,
-  MenuItem,
-  Snackbar,
-} from "@mui/material";
-import { useStateValue } from "../../state-management/state-provider";
+import { Alert, ListItemIcon, Menu, MenuItem, Snackbar } from "@mui/material";
 import {
   AgricultureRounded,
   InsertChartRounded,
@@ -27,6 +20,8 @@ import Slide from "@mui/material/Slide";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import { auth } from "../../services/firebase";
 import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../state-management/auth-context-provider";
+import { SearchContext } from "../../state-management/search-provider";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -87,7 +82,8 @@ function HideOnScroll(props) {
 }
 
 export default function MainAppBar(props) {
-  const [{ searchText, user }, dispatch] = useStateValue();
+  const {currentUser, dispatch} = useContext(AuthContext);
+  const {searchText, searchDispatch} = useContext(SearchContext);
   const [openSuccess, setOpenSuccess] = React.useState(false);
   const [openError, setOpenError] = useState(false);
   const navigate = useNavigate();
@@ -104,31 +100,21 @@ export default function MainAppBar(props) {
   };
 
   const handleSearchInput = (e) => {
-    dispatch({
-      type: "SET_SEARCH_TEXT",
+    searchDispatch({
+      type: "SEARCH",
       searchText: e.target.value,
     });
   };
 
   const logout = (e) => {
     e.preventDefault();
-    if (user) {
+    if (currentUser) {
       // User is signed in, see docs for a list of available properties
       // https://firebase.google.com/docs/reference/js/firebase.User
       // User is signed out
       dispatch({
-        type: "SET_USER",
-        user: null,
-      });
-      // User is signed out
-      dispatch({
-        type: "SET_CUSTOMER_USER",
-        customerUser: null,
-      });
-
-      // User is signed out
-      dispatch({
-        type: "SET_USER_PROFILE",
+        type: "LOGOUT",
+        currentUser: null,
         userProfile: null,
       });
       auth.signOut();

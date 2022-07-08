@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useRef } from "react";
+import React, { useCallback, useState, useEffect, useRef, useContext } from "react";
 import {
   Box,
   Grid,
@@ -13,12 +13,14 @@ import { useStateValue } from "../../state-management/state-provider";
 import CustomerCard from "./customer-card";
 import CustomerMessenger from "./customer-messenger";
 import Loading from "../loading";
+import { AuthContext } from "../../state-management/auth-context-provider";
 
 function CustomerDashboard(props) {
   const { leadId } = props;
   const timer = useRef();
   const [lead, setLead] = useState();
-  const [{ loading, userProfile }, dispatch] = useStateValue("");
+  const [{ loading }, dispatch] = useStateValue("");
+  const { userProfile } = useContext(AuthContext);
   // eslint-disable-next-line
   const [openSuccess, setOpenSuccess] = useState(false);
   // eslint-disable-next-line

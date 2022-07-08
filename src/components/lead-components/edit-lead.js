@@ -47,7 +47,7 @@ export default function EditLead(props) {
   const [importedData, setImportedData] = useState({});
   const [isShowingDialog, setIsShowingDialog] = useState(false);
   const [isShowingConfirmDialog, setIsShowingConfirmDialog] = useState(false);
-  var [loading, setLoading] = useState(false);
+  var [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
   //#endregion
 
@@ -98,6 +98,7 @@ export default function EditLead(props) {
         willPurchase: lead.willPurchase,
         changeLog: lead.changeLog,
       });
+      setLoading(false)
     }
   }, [isShowingDialog, lead]);
 

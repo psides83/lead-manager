@@ -114,6 +114,7 @@ export default function CustomerCard(props) {
     e.preventDefault();
 
     window.open(lead?.quoteLink, "_blank");
+    console.log("here")
     sendQuoteLinkOpenedEmail(lead);
   };
 
