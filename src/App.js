@@ -5,25 +5,15 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import {
-  auth,
-  db,
-  onMessageListener,
-  // eslint-disable-next-line
-  requestForToken,
-} from "./services/firebase";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { CssBaseline } from "@mui/material";
 import { Box } from "@mui/system";
-import { useStateValue } from "./state-management/state-provider";
-import { doc, onSnapshot } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
-import MainAppBar from "./components/lead-components/app-bar";
+import MainAppBar from "./components/app-bar/app-bar";
 import LeadDashboard from "./components/lead-components/dashboard";
 import CustomerAppBar from "./components/customer-components/customer-app-bar";
-import SignIn from "./components/lead-components/sign-in";
+import SignIn from "./components/auth-components/sign-in";
 // eslint-disable-next-line
-import Loading from "./components/loading";
+import Loading from "./components/loading-views/loading";
 // eslint-disable-next-line
 import toast, { Toaster } from "react-hot-toast";
 import SalesmenList from "./components/salesmen-list/salesmen-list";

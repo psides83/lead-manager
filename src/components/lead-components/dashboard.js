@@ -87,7 +87,7 @@ function LeadDashboard() {
     });
     timer.current = window.setTimeout(() => {
       setLoading(false);
-    }, 1000);
+    }, 1200);
   }, [filterParam]);
 
   const fetchTasks = useCallback(async () => {

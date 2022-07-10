@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import { currencyFormatter } from "../../utils/utils";
 import moment from "moment";
 // eslint-disable-next-line
@@ -9,8 +9,10 @@ import SalesCharts from "./sales-charts";
 import ToggleButtons from "../ui-components/toggle-buttons";
 import SalesDataGrid from "./sales-data-grid";
 import { calculateSales, currentVsPreviousYearToDate, fetch, marginPercentage, percentChange } from "./sales-dashboard-view-model";
+import { AuthContext } from "../../state-management/auth-context-provider";
 
 export default function SalesDashboard() {
+  const { userProfile } = useContext(AuthContext);
   const [sales, setSales] = useState([]);
   // eslint-disable-next-line
   const [filterParam, setFilterParam] = useState("All");
@@ -28,7 +30,6 @@ export default function SalesDashboard() {
    // fetches sales data from Firestore
    useEffect(() => {
     fetchSales();
-        // console.log(years())
 
   }, [fetchSales]);
 
@@ -86,7 +87,7 @@ export default function SalesDashboard() {
       <ToggleButtons
         toggleValue={selectedYear}
         setToggleValue={setSelectedYear}
-        selections={years}
+        selections={years(userProfile.yearStarted)}
       />
       <Box
         sx={{

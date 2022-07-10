@@ -7,15 +7,8 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
-import AddLead from "./add-lead";
-import { Alert, ListItemIcon, Menu, MenuItem, Snackbar } from "@mui/material";
-import {
-  AgricultureRounded,
-  InsertChartRounded,
-  LogoutRounded,
-  MenuRounded,
-  PeopleAltRounded,
-} from "@mui/icons-material";
+import AddLead from "../lead-components/add-lead";
+import { AgricultureRounded, MenuRounded } from "@mui/icons-material";
 import Slide from "@mui/material/Slide";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import { auth } from "../../services/firebase";
@@ -23,6 +16,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../state-management/auth-context-provider";
 import { SearchContext } from "../../state-management/search-provider";
 import DynamicSnackbar from "../ui-components/snackbar";
+import AppBarMenu from "./app-bar-menu";
+import UserAccountDialog from "../user-components/user-account-dialog";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -83,11 +78,9 @@ function HideOnScroll(props) {
 }
 
 export default function MainAppBar(props) {
-  const {currentUser, dispatch} = useContext(AuthContext);
-  const {searchText, searchDispatch} = useContext(SearchContext);
-  const [openSuccess, setOpenSuccess] = React.useState(false);
+  const { searchText, searchDispatch } = useContext(SearchContext);
+  const [openSuccess, setOpenSuccess] = useState(false);
   const [openError, setOpenError] = useState(false);
-  const navigate = useNavigate();
   var [message, setMessage] = useState("");
 
   // Handle closing of the alerts.
@@ -107,29 +100,11 @@ export default function MainAppBar(props) {
     });
   };
 
-  const logout = (e) => {
-    e.preventDefault();
-    if (currentUser) {
-      // User is signed in, see docs for a list of available properties
-      // https://firebase.google.com/docs/reference/js/firebase.User
-      // User is signed out
-      dispatch({
-        type: "LOGOUT",
-        currentUser: null,
-        userProfile: null,
-      });
-      auth.signOut();
-    }
-  };
-
   // Menu button
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
-  };
-  const handleMenuClose = () => {
-    setAnchorEl(null);
   };
 
   return (
@@ -186,74 +161,25 @@ export default function MainAppBar(props) {
             >
               <MenuRounded />
             </IconButton>
+            
+            <UserAccountDialog
+              setMessage={setMessage}
+              setOpenSuccess={setOpenSuccess}
+              setOpenError={setOpenError}
+            />
           </Toolbar>
         </AppBar>
       </HideOnScroll>
 
-      <Menu
+      <AppBarMenu
         anchorEl={anchorEl}
-        id="account-menu"
+        setAnchorEl={setAnchorEl}
+        auth={auth}
         open={open}
-        onClose={handleMenuClose}
-        onClick={handleMenuClose}
-        PaperProps={{
-          elevation: 0,
-          sx: {
-            overflow: "visible",
-            filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-            mt: 1.5,
-            "& .MuiAvatar-root": {
-              width: 32,
-              height: 32,
-              ml: -0.5,
-              mr: 1,
-            },
-            "&:before": {
-              content: '""',
-              display: "block",
-              position: "absolute",
-              top: 0,
-              right: 14,
-              width: 10,
-              height: 10,
-              bgcolor: "background.paper",
-              transform: "translateY(-50%) rotate(45deg)",
-              zIndex: 0,
-            },
-          },
-        }}
-        transformOrigin={{ horizontal: "right", vertical: "top" }}
-        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-      >
-        <MenuItem
-          onClick={(e) => {
-            e.preventDefault();
-            navigate("/sales");
-          }}
-        >
-          <ListItemIcon>
-            <InsertChartRounded fontSize="small" />
-          </ListItemIcon>
-          Sales
-        </MenuItem>
-        <MenuItem
-          onClick={(e) => {
-            e.preventDefault();
-            navigate("/salesmen-list");
-          }}
-        >
-          <ListItemIcon>
-            <PeopleAltRounded fontSize="small" />
-          </ListItemIcon>
-          Salesmen
-        </MenuItem>
-        <MenuItem onClick={logout}>
-          <ListItemIcon>
-            <LogoutRounded fontSize="small" />
-          </ListItemIcon>
-          Logout
-        </MenuItem>
-      </Menu>
+        setOpenSuccess={setOpenSuccess}
+        setOpenError={setOpenError}
+        setMessage={setMessage}
+      />
 
       <DynamicSnackbar
         message={message}

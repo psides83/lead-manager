@@ -12,7 +12,7 @@ import { db } from "../../services/firebase";
 import { useStateValue } from "../../state-management/state-provider";
 import CustomerCard from "./customer-card";
 import CustomerMessenger from "./customer-messenger";
-import Loading from "../loading";
+import Loading from "../loading-views/loading";
 import { AuthContext } from "../../state-management/auth-context-provider";
 
 function CustomerDashboard(props) {

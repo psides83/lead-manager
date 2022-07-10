@@ -46,6 +46,12 @@ const equipmentAvailabilityArray = [
   "Unavailable",
 ];
 
+// user types
+const userTypes = [
+  "admin",
+  "sales"
+]
+
 // SunSouth branches
 const branches = [
   "Abbeville",
@@ -74,22 +80,19 @@ const branches = [
 // array of categories for sales data
 const categories = ["sales", "margin", "commission", "bonus"];
 
-// const years = () => {
-//   const yearsSinceStarted = Number(moment().format("yyyy")) - Number("2019")
-//   const years =[]
-//   for (var i=yearsSinceStarted; i>0; i++) {
-//     years.push(moment().subtract(i, "years").format("yyyy"))
-//   }
-//   return years.push(moment().format("yyyy"))
-// }
-
 // array of years going three years back
-const years = [
-  moment().subtract(3, "years").format("yyyy"),
-  moment().subtract(2, "years").format("yyyy"),
-  moment().subtract(1, "years").format("yyyy"),
-  moment().format("yyyy"),
-];
+const years = (yearStarted) => {
+  const yearsSinceStarted = Number(moment().format("yyyy")) - Number(yearStarted)
+  const yearsArray =[]
+
+  for (var i=yearsSinceStarted; i>0; i--) {
+    yearsArray.push(moment().subtract(i, "years").format("yyyy"))
+  }
+
+  yearsArray.push(moment().format("yyyy"))
+
+  return yearsArray
+}
 
 // array of months in digit form
 const months = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
@@ -232,13 +235,74 @@ const addEquipmentInputs = [
   },
 ];
 
+// array of props for user inputs
+const userInputs = [
+  {
+    id: "firstName",
+    label: "First Name",
+    type: "text",
+    gridXS: 12,
+    gridSM: 6,
+    required: true,
+    autoFocus: true,
+    select: false,
+    multiline: false,
+  },
+  {
+    id: "lastName",
+    label: "Last Name",
+    type: "text",
+    gridXS: 12,
+    gridSM: 6,
+    required: true,
+    autoFocus: false,
+    select: false,
+    multiline: false,
+  },
+  // {
+  //   id: "email",
+  //   label: "Email",
+  //   type: "mail",
+  //   gridXS: 12,
+  //   gridSM: 12,
+  //   required: false,
+  //   autoFocus: false,
+  //   select: false,
+  //   multiline: false,
+  // },
+  {
+    id: "type",
+    label: "Type",
+    type: "text",
+    select: true,
+    gridXS: 12,
+    gridSM: 6,
+    required: false,
+    autoFocus: false,
+    multiline: false,
+  },
+  {
+    id: "yearStarted",
+    label: "Year Started",
+    type: "text",
+    gridXS: 12,
+    gridSM: 6,
+    required: false,
+    autoFocus: false,
+    select: false,
+    multiline: false,
+  },
+];
+
 export {
   leadStatusArray,
   equipmentStatusArray,
   equipmentAvailabilityArray,
   branches,
+  userTypes,
   addLeadInputs,
   addEquipmentInputs,
+  userInputs,
   categories,
   years,
   months,

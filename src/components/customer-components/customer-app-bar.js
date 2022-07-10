@@ -10,7 +10,7 @@ import Slide from "@mui/material/Slide";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import CustomerDashboard from "./customer-dashboard";
 // eslint-disable-next-line
-import Loading from "../loading";
+import Loading from "../loading-views/loading";
 import { useParams } from "react-router-dom";
 
 function HideOnScroll(props) {

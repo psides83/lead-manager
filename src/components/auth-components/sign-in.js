@@ -43,7 +43,6 @@ export default function SignIn() {
             userProfile: docSnap.data(),
           });
           navigate("/");
-          console.log("Current data: ");
         }
       }
     } catch (error) {
