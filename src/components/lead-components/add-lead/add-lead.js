@@ -74,7 +74,8 @@ export default function AddLead(props) {
     viewModel.resetCompleteForm();
   };
 
-  const viewModel = new AddLeadViewModel(setMessage,
+  const viewModel = new AddLeadViewModel(
+    setMessage,
     setOpenSuccess,
     setOpenError,
     userProfile,
@@ -88,7 +89,8 @@ export default function AddLead(props) {
     setLoadingLead,
     setLeadSuccess,
     setLoadingEquipment,
-    setEquipmentSuccess)
+    setEquipmentSuccess
+  );
   //#endregion
 
   // handles opening of the add lead dialog
@@ -261,11 +263,13 @@ export default function AddLead(props) {
                   value={viewModel.handleEquipmentValues(input.id)}
                 >
                   {input.select === true
-                    ? viewModel.equipmentSelectArray(input.id)?.map((status, index) => (
-                        <MenuItem key={index} value={status}>
-                          {status}
-                        </MenuItem>
-                      ))
+                    ? viewModel
+                        .equipmentSelectArray(input.id)
+                        ?.map((status, index) => (
+                          <MenuItem key={index} value={status}>
+                            {status}
+                          </MenuItem>
+                        ))
                     : null}
                 </TextField>
               </Grid>
