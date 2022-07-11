@@ -30,7 +30,7 @@ import {
 } from "@mui/material";
 import moment from "moment";
 import ContactDialog from "./contact-dialog";
-import EditLead from "./edit-lead";
+import EditLead from "./edit-lead/edit-lead";
 import AddTaskDialog from "./add-lead-tasks";
 import EquipmentForm from "./equipment-form";
 import { relativeTime } from "../../utils/utils";
