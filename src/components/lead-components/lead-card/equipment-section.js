@@ -11,7 +11,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import EquipmentForm from "../equipment-form";
+import EquipmentForm from "../equipment-form/equipment-form";
 
 export default function EquipmentSection(props) {
     const { lead, setMessage, setOpenError, setOpenSuccess } = props;

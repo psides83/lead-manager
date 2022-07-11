@@ -1,13 +1,13 @@
 //Imports
 import React, { useCallback, useEffect, useState } from "react";
-import { db } from "../../services/firebase";
+import { db } from "../../../services/firebase";
 import { setDoc, doc } from "@firebase/firestore";
 import moment from "moment";
 import {
   addEquipmentInputs,
   equipmentAvailabilityArray,
   equipmentStatusArray,
-} from "../../models/arrays";
+} from "../../../models/arrays";
 import {
   Box,
   Grid,
@@ -31,16 +31,11 @@ import {
   DeleteRounded,
   SaveRounded,
 } from "@mui/icons-material";
+import EquipmentFormViewModel from "./equipment-form-view-model";
 
 export default function EquipmentForm(props) {
   //#region State Properties
-  const {
-    lead,
-    equipment,
-    setValidationMessage,
-    setOpenSuccess,
-    setOpenError,
-  } = props;
+  const { lead, equipment, setMessage, setOpenSuccess, setOpenError } = props;
   var [equipmentData, setEquipmentData] = useState({
     model: "",
     stock: "",
@@ -61,7 +56,7 @@ export default function EquipmentForm(props) {
   const handleCloseDialog = async () => {
     setIsShowingDialog(false);
     setIsShowingConfirmDialog(false);
-    resetLeadForm();
+    viewModel.resetLeadForm();
   };
 
   const handleToggleDialog = () => {
@@ -76,6 +71,25 @@ export default function EquipmentForm(props) {
   const handleToggleConfirmDialog = () => {
     setIsShowingConfirmDialog(!isShowingConfirmDialog);
   };
+
+  const viewModel = new EquipmentFormViewModel(
+    lead,
+    equipment,
+    equipmentData,
+    setEquipmentData,
+    importedData,
+    setImportedData,
+    change,
+    setChange,
+    setMessage,
+    setOpenSuccess,
+    setOpenError,
+    loading,
+    setLoading,
+    setSuccess,
+    setIsShowingDialog,
+    handleCloseDialog
+  );
 
   // load data from equipment
   const loadEquipmentData = useCallback(() => {
@@ -98,223 +112,12 @@ export default function EquipmentForm(props) {
         status: equipment.status,
       });
     }
+    // eslint-disable-next-line
   }, [isShowingDialog, equipment]);
 
   useEffect(() => {
     loadEquipmentData();
   }, [loadEquipmentData]);
-
-  const deleteEquipment = async () => {
-    const leadRef = doc(db, "leads", lead.id);
-
-    const equipmentIndex = lead.equipment.indexOf(equipment);
-
-    lead.equipment.splice(equipmentIndex, 1);
-
-    await setDoc(leadRef, { equipment: lead.equipment }, { merge: true });
-
-    setIsShowingDialog(false);
-  };
-
-  const logChanges = () => {
-    if (equipmentData.model !== importedData.model) {
-      setChange(
-        change.push(
-          `Model edited from ${
-            importedData.model === "" ? "BLANK" : importedData.model
-          } to ${equipmentData.model === "" ? "BLANK" : equipmentData.model}`
-        )
-      );
-    }
-
-    if (equipmentData.stock !== importedData.stock) {
-      setChange(
-        change.push(
-          `Stock # for ${equipmentData.model} edited from ${
-            importedData.stock === "" ? "BLANK" : importedData.stock
-          } to ${equipmentData.stock === "" ? "BLANK" : equipmentData.stock}`
-        )
-      );
-    }
-
-    if (equipmentData.serial !== importedData.serial) {
-      setChange(
-        change.push(
-          `Serial # for ${equipmentData.model} edited from ${
-            importedData.serial === "" ? "BLANK" : importedData.serial
-          } to ${equipmentData.serial === "" ? "BLANK" : equipmentData.serial}`
-        )
-      );
-    }
-
-    if (equipmentData.status !== importedData.status) {
-      setChange(
-        change.push(
-          `Status of ${equipmentData.model} updated from ${importedData.status} to ${equipmentData.status}`
-        )
-      );
-    }
-
-    if (equipmentData.notes !== importedData.notes) {
-      setChange(
-        change.push(
-          `Notes on ${equipmentData.model} edited from ${
-            importedData.notes === "" ? "BLANK" : importedData.notes
-          } to ${equipmentData.notes === "" ? "BLANK" : equipmentData.notes}`
-        )
-      );
-    }
-
-    if (equipmentData.availability !== importedData.availability) {
-      setChange(
-        change.push(
-          `Availability of ${equipmentData.model} updated from ${importedData.availability} to ${equipmentData.availability}`
-        )
-      );
-    }
-  };
-
-  // Add the equipment to the firestore "leads" collection and the equipment to the fire store "equipment" collection.
-  const setEquipmentToFirestore = async () => {
-    const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
-    const id = equipment ? equipment.id : moment().format("yyyyMMDDHHmmss");
-    logChanges();
-    var changeString = change.toString().replace(/,/g, ", ");
-
-    if (changeString[0] === ",") {
-      changeString = changeString.substring(1).trim();
-    }
-
-    equipmentData.changeLog.push({
-      id: id,
-      change: equipment ? changeString : `${equipmentData.model} added`,
-      timestamp: timestamp,
-    });
-
-    var leadChangeLog = lead.changeLog;
-
-    leadChangeLog.push({
-      id: moment().format("yyyyMMDDHHmmss"),
-      change: equipment ? changeString : `${equipmentData.model} added`,
-      timestamp: timestamp,
-    });
-
-    equipmentData.id = id;
-    equipmentData.timestamp = timestamp;
-
-    if (equipment) {
-      const currentEquipmentIndex = lead.equipment.indexOf(equipment);
-      lead.equipment[currentEquipmentIndex] = equipmentData;
-    } else {
-      lead.equipment.push(equipmentData);
-    }
-
-    const leadRef = doc(db, "leads", lead?.id);
-
-    await setDoc(
-      leadRef,
-      { equipment: lead.equipment, changeLog: leadChangeLog },
-      { merge: true }
-    );
-  };
-
-  // Reset the Lead form
-  const resetLeadForm = () => {
-    setEquipmentData({
-      model: "",
-      stock: "",
-      serial: "",
-      availability: "Availability Unknown",
-      status: "Equipment added",
-      notes: "",
-      changeLog: [],
-    });
-    setChange([]);
-    setImportedData({});
-  };
-
-  
-
-  // Requst submission validation.
-  const equipmentSubmitValidation = async (event) => {
-    event.preventDefault();
-    setLoading(true);
-
-    if (equipmentData.model === "") {
-      setValidationMessage("Equipment must have a model");
-      setOpenError(true);
-      return;
-    } else {
-      await setEquipmentToFirestore();
-      setSuccess(true);
-      setValidationMessage("lead successfully edited");
-      setOpenSuccess(true);
-      setLoading(false);
-      handleCloseDialog();
-    }
-  };
-
-  // sets the state of the save button based on whether data in the form has changed or is being saved
-  const buttonIsDisabled = () => {
-    if (loading) return true;
-
-    if (equipmentData.model !== importedData.model) return false;
-    if (equipmentData.stock !== importedData.stock) return false;
-    if (equipmentData.serial !== importedData.serial) return false;
-    if (equipmentData.status !== importedData.status) return false;
-    if (equipmentData.availability !== importedData.availability) return false;
-    if (equipmentData.notes !== importedData.notes) return false;
-    return true;
-  };
-
-  // handles the onChange of the equipment inputs
-  const handleEquipmentInput = (e, id) => {
-    var value = e.target.value;
-
-    if (id === "model" || id === "serial") {
-      const newValue = e.target.value;
-      value = newValue.toUpperCase();
-    }
-
-    if (id === "stock") {
-      const newValue = e.target.value;
-      value = newValue.replace(/[^0-9]/g, "");
-    }
-
-    setEquipmentData({ ...equipmentData, [id]: value });
-  };
-
-  // handles equipment object values for the inputs
-  const handleEquipmentValues = (id) => {
-    switch (id) {
-      case "model":
-        return equipmentData.model;
-      case "stock":
-        return equipmentData.stock;
-      case "serial":
-        return equipmentData.serial;
-      case "status":
-        return equipmentData.status;
-      case "availability":
-        return equipmentData.availability;
-      case "notes":
-        return equipmentData.notes;
-      default:
-        return "";
-    }
-  };
-
-  // sets the array for the equipment select inputs
-  const equipmentSelectArray = (id) => {
-    switch (id) {
-      case "status":
-        return equipmentStatusArray;
-      case "availability":
-        return equipmentAvailabilityArray;
-      default:
-        return null;
-    }
-  };
 
   // UI view of the submission form
   return (
@@ -399,15 +202,17 @@ export default function EquipmentForm(props) {
                   labelid={input.id}
                   inputProps={input.inputProps}
                   variant="outlined"
-                  onChange={(e) => handleEquipmentInput(e, input.id)}
-                  value={handleEquipmentValues(input.id)}
+                  onChange={(e) => viewModel.handleEquipmentInput(e, input.id)}
+                  value={viewModel.handleEquipmentValues(input.id)}
                 >
                   {input.select === true
-                    ? equipmentSelectArray(input.id)?.map((status, index) => (
-                        <MenuItem key={index} value={status}>
-                          {status}
-                        </MenuItem>
-                      ))
+                    ? viewModel
+                        .equipmentSelectArray(input.id)
+                        ?.map((status, index) => (
+                          <MenuItem key={index} value={status}>
+                            {status}
+                          </MenuItem>
+                        ))
                     : null}
                 </TextField>
               </Grid>
@@ -430,8 +235,8 @@ export default function EquipmentForm(props) {
                 variant="contained"
                 color="primary"
                 endIcon={success ? <CheckRounded /> : <SaveRounded />}
-                disabled={buttonIsDisabled()}
-                onClick={equipmentSubmitValidation}
+                disabled={viewModel.buttonIsDisabled()}
+                onClick={(e) => viewModel.equipmentSubmitValidation(e)}
               >
                 {loading && (
                   <CircularProgress
@@ -485,7 +290,7 @@ export default function EquipmentForm(props) {
               <Button
                 variant="contained"
                 color="error"
-                onClick={deleteEquipment}
+                onClick={(e) => viewModel.deleteEquipment(e)}
               >
                 Delete
               </Button>

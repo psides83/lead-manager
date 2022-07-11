@@ -41,38 +41,6 @@ class EditLeadViewModel {
     // this.loadLeadData = loadLeadData
   }
 
-  // load data from lead
-  loadData() {
-    const lead = this.lead;
-    if (lead && this.isShowingDialog) {
-      this.setLeadData({
-        name: lead.name,
-        email: lead.email,
-        phone: lead.phone,
-        status: lead.status,
-        notes: lead.notes,
-        quoteLink: lead.quoteLink === undefined ? "" : lead.quoteLink,
-        willFinance: lead.willFinance,
-        hasTrade: lead.hasTrade,
-        willPurchase: lead.willPurchase,
-        changeLog: lead.changeLog,
-      });
-      this.setImportedData({
-        name: lead.name,
-        email: lead.email,
-        phone: lead.phone,
-        status: lead.status,
-        notes: lead.notes,
-        quoteLink: lead.quoteLink === undefined ? "" : lead.quoteLink,
-        willFinance: lead.willFinance,
-        hasTrade: lead.hasTrade,
-        willPurchase: lead.willPurchase,
-        changeLog: lead.changeLog,
-      });
-      this.setLoading(false);
-    }
-  }
-
   // Handle deleting of child record.
   deleteLead = async (event) => {
     event.stopPropagation();

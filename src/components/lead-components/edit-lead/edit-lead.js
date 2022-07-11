@@ -90,9 +90,35 @@ export default function EditLead(props) {
 
   // load data from lead
   const loadLeadData = useCallback(() => {
-    viewModel.loadData();
+    if (lead && isShowingDialog) {
+      setLeadData({
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        status: lead.status,
+        notes: lead.notes,
+        quoteLink: lead.quoteLink === undefined ? "" : lead.quoteLink,
+        willFinance: lead.willFinance,
+        hasTrade: lead.hasTrade,
+        willPurchase: lead.willPurchase,
+        changeLog: lead.changeLog,
+      });
+      setImportedData({
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        status: lead.status,
+        notes: lead.notes,
+        quoteLink: lead.quoteLink === undefined ? "" : lead.quoteLink,
+        willFinance: lead.willFinance,
+        hasTrade: lead.hasTrade,
+        willPurchase: lead.willPurchase,
+        changeLog: lead.changeLog,
+      });
+      setLoading(false);
+    }
     // eslint-disable-next-line
-  }, [isShowingDialog, viewModel]);
+  }, [isShowingDialog, lead]);
 
   useEffect(() => {
     loadLeadData();
