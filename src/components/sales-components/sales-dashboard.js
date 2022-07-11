@@ -2,30 +2,28 @@ import React, { useState, useEffect, useCallback, useContext } from "react";
 import { currencyFormatter } from "../../utils/utils";
 import moment from "moment";
 // eslint-disable-next-line
-import { Box, Button, Paper, Stack, Typography } from "@mui/material";
+import { Box, Paper, Stack, Typography } from "@mui/material";
 import { ArrowDownwardRounded, ArrowUpwardRounded } from "@mui/icons-material";
 import { categories, years } from "../../models/arrays";
 import SalesCharts from "./sales-charts";
 import ToggleButtons from "../ui-components/toggle-buttons";
 import SalesDataGrid from "./sales-data-grid";
-import { calculateSales, currentVsPreviousYearToDate, fetch, marginPercentage, percentChange } from "./sales-dashboard-view-model";
+import SalesDashboardViewModel from "./sales-dashboard-view-model";
 import { AuthContext } from "../../state-management/auth-context-provider";
 
 export default function SalesDashboard() {
   const { userProfile } = useContext(AuthContext);
   const [sales, setSales] = useState([]);
-  // eslint-disable-next-line
-  const [filterParam, setFilterParam] = useState("All");
-  // eslint-disable-next-line
-  const [salesData, setSalesData] = useState({});
   const [selectedCategory, setSelectedCategory] = useState("sales");
   const [selectedYear, setSelectedYear] = useState(moment().format("yyyy"));
 
+  const viewModel = new SalesDashboardViewModel(sales, setSales, selectedYear, selectedCategory)
+
   //    Fetch leads from firestore
   const fetchSales = useCallback(async () => {
-    await fetch(setSales);
+    await viewModel.fetch();
     // eslint-disable-next-line
-  }, [filterParam]);
+  }, []);
 
    // fetches sales data from Firestore
    useEffect(() => {
@@ -35,29 +33,29 @@ export default function SalesDashboard() {
 
   // sets the UI for to show the trend is up or down with an appropriately colored arrow
   const trend = () => {
-    if (currentVsPreviousYearToDate(sales, selectedYear, selectedCategory) === 0) {
+    if (viewModel.currentVsPreviousYearToDate() === 0) {
       return (
         <Typography>
           <strong>the same</strong> as last year
         </Typography>
       );
     }
-    if (currentVsPreviousYearToDate(sales, selectedYear, selectedCategory) < 0) {
+    if (viewModel.currentVsPreviousYearToDate() < 0) {
       return (
         <Stack direction="row">
           <ArrowDownwardRounded color="error" />
           <Typography>
-            <strong>{percentChange(sales, selectedYear, selectedCategory)}</strong> from last year
+            <strong>{viewModel.percentChange()}</strong> from last year
           </Typography>
         </Stack>
       );
     }
-    if (currentVsPreviousYearToDate(sales, selectedYear, selectedCategory) > 0) {
+    if (viewModel.currentVsPreviousYearToDate() > 0) {
       return (
         <Stack direction="row">
           <ArrowUpwardRounded color="success" />
           <Typography>
-            <strong>{percentChange(sales, selectedYear, selectedCategory)}</strong> from last year
+            <strong>{viewModel.percentChange()}</strong> from last year
           </Typography>
         </Stack>
       );
@@ -129,10 +127,10 @@ export default function SalesDashboard() {
         <Stack direction="row" justifyContent="space-between">
           <Typography sx={{ margin: "0 0 2px 2px", padding: "0 0 8px 8px" }}>
             <strong>Total</strong>{" "}
-            {currencyFormatter.format(calculateSales(sales, selectedYear, selectedCategory))}
+            {currencyFormatter.format(viewModel.calculateSales())}
           </Typography>
           <Typography sx={{ margin: "0 2px 2px 0", padding: "0 8px 8px 0" }}>
-            <strong>Margin</strong> {marginPercentage(sales, selectedYear)}
+            <strong>Margin</strong> {viewModel.marginPercentage()}
           </Typography>
         </Stack>
       </Paper>

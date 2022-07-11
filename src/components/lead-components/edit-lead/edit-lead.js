@@ -1,8 +1,5 @@
 //Imports
 import React, { useCallback, useEffect, useState } from "react";
-import { db } from "../../../services/firebase";
-import { setDoc, doc, deleteDoc } from "@firebase/firestore";
-import moment from "moment";
 import { addLeadInputs, leadStatusArray } from "../../../models/arrays";
 import {
   Box,
@@ -27,17 +24,7 @@ import {
   EditRounded,
   SaveRounded,
 } from "@mui/icons-material";
-import {
-  buttonIsDisabled,
-  checkBoxes,
-  deleteLead,
-  handleChange,
-  handleInput,
-  handleLeadValues,
-  leadSubmitValidation,
-  loadData,
-  resetLeadForm,
-} from "./edit-lead-view-model";
+import EditLeadViewModel from "./edit-lead-view-model";
 
 export default function EditLead(props) {
   //#region State Properties
@@ -65,7 +52,7 @@ export default function EditLead(props) {
   const handleCloseDialog = () => {
     setIsShowingDialog(false);
     setIsShowingConfirmDialog(false);
-    resetLeadForm(setLeadData, setChange, setImportedData);
+    viewModel.resetLeadForm();
   };
 
   const handleToggleDialog = () => {
@@ -82,9 +69,28 @@ export default function EditLead(props) {
     setIsShowingConfirmDialog(!isShowingConfirmDialog);
   };
 
+  const viewModel = new EditLeadViewModel(
+    lead,
+    leadData,
+    setLeadData,
+    importedData,
+    setImportedData,
+    change,
+    setChange,
+    loading,
+    setLoading,
+    setMessage,
+    setSuccess,
+    setOpenSuccess,
+    setOpenError,
+    isShowingDialog,
+    handleCloseDialog,
+    handleCloseConfirmDialog
+  );
+
   // load data from lead
   const loadLeadData = useCallback(() => {
-    loadData(lead, isShowingDialog, setLeadData, setImportedData, setLoading);
+    viewModel.loadData();
   }, [isShowingDialog, lead]);
 
   useEffect(() => {
@@ -136,10 +142,8 @@ export default function EditLead(props) {
                   labelid={input.id}
                   variant="outlined"
                   select={input.select}
-                  value={handleLeadValues(input.id, leadData)}
-                  onChange={(e) =>
-                    handleInput(e, input.id, leadData, setLeadData)
-                  }
+                  value={viewModel.handleLeadValues(input.id)}
+                  onChange={(e) => viewModel.handleInput(e, input.id)}
                   InputProps={input.inputProps}
                 >
                   {input.id === "status"
@@ -155,14 +159,14 @@ export default function EditLead(props) {
 
             <Grid item>
               <Stack direction="row">
-                {checkBoxes(leadData).map((option) => (
+                {viewModel.checkBoxes().map((option) => (
                   <FormControlLabel
                     key={option.id}
                     control={
                       <Checkbox
                         id={option.id}
                         checked={option.checkedState}
-                        onChange={(e) => handleChange(e, leadData, setLeadData)}
+                        onChange={(e) => viewModel.handleChange(e)}
                         color="primary"
                         value={option.checkedState}
                       />
@@ -192,33 +196,10 @@ export default function EditLead(props) {
               <Box sx={{ position: "relative" }}>
                 <Button
                   fullWidth
-                  disabled={buttonIsDisabled(
-                    isShowingDialog,
-                    lead,
-                    loading,
-                    leadData,
-                    importedData
-                  )}
+                  disabled={viewModel.buttonIsDisabled()}
                   variant="contained"
                   endIcon={success ? <CheckRounded /> : <SaveRounded />}
-                  onClick={(e) =>
-                    leadSubmitValidation(
-                      e,
-                      lead,
-                      leadData,
-                      setLoading,
-                      setMessage,
-                      setOpenError,
-                      setOpenSuccess,
-                      handleCloseDialog,
-                      resetLeadForm,
-                      loadLeadData,
-                      setSuccess,
-                      setChange, 
-                      change,
-                      importedData
-                    )
-                  }
+                  onClick={(e) => viewModel.leadSubmitValidation(e)}
                 >
                   {loading && (
                     <CircularProgress
@@ -273,14 +254,7 @@ export default function EditLead(props) {
               <Button
                 variant="contained"
                 color="error"
-                onClick={(e) =>
-                  deleteLead(
-                    e,
-                    lead,
-                    handleCloseConfirmDialog,
-                    handleCloseDialog
-                  )
-                }
+                onClick={(e) => viewModel.deleteLead(e)}
               >
                 Delete
               </Button>

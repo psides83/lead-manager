@@ -7,7 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
-import AddLead from "../lead-components/add-lead";
+import AddLead from "../lead-components/add-lead/add-lead";
 import { AgricultureRounded, MenuRounded } from "@mui/icons-material";
 import Slide from "@mui/material/Slide";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
