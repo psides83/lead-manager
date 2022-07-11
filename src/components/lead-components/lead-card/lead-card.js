@@ -33,7 +33,7 @@ export default function LeadCard(props) {
   const [openError, setOpenError] = useState(false);
   var [message, setMessage] = useState("");
 
-  const viewModel = new LeadCardViewModel(lead)
+  const viewModel = new LeadCardViewModel(lead, setMessage, setOpenSuccess, setOpenError)
 
   // Handle closing of the alerts.
   const handleClose = (event, reason) => {
