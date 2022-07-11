@@ -1,12 +1,7 @@
 //Imports
 import React, { useCallback, useEffect, useState } from "react";
-import { db } from "../../../services/firebase";
-import { setDoc, doc } from "@firebase/firestore";
-import moment from "moment";
 import {
   addEquipmentInputs,
-  equipmentAvailabilityArray,
-  equipmentStatusArray,
 } from "../../../models/arrays";
 import {
   Box,

@@ -5,7 +5,6 @@ import {
   equipmentAvailabilityArray,
   equipmentStatusArray,
 } from "../../../models/arrays";
-import { isHostComponent } from "@mui/base";
 
 export default class EquipmentFormViewModel {
   constructor(
