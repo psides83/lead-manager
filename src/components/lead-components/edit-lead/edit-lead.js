@@ -91,7 +91,8 @@ export default function EditLead(props) {
   // load data from lead
   const loadLeadData = useCallback(() => {
     viewModel.loadData();
-  }, [isShowingDialog, lead]);
+    // eslint-disable-next-line
+  }, [isShowingDialog, viewModel]);
 
   useEffect(() => {
     loadLeadData();

@@ -44,7 +44,6 @@ const RowText = (props) => {
     e.stopPropagation();
     e.preventDefault();
     const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
-    // const id = moment().format("yyyyMMDDHHmmss");
 
     if (item.task !== "") {
       const status = item.isComplete === false ? true : false;
@@ -68,41 +67,40 @@ const RowText = (props) => {
             edge="start"
             checked={item.isComplete}
             onClick={handleClick}
-            // disableRipple
             inputProps={{ "aria-labelledby": task.id }}
           />
         </ListItemIcon>
       )}
       <ListItemText>
         {isEditing ? (
-          <input
-            required
-            style={{
-              width: "100%",
-              outline: "none",
-              border: "none",
-              fontSize: "16px",
-              // color: "rgba(255, 255, 255, 1)",
-              // backgroundColor: "rgba(242, 242, 242, 1)"
-            }}
-            // size="small"
-            key={item.id}
-            id={item.id}
-            name="item"
-            // variant="standard"
-            value={task}
-            onChange={(event) => setTask(event.target.value)}
-            onBlur={blurHandler}
-          />
+          <Stack>
+            <input
+              required
+              style={{
+                width: "100%",
+                outline: "none",
+                border: "none",
+                fontSize: "16px",
+              }}
+              key={item.id}
+              id={item.id}
+              name="item"
+              value={task}
+              onChange={(event) => setTask(event.target.value)}
+              onBlur={blurHandler}
+            />
+            <Typography
+              component="span"
+              variant="caption"
+              color="text.secondary"
+            >
+              {item.leadName}
+            </Typography>
+          </Stack>
         ) : (
-          <Stack
-          // direction="row"
-          // alignItems="center"
-          // justifyContent="space-between"
-          >
+          <Stack>
             <Typography variant="subtitle1">{item.task}</Typography>
             <Typography
-              //                           //   sx={{ display: "inline" }}
               component="span"
               variant="caption"
               color="text.secondary"
@@ -117,43 +115,16 @@ const RowText = (props) => {
 };
 
 function Tasks() {
-  // const [newTask, setNewTask] = useState();
   const [tasks, setTasks] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
-  // const [isAdding, setIsAdding] = useState(false);
-
-  // const handleAdding = () => {
-  //   if (!isAdding) {
-  //     setIsAdding(true);
-  //   } else {
-  //     setNewTask("");
-  //     setIsAdding(false);
-  //   }
-  // };
 
   const handleEditing = () => {
     if (!isEditing) {
       setIsEditing(true);
     } else {
       setIsEditing(false);
-      // setIsAdding(false);
     }
   };
-
-  // const addNewTask = async () => {
-  //   const newDoc = await addDoc(collection(db, "tasks"), {
-  //     task: newTask,
-  //     order: tasks.length,
-  //   });
-
-  //   await setDoc(
-  //     doc(db, "tasks", newDoc.id),
-  //     { id: newDoc.id },
-  //     { merge: true }
-  //   );
-
-  //   handleAdding();
-  // };
 
   const fetchTasks = useCallback(async () => {
     const taskQuery = query(
@@ -213,7 +184,6 @@ function Tasks() {
               width: "100%",
               minWidth: 300,
               maxWidth: 360,
-              // bgcolor: "background.paper",
             }}
           >
             <div
@@ -246,7 +216,6 @@ function Tasks() {
                       {(provided, snapshot) => (
                         <>
                           <ListItem
-                            // id={item.id}
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...(isEditing ? provided.dragHandleProps : null)}
@@ -263,9 +232,7 @@ function Tasks() {
                             secondaryAction={
                               isEditing ? (
                                 <Tooltip title="Reorder">
-                                  {/* <IconButton edge="end" {...provided.draggableProps}> */}
                                   <Menu />
-                                  {/* </IconButton> */}
                                 </Tooltip>
                               ) : null
                             }
@@ -283,55 +250,6 @@ function Tasks() {
                 </div>
               )}
             </Droppable>
-            {/* <ListItem>
-              {isEditing ? (
-                isAdding ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <TextField
-                      size="small"
-                      variant="outlined"
-                      label="Add New Task"
-                      value={newTask}
-                      onChange={(e) => setNewTask(e.target.value)}
-                    />
-
-                    <IconButton onClick={addNewTask}>
-                      <Save />
-                    </IconButton>
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAdding();
-                      }}
-                    >
-                      <CancelPresentationRounded />
-                    </IconButton>
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <Button
-                      variant="outlined"
-                      onClick={handleAdding}
-                      startIcon={<Add />}
-                    >
-                      Add Task
-                    </Button>
-                  </div>
-                )
-              ) : null}
-            </ListItem> */}
           </List>
         </Paper>
       </DragDropContext>

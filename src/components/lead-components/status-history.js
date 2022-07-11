@@ -39,21 +39,11 @@ function StatusHistory(props) {
   return (
     <>
       <Tooltip title="Lead Status History">
-        {/* <Typography color="text.secondary">Status History</Typography> */}
         <IconButton onClick={handleToggleDialog}>
           <History />
         </IconButton>
       </Tooltip>
-      {/* <Button
-          // color="success"
-          size="small"
-        //   variant="outlined"
-          startIcon={<History />}
-          onClick={handleToggleDialog}
-        //   sx={{ mx: 4, mb: 1, mt: 1 }}
-        >
-          Contact History
-        </Button> */}
+     
       <Dialog
         onClose={handleCloseDialog}
         open={isShowingDialog}

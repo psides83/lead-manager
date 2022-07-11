@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect, useRef, useContext } from "react";
-import LeadCard from "./lead-card";
+import LeadCard from "./lead-card/lead-card";
 import {
   Box,
   Grid,
