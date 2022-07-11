@@ -11,9 +11,8 @@ import {
   Tooltip,
 } from "@mui/material";
 import { setDoc, doc } from "@firebase/firestore";
-import { db } from "../../services/firebase";
-// import { UpArrow } from "../../icons";
 import moment from "moment";
+import { db } from "../../../../services/firebase";
 
 /**
  * This component recieves props for the SnackBar to be dislayed once actions are completed or if an erronious input is received.

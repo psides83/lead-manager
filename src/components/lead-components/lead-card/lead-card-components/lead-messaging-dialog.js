@@ -2,9 +2,9 @@ import React, { useContext, useState } from "react";
 import { TextsmsRounded } from "@mui/icons-material";
 import { Button, Dialog, Tooltip } from "@mui/material";
 import { setDoc, doc } from "@firebase/firestore";
-import { db } from "../../services/firebase";
-import CustomerMessenger from "../customer-components/customer-messenger";
-import { AuthContext } from "../../state-management/auth-context-provider";
+import { db } from "../../../../services/firebase";
+import CustomerMessenger from "../../../customer-components/customer-messenger";
+import { AuthContext } from "../../../../state-management/auth-context-provider"
 
 /**
  * This component recieves props for the SnackBar to be dislayed once actions are completed or if an erronious input is received.

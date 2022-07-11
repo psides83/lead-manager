@@ -6,8 +6,8 @@ import {
   LinkRounded,
   MailRounded,
 } from "@mui/icons-material";
-import ContactHistory from "../contact-history";
-import StatusHistory from "../status-history";
+import ContactHistory from "../lead-card/lead-card-components/contact-history";
+import StatusHistory from "../lead-card/lead-card-components/status-history";
 import {
   Card,
   CardContent,
@@ -16,13 +16,13 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import ContactDialog from "../contact-dialog";
+import ContactDialog from "../lead-card/lead-card-components/contact-dialog";
 import EditLead from "../edit-lead/edit-lead";
 import { relativeTime } from "../../../utils/utils";
 import DynamicSnackbar from "../../ui-components/snackbar";
-import TaskSection from "./task-section";
-import EquipmentSection from "./equipment-section";
 import LeadCardViewModel from "./lead-card-view-model";
+import TaskSection from "./lead-card-components/task-section";
+import EquipmentSection from "./lead-card-components/equipment-section"
 
 export default function LeadCard(props) {
   const { lead, tasks } = props;

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { doc, setDoc } from "firebase/firestore";
-import { db } from "../../../services/firebase";
+import { db } from "../../../../services/firebase";
 import {
     ExpandLessRounded,
     ExpandMoreRounded,
@@ -19,7 +19,7 @@ import {
     Typography,
   } from "@mui/material";
   import moment from "moment";
-  import AddTaskDialog from "../add-lead-tasks";
+import AddTaskDialog from "./add-lead-tasks";
 
 export default function TaskSection(props) {
     const { lead, tasks, setMessage, setOpenError, setOpenSuccess } =

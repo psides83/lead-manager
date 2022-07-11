@@ -10,7 +10,7 @@ import {
   AttachMoneyRounded,
   MailRounded,
 } from "@mui/icons-material";
-import StatusHistory from "../lead-components/status-history";
+import StatusHistory from "../lead-components/lead-card/lead-card-components/status-history";
 import {
   Alert,
   Button,

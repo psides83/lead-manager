@@ -16,8 +16,8 @@ import {
 import { doc, setDoc } from "firebase/firestore";
 import moment from "moment";
 import React, { useState } from "react";
-import { db } from "../../services/firebase";
-import LeadMessagingDialog from "./lead-messaging-dialog";
+import { db } from "../../../../services/firebase";
+import LeadMessagingDialog from "../lead-card-components/lead-messaging-dialog";
 
 function ContactDialog(props) {
   const { lead } = props;
