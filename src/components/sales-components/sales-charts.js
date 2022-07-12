@@ -55,8 +55,8 @@ const SalesCharts = (props) => {
             <Bar
               dataKey={"cost"}
               stackId="1"
-              stroke="#666666"
-              fill="#666666"
+              stroke="#e3e8e7"
+              fill="#e3e8e7"
               barSize={12}
               // radius={[3, 3, 0, 0]}
             />
