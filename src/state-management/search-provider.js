@@ -4,6 +4,10 @@ const INITIAL_STATE = {
   searchText: ""
 };
 
+export const SEARCH_ACTION = {
+  SEARCH: "SEARCH"
+}
+
 export const SearchContext = createContext(INITIAL_STATE);
 
 export const SearchContextProvider = ({ children }) => {
@@ -23,8 +27,8 @@ export const SearchContextProvider = ({ children }) => {
 
 const ContextReducer = (state, action) => {
     switch (action.type) {
-      case "SEARCH": {
-          return {
+      case SEARCH_ACTION.SEARCH: {
+          return {...state,
             searchText: action.searchText,
           };
         }

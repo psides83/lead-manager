@@ -13,7 +13,7 @@ import Slide from "@mui/material/Slide";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import { auth } from "../../services/firebase";
 import { Link } from "react-router-dom";
-import { SearchContext } from "../../state-management/search-provider";
+import { SearchContext, SEARCH_ACTION } from "../../state-management/search-provider";
 import DynamicSnackbar from "../ui-components/snackbar";
 import AppBarMenu from "./app-bar-menu";
 import UserAccountDialog from "../user-components/user-account-dialog";
@@ -94,7 +94,7 @@ export default function MainAppBar(props) {
 
   const handleSearchInput = (e) => {
     searchDispatch({
-      type: "SEARCH",
+      type: SEARCH_ACTION.SEARCH,
       searchText: e.target.value,
     });
   };

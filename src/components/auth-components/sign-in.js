@@ -19,7 +19,7 @@ import {
   Snackbar,
   Box,
 } from "@mui/material";
-import { AuthContext } from "../../state-management/auth-context-provider";
+import { AuthContext, AUTH_ACTION } from "../../state-management/auth-context-provider";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -38,7 +38,7 @@ export default function SignIn() {
 
         if (docSnap.exists()) {
           dispatch({
-            type: "LOGIN",
+            type: AUTH_ACTION.LOGIN,
             currentUser: user,
             userProfile: docSnap.data(),
           });

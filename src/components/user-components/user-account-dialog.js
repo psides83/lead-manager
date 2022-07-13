@@ -25,7 +25,7 @@ import {
   DeleteRounded,
   SaveRounded,
 } from "@mui/icons-material";
-import { AuthContext } from "../../state-management/auth-context-provider";
+import { AuthContext, AUTH_ACTION } from "../../state-management/auth-context-provider";
 
 export default function UserAccountDialog(props) {
   //#region State Properties
@@ -126,8 +126,7 @@ export default function UserAccountDialog(props) {
   //   update user profile context
   const updateUserProfile = async () => {
     dispatch({
-      type: "LOGIN",
-      currentUser: currentUser,
+      type: AUTH_ACTION.UPDATE_USER,
       userProfile: userData,
     });
   };
