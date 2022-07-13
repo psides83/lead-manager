@@ -127,7 +127,7 @@ export default function SalesDashboard() {
         <Stack direction="row" justifyContent="space-between">
           <Typography sx={{ margin: "0 0 2px 2px", padding: "0 0 8px 8px" }}>
             <strong>Total</strong>{" "}
-            {currencyFormatter.format(viewModel.calculateSales())}
+            {currencyFormatter.format(viewModel.calculateSales(selectedCategory))}
           </Typography>
           <Typography sx={{ margin: "0 2px 2px 0", padding: "0 8px 8px 0" }}>
             <strong>Margin</strong> {viewModel.marginPercentage()}
