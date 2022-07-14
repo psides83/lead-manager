@@ -5,8 +5,9 @@ import {
   LogoutRounded,
   PeopleAltRounded,
 } from "@mui/icons-material";
-import { AuthContext } from "../../state-management/auth-context-provider";
+import { AuthContext, AUTH_ACTION } from "../../state-management/auth-context-provider";
 import { useNavigate } from "react-router-dom";
+import { pdiAuth } from "../../services/pdi-firebase";
 
 function AppBarMenu(props) {
   const { anchorEl, setAnchorEl, auth, open } = props;
@@ -24,11 +25,13 @@ function AppBarMenu(props) {
       // https://firebase.google.com/docs/reference/js/firebase.User
       // User is signed out
       dispatch({
-        type: "LOGOUT",
+        type: AUTH_ACTION.LOGOUT,
         currentUser: null,
         userProfile: null,
+        pdiUser: null,
       });
       auth.signOut();
+      pdiAuth.signOut();
     }
   };
 

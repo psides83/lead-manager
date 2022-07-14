@@ -20,6 +20,7 @@ import {
   Box,
 } from "@mui/material";
 import { AuthContext, AUTH_ACTION } from "../../state-management/auth-context-provider";
+import { pdiAuth, pdiDB } from "../../services/pdi-firebase";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -50,6 +51,25 @@ export default function SignIn() {
     }
   };
 
+  const fetchPDIProfile = async (user) => {
+    try {
+      if (user) {
+        const docRef = doc(pdiDB, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          dispatch({
+            type: AUTH_ACTION.PDI_LOGIN,
+            pdiUser: docSnap.data(),
+          });
+          navigate("/");
+        }
+      }
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
   const signIn = async (e) => {
     e.preventDefault();
 
@@ -58,6 +78,17 @@ export default function SignIn() {
         // Signed in
         const user = userCredential.user;
         fetchProfile(user);
+      })
+      .catch((error) => {
+        setValidationMessage("The email and/or password do not match");
+        setOpenError(true);
+      });
+
+      signInWithEmailAndPassword(pdiAuth, email, password)
+      .then(async (userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        fetchPDIProfile(user);
       })
       .catch((error) => {
         setValidationMessage("The email and/or password do not match");

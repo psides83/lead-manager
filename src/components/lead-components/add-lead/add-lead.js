@@ -61,6 +61,8 @@ export default function AddLead(props) {
     availability: "Availability Unknown",
     status: "Equipment added",
     notes: "",
+    willSubmitPDI: false,
+    hasSubmittedPDI: false,
   });
   var [equipmentList, setEquipmentList] = useState([]);
   const [isShowingDialog, setIsShowingDialog] = useState(false);

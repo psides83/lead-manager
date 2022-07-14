@@ -1,8 +1,6 @@
 //Imports
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  addEquipmentInputs,
-} from "../../../models/static-data";
+import { addEquipmentInputs } from "../../../models/static-data";
 import {
   Box,
   Grid,
@@ -27,6 +25,7 @@ import {
   SaveRounded,
 } from "@mui/icons-material";
 import EquipmentFormViewModel from "./equipment-form-view-model";
+import PDIRequestCheckboxes from "./pdi-request-checkboxes";
 
 export default function EquipmentForm(props) {
   //#region State Properties
@@ -38,6 +37,8 @@ export default function EquipmentForm(props) {
     availability: "Availability Unknown",
     status: "Equipment added",
     notes: "",
+    willSubmitPDI: false,
+    hasSubmittedPDI: false,
     changeLog: [],
   });
   var [change, setChange] = useState([]);
@@ -46,6 +47,8 @@ export default function EquipmentForm(props) {
   const [isShowingConfirmDialog, setIsShowingConfirmDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  // var [work, setWork] = useState([]);
+  var [other, setOther] = useState("");
   //#endregion
 
   const handleCloseDialog = async () => {
@@ -96,6 +99,9 @@ export default function EquipmentForm(props) {
         availability: equipment.availability,
         notes: equipment.notes,
         status: equipment.status,
+        willSubmitPDI: equipment.willSubmitPDI ? equipment.willSubmitPDI : false,
+        hasSubmittedPDI: equipment.hasSubmittedPDI ? equipment.hasSubmittedPDI : false,
+        work: [],
         changeLog: equipment.changeLog,
       });
       setImportedData({
@@ -105,6 +111,9 @@ export default function EquipmentForm(props) {
         availability: equipment.availability,
         notes: equipment.notes,
         status: equipment.status,
+        willSubmitPDI: equipment.willSubmitPDI ? equipment.willSubmitPDI : false,
+        hasSubmittedPDI: equipment.hasSubmittedPDI ? equipment.hasSubmittedPDI : false,
+        work: []
       });
     }
     // eslint-disable-next-line
@@ -212,6 +221,13 @@ export default function EquipmentForm(props) {
                 </TextField>
               </Grid>
             ))}
+
+            <PDIRequestCheckboxes
+              equipmentData={equipmentData}
+              setEquipmentData={setEquipmentData}
+              other={other}
+              setOther={setOther}
+            />
 
             <Grid item xs={12} sm={6}>
               <Button
