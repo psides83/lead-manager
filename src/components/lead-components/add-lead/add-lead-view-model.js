@@ -1,6 +1,6 @@
 import { doc, setDoc } from "firebase/firestore";
 import moment from "moment";
-import { equipmentAvailabilityArray, equipmentStatusArray } from "../../../models/arrays";
+import { equipmentAvailabilityArray, equipmentStatusArray } from "../../../models/static-data";
 import { db } from "../../../services/firebase";
 
 class AddLeadViewModel {

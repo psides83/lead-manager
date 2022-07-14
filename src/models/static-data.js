@@ -294,6 +294,13 @@ const userInputs = [
   },
 ];
 
+const SALES_CATEGORIES = {
+  SALES: "sales",
+  MARGIN: "margin",
+  COMMISSION: "commission",
+  BONUS: "bonus"
+}
+
 export {
   leadStatusArray,
   equipmentStatusArray,
@@ -306,4 +313,5 @@ export {
   categories,
   years,
   months,
+  SALES_CATEGORIES
 };

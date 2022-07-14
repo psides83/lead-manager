@@ -4,7 +4,7 @@ import moment from "moment";
 import {
   equipmentAvailabilityArray,
   equipmentStatusArray,
-} from "../../../models/arrays";
+} from "../../../models/static-data";
 
 export default class EquipmentFormViewModel {
   constructor(

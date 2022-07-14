@@ -4,7 +4,7 @@ import {
   addEquipmentInputs,
   addLeadInputs,
   leadStatusArray,
-} from "../../../models/arrays";
+} from "../../../models/static-data";
 import { styled } from "@mui/material/styles";
 import {
   Box,

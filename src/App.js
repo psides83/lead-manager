@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -15,7 +15,6 @@ import SignIn from "./components/auth-components/sign-in";
 // eslint-disable-next-line
 import Loading from "./components/loading-views/loading";
 // eslint-disable-next-line
-import toast, { Toaster } from "react-hot-toast";
 import SalesmenList from "./components/salesmen-list/salesmen-list";
 import { AuthContext } from "./state-management/auth-context-provider";
 import SalesDashboard from "./components/sales-components/sales-dashboard";
@@ -87,7 +86,6 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Toaster />
       <Router>
         {currentUser && <MainAppBar />}
         <Box style={{ marginTop: currentUser && "75px" }}>

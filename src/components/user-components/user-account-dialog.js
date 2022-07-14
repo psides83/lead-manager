@@ -2,8 +2,7 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { db } from "../../services/firebase";
 import { setDoc, doc, deleteDoc } from "@firebase/firestore";
-import moment from "moment";
-import { userInputs, userTypes } from "../../models/arrays";
+import { userInputs, userTypes } from "../../models/static-data";
 import {
   Box,
   Grid,
@@ -30,7 +29,7 @@ import { AuthContext, AUTH_ACTION } from "../../state-management/auth-context-pr
 export default function UserAccountDialog(props) {
   //#region State Properties
   const { setMessage, setOpenSuccess, setOpenError } = props;
-  const { currentUser, userProfile, dispatch } = useContext(AuthContext);
+  const { userProfile, dispatch } = useContext(AuthContext);
   var [userData, setUserData] = useState({
     firstName: "",
     lastName: "",

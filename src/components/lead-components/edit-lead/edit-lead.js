@@ -1,6 +1,6 @@
 //Imports
 import React, { useCallback, useEffect, useState } from "react";
-import { addLeadInputs, leadStatusArray } from "../../../models/arrays";
+import { addLeadInputs, leadStatusArray } from "../../../models/static-data";
 import {
   Box,
   Grid,

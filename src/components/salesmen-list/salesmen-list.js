@@ -4,7 +4,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { db } from "../../services/firebase";
-import { branches } from "../../models/arrays";
+import { branches } from "../../models/static-data";
 import {
   Box,
   Button,

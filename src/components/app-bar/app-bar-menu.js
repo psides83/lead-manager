@@ -7,11 +7,10 @@ import {
 } from "@mui/icons-material";
 import { AuthContext } from "../../state-management/auth-context-provider";
 import { useNavigate } from "react-router-dom";
-import UserAccountDialog from "../user-components/user-account-dialog";
 
 function AppBarMenu(props) {
-  const { anchorEl, setAnchorEl, auth, open, setMessage, setOpenSuccess, setOpenError } = props;
-  const { currentUser, userProfile, dispatch } = useContext(AuthContext);
+  const { anchorEl, setAnchorEl, auth, open } = props;
+  const { currentUser, dispatch } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleMenuClose = () => {

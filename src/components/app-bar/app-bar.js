@@ -175,9 +175,6 @@ export default function MainAppBar(props) {
         setAnchorEl={setAnchorEl}
         auth={auth}
         open={open}
-        setOpenSuccess={setOpenSuccess}
-        setOpenError={setOpenError}
-        setMessage={setMessage}
       />
 
       <DynamicSnackbar

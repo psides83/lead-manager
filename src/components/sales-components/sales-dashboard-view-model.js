@@ -1,5 +1,6 @@
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import moment from "moment";
+import { SALES_CATEGORIES } from "../../models/static-data";
 import { db } from "../../services/firebase";
 
 class SalesDashboardViewModel {
@@ -36,35 +37,27 @@ class SalesDashboardViewModel {
   // calculates sales for the sales dashboard based on the selected year and category
   calculateSales(selectedCategory) {
     const category =
-      selectedCategory !== undefined || selectedCategory !== null
-        ? selectedCategory
-        : this.category;
-    var salesDollars = 0;
-    var marginDollars = 0;
-    var commission = 0;
-    var bonus = 0;
+      selectedCategory === undefined || selectedCategory === null
+        ? this.category
+        : selectedCategory;
 
-    this.sales
-      ?.filter((sale) => {
-        if (sale.year === this.year) {
-          return sale;
-        }
-        return null;
-      })
-      .forEach((value) => {
-        salesDollars += value.sales;
-        marginDollars += value.margin;
-        commission += value.commission;
-        bonus += value.bonus;
-      });
-
-    if (category === "sales") return salesDollars;
-
-    if (category === "margin") return marginDollars;
-
-    if (category === "commission") return commission;
-
-    if (category === "bonus") return bonus;
+    if (this.sales.length !== 0) {
+      const filteredSales = this.sales
+        ?.filter((data) => {
+          return data.year === this.year;
+        })
+        .reduce((sum, data) => {
+          if (category === SALES_CATEGORIES.SALES) return sum + data.sales;
+          if (category === SALES_CATEGORIES.MARGIN) return sum + data.margin;
+          if (category === SALES_CATEGORIES.COMMISSION)
+            return sum + data.commission;
+          if (category === SALES_CATEGORIES.BONUS) return sum + data.bonus;
+          return null;
+        }, 0);
+      return filteredSales;
+    } else {
+      return 0;
+    }
   }
 
   //   Compares the sales trend of the selected year from the previous year
@@ -76,42 +69,39 @@ class SalesDashboardViewModel {
       .format("yyyy");
     const currentMonth = moment().format("MM");
 
-    var yearTotal = 0;
-    var previousYearToDate = 0;
-
-    this.sales
-      ?.filter((sale) => {
-        if (sale.year === this.year) return sale;
-        return null;
+    const yearTotal = this.sales
+      ?.filter((data) => {
+        return data.year === this.year;
       })
-      .forEach((value) => {
-        if (category === "sales") yearTotal += value.sales;
-        if (category === "margin") yearTotal += value.margin;
-        if (category === "commission") yearTotal += value.commission;
-        if (category === "bonus") yearTotal += value.bonus;
-      });
+      .reduce((sum, data) => {
+        if (category === SALES_CATEGORIES.SALES) return sum + data.sales;
+        if (category === SALES_CATEGORIES.MARGIN) return (sum += data.margin);
+        if (category === SALES_CATEGORIES.COMMISSION)
+          return (sum += data.commission);
+        if (category === SALES_CATEGORIES.BONUS) return (sum += data.bonus);
+        return null;
+      }, 0);
 
-    this.sales
-      ?.filter((sale) => {
+    const previousYearToDate = this.sales
+      ?.filter((data) => {
         if (this.year === currentYear) {
-          if (
-            sale.year === previousYear &&
-            sale.month >= "01" &&
-            sale.month <= currentMonth
-          )
-            return sale;
+          return (
+            data.year === previousYear &&
+            data.month >= "01" &&
+            data.month <= currentMonth
+          );
         } else {
-          if (sale.year === previousYear) return sale;
+          return data.year === previousYear;
         }
-
-        return null;
       })
-      .forEach((value) => {
-        if (category === "sales") previousYearToDate += value.sales;
-        if (category === "margin") previousYearToDate += value.margin;
-        if (category === "commission") previousYearToDate += value.commission;
-        if (category === "bonus") previousYearToDate += value.bonus;
-      });
+      .reduce((sum, data) => {
+        if (category === SALES_CATEGORIES.SALES) return sum + data.sales;
+        if (category === SALES_CATEGORIES.MARGIN) return (sum += data.margin);
+        if (category === SALES_CATEGORIES.COMMISSION)
+          return (sum += data.commission);
+        if (category === SALES_CATEGORIES.BONUS) return (sum += data.bonus);
+        return null;
+      }, 0);
 
     const difference = yearTotal / previousYearToDate - 1;
 
@@ -125,8 +115,8 @@ class SalesDashboardViewModel {
 
   // calculates the margin percentage of the selected year, outputs as a string
   marginPercentage() {
-    const marginCategory = "margin";
-    const salesCategory = "sales";
+    const marginCategory = SALES_CATEGORIES.MARGIN;
+    const salesCategory = SALES_CATEGORIES.SALES;
     if (this.sales !== undefined) {
       const rawMargin =
         this.calculateSales(marginCategory) /

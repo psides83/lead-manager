@@ -4,7 +4,7 @@ import moment from "moment";
 // eslint-disable-next-line
 import { Box, Paper, Stack, Typography } from "@mui/material";
 import { ArrowDownwardRounded, ArrowUpwardRounded } from "@mui/icons-material";
-import { categories, years } from "../../models/arrays";
+import { SALES_CATEGORIES, years } from "../../models/static-data";
 import SalesCharts from "./sales-charts";
 import ToggleButtons from "../ui-components/toggle-buttons";
 import SalesDataGrid from "./sales-data-grid";
@@ -16,8 +16,10 @@ export default function SalesDashboard() {
   const [sales, setSales] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("sales");
   const [selectedYear, setSelectedYear] = useState(moment().format("yyyy"));
+  const categories = Object.values(SALES_CATEGORIES)
 
   const viewModel = new SalesDashboardViewModel(sales, setSales, selectedYear, selectedCategory)
+
 
   //    Fetch leads from firestore
   const fetchSales = useCallback(async () => {
@@ -28,7 +30,6 @@ export default function SalesDashboard() {
    // fetches sales data from Firestore
    useEffect(() => {
     fetchSales();
-
   }, [fetchSales]);
 
   // sets the UI for to show the trend is up or down with an appropriately colored arrow
@@ -127,7 +128,7 @@ export default function SalesDashboard() {
         <Stack direction="row" justifyContent="space-between">
           <Typography sx={{ margin: "0 0 2px 2px", padding: "0 0 8px 8px" }}>
             <strong>Total</strong>{" "}
-            {currencyFormatter.format(viewModel.calculateSales(selectedCategory))}
+            {currencyFormatter.format(viewModel.calculateSales())}
           </Typography>
           <Typography sx={{ margin: "0 2px 2px 0", padding: "0 8px 8px 0" }}>
             <strong>Margin</strong> {viewModel.marginPercentage()}

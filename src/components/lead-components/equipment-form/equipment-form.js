@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
   addEquipmentInputs,
-} from "../../../models/arrays";
+} from "../../../models/static-data";
 import {
   Box,
   Grid,
