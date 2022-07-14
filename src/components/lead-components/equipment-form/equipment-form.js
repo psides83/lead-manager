@@ -39,6 +39,8 @@ export default function EquipmentForm(props) {
     notes: "",
     willSubmitPDI: false,
     hasSubmittedPDI: false,
+    work: [],
+    pdiNotes: "",
     changeLog: [],
   });
   var [change, setChange] = useState([]);
@@ -101,7 +103,8 @@ export default function EquipmentForm(props) {
         status: equipment.status,
         willSubmitPDI: equipment.willSubmitPDI ? equipment.willSubmitPDI : false,
         hasSubmittedPDI: equipment.hasSubmittedPDI ? equipment.hasSubmittedPDI : false,
-        work: [],
+        work: equipment.work && !equipment.work.every((item) => item === null) ? equipment.work : [],
+        pdiNotes: equipment.pdiNotes ? equipment.pdiNotes : "",
         changeLog: equipment.changeLog,
       });
       setImportedData({
@@ -113,8 +116,13 @@ export default function EquipmentForm(props) {
         status: equipment.status,
         willSubmitPDI: equipment.willSubmitPDI ? equipment.willSubmitPDI : false,
         hasSubmittedPDI: equipment.hasSubmittedPDI ? equipment.hasSubmittedPDI : false,
-        work: []
+        work: equipment.work && !equipment.work.every((item) => item === null) ? equipment.work : [],
+        pdiNotes: equipment.pdiNotes ? equipment.pdiNotes : "",
       });
+      if (equipment.work?.length === 8) {
+        setOther(equipment.work[7])
+      }
+      console.log(equipment.work)
     }
     // eslint-disable-next-line
   }, [isShowingDialog, equipment]);

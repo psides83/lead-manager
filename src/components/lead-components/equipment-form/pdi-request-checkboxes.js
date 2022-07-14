@@ -10,6 +10,8 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 
+// TODO - gray out pdi section if pdi has been submitted, hide willSubmitPDI checkbox if stock and serial are not filled
+
 function PDIRequestCheckboxes(props) {
   const { equipmentData, setEquipmentData, other, setOther } = props;
 
@@ -23,6 +25,7 @@ function PDIRequestCheckboxes(props) {
   var [checked8, setChecked8] = useState(false);
   var [otherDisabled, setOtherDisabled] = useState(true);
   console.log(equipmentData.work);
+  console.log(other);
 
   // Array of work options that populate the checkbox setion of the form.
   var workOptions = [
@@ -181,6 +184,21 @@ function PDIRequestCheckboxes(props) {
       setEquipmentData({ ...equipmentData, willSubmitPDI: true });
   }
 
+  const workArrayString = () => {
+    var temp = [];
+
+    if (equipmentData.work !== undefined) {
+      for (let i of equipmentData.work) i && temp.push(i);
+    }
+    var workString = temp.toString().replace(/,/g, ", ");
+
+    if (workString[0] === ",") {
+      return workString.substring(1).trim();
+    }
+
+    return workString;
+  };
+
   return (
     <>
       <Grid item>
@@ -203,9 +221,22 @@ function PDIRequestCheckboxes(props) {
       </Grid>
       <Grid item xs={12}>
         <Collapse in={equipmentData.willSubmitPDI}>
+          <Typography>
+            <strong>Current Work</strong>
+          </Typography>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "flexStart",
+            }}
+          >
+            <Typography>{workArrayString()}</Typography>
+          </div>
+
           <FormGroup>
             <Typography variant="h6" style={{ fontSize: 18 }}>
-              Work Required*
+              Work Required
             </Typography>
 
             {workOptions.map((option, index) => (
@@ -255,7 +286,21 @@ function PDIRequestCheckboxes(props) {
                 onChange={enableOther}
               />
             </Stack>
-          </FormGroup>
+          <Grid item xs={12} sm={12} style={{marginTop: "10px"}}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  id={"pdiNotes"}
+                  name={"pdiNotes"}
+                  label={"PDI Notes"}
+                  labelid={"pdiNotes"}
+                  variant="outlined"
+                  onChange={(e) => setEquipmentData({ ...equipmentData, pdiNotes: e.target.value })}
+                  value={equipmentData.pdiNotes ? equipmentData.pdiNotes : ""}
+                  />
+        
+              </Grid>
+                  </FormGroup>
         </Collapse>
       </Grid>
     </>

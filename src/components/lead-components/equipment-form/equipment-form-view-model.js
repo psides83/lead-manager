@@ -219,6 +219,7 @@ export default class EquipmentFormViewModel {
     if (equipmentData.status !== importedData.status) return false;
     if (equipmentData.availability !== importedData.availability) return false;
     if (equipmentData.notes !== importedData.notes) return false;
+    if (equipmentData.willSubmitPDI !== importedData.willSubmitPDI) return false;
     if (equipmentData.work.length !== 0 && equipmentData.work.some((item) => { return item !== null })) return false;
     return true;
   }
