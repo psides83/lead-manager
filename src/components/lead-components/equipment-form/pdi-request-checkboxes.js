@@ -179,7 +179,7 @@ function PDIRequestCheckboxes(props) {
   // Handle changes in the checkboxes.
   function handleChange(event) {
     if (equipmentData.willSubmitPDI)
-      setEquipmentData({ ...equipmentData, willSubmitPDI: false });
+      setEquipmentData({ ...equipmentData, willSubmitPDI: false, work: [] });
     if (!equipmentData.willSubmitPDI)
       setEquipmentData({ ...equipmentData, willSubmitPDI: true });
   }
@@ -199,28 +199,58 @@ function PDIRequestCheckboxes(props) {
     return workString;
   };
 
+  function PDICheckBox() {
+    if (
+      !equipmentData.hasSubmittedPDI &&
+      (equipmentData.stock.length === 6) &&
+      (equipmentData.serial !== "")
+    ) {
+      return (
+        <FormControlLabel
+          control={
+            <Checkbox
+              id={"submitToPDI"}
+              checked={equipmentData.willSubmitPDI}
+              onChange={(e) => handleChange(e)}
+              color="primary"
+              value={equipmentData.willSubmitPDI}
+            />
+          }
+          label={
+            <Typography style={{ fontSize: 14 }}>Submit PDI/Setup</Typography>
+          }
+        />
+      );
+    } else if (equipmentData.hasSubmittedPDI) {
+      return (
+        <div
+          style={{
+            padding: "3px 5px 3px 5px",
+            background: "rgb(54, 124, 42, 0.9)",
+            borderRadius: "4px",
+          }}
+        >
+          <Typography style={{ fontSize: 12, color: "white" }}>
+            PDI/Setup Submitted
+          </Typography>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
   return (
     <>
       <Grid item>
         <Stack direction="row">
-          <FormControlLabel
-            control={
-              <Checkbox
-                id={"submitToPDI"}
-                checked={equipmentData.willSubmitPDI}
-                onChange={(e) => handleChange(e)}
-                color="primary"
-                value={equipmentData.willSubmitPDI}
-              />
-            }
-            label={
-              <Typography style={{ fontSize: 14 }}>Submit PDI/Setup</Typography>
-            }
-          />
+          <PDICheckBox />
         </Stack>
       </Grid>
       <Grid item xs={12}>
-        <Collapse in={equipmentData.willSubmitPDI}>
+        <Collapse
+          in={equipmentData.willSubmitPDI && !equipmentData.hasSubmittedPDI}
+        >
           <Typography>
             <strong>Current Work</strong>
           </Typography>
@@ -286,21 +316,25 @@ function PDIRequestCheckboxes(props) {
                 onChange={enableOther}
               />
             </Stack>
-          <Grid item xs={12} sm={12} style={{marginTop: "10px"}}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  id={"pdiNotes"}
-                  name={"pdiNotes"}
-                  label={"PDI Notes"}
-                  labelid={"pdiNotes"}
-                  variant="outlined"
-                  onChange={(e) => setEquipmentData({ ...equipmentData, pdiNotes: e.target.value })}
-                  value={equipmentData.pdiNotes ? equipmentData.pdiNotes : ""}
-                  />
-        
-              </Grid>
-                  </FormGroup>
+            <Grid item xs={12} sm={12} style={{ marginTop: "10px" }}>
+              <TextField
+                fullWidth
+                size="small"
+                id={"pdiNotes"}
+                name={"pdiNotes"}
+                label={"PDI Notes"}
+                labelid={"pdiNotes"}
+                variant="outlined"
+                onChange={(e) =>
+                  setEquipmentData({
+                    ...equipmentData,
+                    pdiNotes: e.target.value,
+                  })
+                }
+                value={equipmentData.pdiNotes ? equipmentData.pdiNotes : ""}
+              />
+            </Grid>
+          </FormGroup>
         </Collapse>
       </Grid>
     </>

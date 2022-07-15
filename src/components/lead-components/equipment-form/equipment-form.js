@@ -94,6 +94,11 @@ export default function EquipmentForm(props) {
   // load data from equipment
   const loadEquipmentData = useCallback(() => {
     if (isShowingDialog && equipment) {
+      var importedWork = []
+      if (equipment.work && !equipment.work.every((item) => item === null)) {
+        importedWork.push(equipment.work)
+      }
+
       setEquipmentData({
         model: equipment.model,
         stock: equipment.stock,
@@ -116,7 +121,7 @@ export default function EquipmentForm(props) {
         status: equipment.status,
         willSubmitPDI: equipment.willSubmitPDI ? equipment.willSubmitPDI : false,
         hasSubmittedPDI: equipment.hasSubmittedPDI ? equipment.hasSubmittedPDI : false,
-        work: equipment.work && !equipment.work.every((item) => item === null) ? equipment.work : [],
+        work: importedWork.toString(),
         pdiNotes: equipment.pdiNotes ? equipment.pdiNotes : "",
       });
       if (equipment.work?.length === 8) {

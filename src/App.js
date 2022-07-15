@@ -53,6 +53,8 @@ export default function App() {
     return currentUser ? children : <Navigate to="/sign-in" />;
   };
 
+  // TODO - make snackbar/toast global
+
   // const notify = () => toast(<ToastDisplay />);
   // function ToastDisplay() {
   //   return (

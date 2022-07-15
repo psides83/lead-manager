@@ -36,6 +36,7 @@ const fetch = async (setFunc, filterParam, timer, setLoading) => {
               contactLog: doc.data().contactLog,
               equipment: doc.data().equipment,
               messages: doc.data().messages,
+              pdiID: doc.data().pdiID,
             }))
           );
         });

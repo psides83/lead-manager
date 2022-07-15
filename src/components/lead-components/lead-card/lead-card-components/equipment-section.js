@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   BuildRounded,
   ExpandLessRounded,
@@ -21,13 +21,15 @@ import EquipmentForm from "../../equipment-form/equipment-form";
 import { AuthContext } from "../../../../state-management/auth-context-provider";
 import moment from "moment";
 import { pdiDB } from "../../../../services/pdi-firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, onSnapshot, setDoc } from "firebase/firestore";
+import { db } from "../../../../services/firebase";
 
 export default function EquipmentSection(props) {
   const { lead, setMessage, setOpenError, setOpenSuccess } = props;
   const [showingEquipment, setShowingEquipment] = useState(false);
   const [isShowingConfirmDialog, setIsShowingConfirmDialog] = useState(false);
-  var [equipmentList, setEquipmentList] = useState([])
+  var [equipmentList, setEquipmentList] = useState([]);
+  const [pdiStatus, setPDIStatus] = useState("");
   const { pdiUser } = useContext(AuthContext);
 
   const handleCloseConfirmDialog = () => {
@@ -42,6 +44,15 @@ export default function EquipmentSection(props) {
     event.preventDefault();
     showingEquipment ? setShowingEquipment(false) : setShowingEquipment(true);
   };
+
+  useEffect(() => {
+    if (lead.pdiID !== undefined) {
+      onSnapshot(doc(pdiDB, "branches", pdiUser?.branch, "requests", lead?.pdiID), (doc) => {
+        setPDIStatus(doc.data().status)
+      })
+    }
+  }, [])
+  
 
   const stockNumber = (stock) => {
     if (stock === undefined) return;
@@ -71,11 +82,27 @@ export default function EquipmentSection(props) {
       );
   }
 
-  // TODO - add lead equipment functions for updating firestore values (hasSubmittedPDI, update equipment status to pdi requested)
+  function PDIStatus() {
+    if (pdiStatus !== "")
+    return (
+      <div
+          style={{
+            padding: "3px 5px 3px 5px",
+            background: "rgb(54, 124, 42, 0.9)",
+            borderRadius: "4px",
+          }}
+        >
+          <Typography style={{ fontSize: 12, color: "white" }}>
+            {pdiStatus}
+          </Typography>
+        </div>
+    )
+  }
 
-  async function setPDITofirestore() {
+  // TODO - add lead equipment functions for updating firestore values (pdiID on the lead, update equipment status to pdi requested)
+
+  async function setPDITofirestore(id) {
     const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
-    const id = moment().format("yyyyMMDDHHmmss");
     const salesman = `${pdiUser?.firstName} ${pdiUser?.lastName}`;
     const changeLog = [
       {
@@ -103,7 +130,11 @@ export default function EquipmentSection(props) {
       firestoreRequest.id
     );
 
-    await setDoc(requestRef, firestoreRequest, { merge: true });
+    const leadRef = doc(db, "leads", lead.id);
+
+    await setDoc(requestRef, firestoreRequest, { merge: true }).then(() => {
+      setDoc(leadRef, { equipment: lead.equipment }, { merge: true });
+    });
 
     for (var i = 0; i < equipmentList.length; i++) {
       const equipment = {
@@ -136,7 +167,8 @@ export default function EquipmentSection(props) {
     //   userProfile,
     //   salesman
     // );
-  };
+    handleCloseConfirmDialog()
+  }
 
   async function buildPdiList() {
     const fullName = pdiUser?.firstName + " " + pdiUser?.lastName;
@@ -165,7 +197,7 @@ export default function EquipmentSection(props) {
         ];
 
         var equipment = {
-          id: equipmentList.length + 1,
+          id: unit.id,
           model: unit.model,
           stock: unit.stock,
           serial: unit.serial,
@@ -174,20 +206,24 @@ export default function EquipmentSection(props) {
           changeLog: changeLog,
         };
 
+        const id = moment().format("yyyyMMDDHHmmss");
+
+        unit.hasSubmittedPDI = true;
+        unit.willSubmitPDI = false;
+
         equipmentList.push(equipment);
         setEquipmentList(equipmentList);
         console.log("Temp EQ");
         console.log(equipmentList);
+        setPDITofirestore(id)
       }
     });
   }
 
   async function submitPDI(e) {
-    e.preventDefault()
-    e.stopPropagation()
-    await buildPdiList().then(() => {
-      setPDITofirestore()
-    })
+    e.preventDefault();
+    e.stopPropagation();
+    await buildPdiList();
   }
 
   return (
@@ -202,6 +238,7 @@ export default function EquipmentSection(props) {
             setOpenSuccess={setOpenSuccess}
           />
           <SubmitPDIButton />
+          <PDIStatus/>
         </Stack>
         {lead.equipment.length !== 0 ? (
           <IconButton size="small" onClick={showEquipment}>

@@ -58,6 +58,8 @@ export default class EquipmentFormViewModel {
     this.setIsShowingDialog(false);
   };
 
+  // TODO - add changes for pdi info
+
   logChanges() {
     const equipmentData = this.equipmentData;
     const importedData = this.importedData;
@@ -210,7 +212,16 @@ export default class EquipmentFormViewModel {
   buttonIsDisabled() {
     const equipmentData = this.equipmentData;
     const importedData = this.importedData;
+    function removeNulls(array) {
+      var temp = [];
+      if (array !== undefined) {
+        for (let i of array) i && temp.push(i);
+        return temp.toString().replace(/(^,)|(,$)/g, '')
+      }
+    }
 
+    console.log(removeNulls(equipmentData?.work))
+    console.log(importedData?.work?.replace(/(^,)|(,$)/g, ''))
     if (this.loading) return true;
 
     if (equipmentData.model !== importedData.model) return false;
@@ -220,7 +231,11 @@ export default class EquipmentFormViewModel {
     if (equipmentData.availability !== importedData.availability) return false;
     if (equipmentData.notes !== importedData.notes) return false;
     if (equipmentData.willSubmitPDI !== importedData.willSubmitPDI) return false;
-    if (equipmentData.work.length !== 0 && equipmentData.work.some((item) => { return item !== null })) return false;
+    if (
+      (equipmentData.work.length !== 0 && equipmentData.work.some((item) => { return item !== null }))
+      &&
+      (removeNulls(equipmentData.work) !== importedData?.work?.replace(/(^,)|(,$)/g, '')) 
+      ) return false;
     return true;
   }
 
