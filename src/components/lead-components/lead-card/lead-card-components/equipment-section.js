@@ -47,12 +47,14 @@ export default function EquipmentSection(props) {
 
   useEffect(() => {
     if (lead.pdiID !== undefined) {
-      onSnapshot(doc(pdiDB, "branches", pdiUser?.branch, "requests", lead?.pdiID), (doc) => {
-        setPDIStatus(doc.data().status)
-      })
+      onSnapshot(
+        doc(pdiDB, "branches", pdiUser?.branch, "requests", lead?.pdiID),
+        (doc) => {
+          setPDIStatus(doc.data()?.status);
+        }
+      );
     }
-  }, [])
-  
+  }, []);
 
   const stockNumber = (stock) => {
     if (stock === undefined) return;
@@ -84,10 +86,10 @@ export default function EquipmentSection(props) {
 
   function PDIStatus() {
     if (pdiStatus !== "")
-    return (
-      <div
+      return (
+        <div
           style={{
-            padding: "3px 5px 3px 5px",
+            padding: "2px 4px 2px 4px",
             background: "rgb(54, 124, 42, 0.9)",
             borderRadius: "4px",
           }}
@@ -96,7 +98,7 @@ export default function EquipmentSection(props) {
             {pdiStatus}
           </Typography>
         </div>
-    )
+      );
   }
 
   // TODO - add lead equipment functions for updating firestore values (pdiID on the lead, update equipment status to pdi requested)
@@ -167,7 +169,7 @@ export default function EquipmentSection(props) {
     //   userProfile,
     //   salesman
     // );
-    handleCloseConfirmDialog()
+    handleCloseConfirmDialog();
   }
 
   async function buildPdiList() {
@@ -215,7 +217,7 @@ export default function EquipmentSection(props) {
         setEquipmentList(equipmentList);
         console.log("Temp EQ");
         console.log(equipmentList);
-        setPDITofirestore(id)
+        setPDITofirestore(id);
       }
     });
   }
@@ -238,7 +240,7 @@ export default function EquipmentSection(props) {
             setOpenSuccess={setOpenSuccess}
           />
           <SubmitPDIButton />
-          <PDIStatus/>
+          <PDIStatus />
         </Stack>
         {lead.equipment.length !== 0 ? (
           <IconButton size="small" onClick={showEquipment}>
