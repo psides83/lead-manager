@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   BuildRounded,
   ExpandLessRounded,
@@ -23,6 +23,7 @@ import moment from "moment";
 import { pdiDB } from "../../../../services/pdi-firebase";
 import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import { db } from "../../../../services/firebase";
+import { sendNewRequestEmail } from "../../../../services/pdi-email-service";
 
 export default function EquipmentSection(props) {
   const { lead, setMessage, setOpenError, setOpenSuccess } = props;
@@ -34,6 +35,7 @@ export default function EquipmentSection(props) {
 
   const handleCloseConfirmDialog = () => {
     setIsShowingConfirmDialog(false);
+    setEquipmentList([])
   };
 
   const handleToggleConfirmDialog = () => {
@@ -45,7 +47,7 @@ export default function EquipmentSection(props) {
     showingEquipment ? setShowingEquipment(false) : setShowingEquipment(true);
   };
 
-  useEffect(() => {
+  const getPDIStatus = useCallback(async () => {
     if (lead.pdiID !== undefined) {
       onSnapshot(
         doc(pdiDB, "branches", pdiUser?.branch, "requests", lead?.pdiID),
@@ -54,7 +56,11 @@ export default function EquipmentSection(props) {
         }
       );
     }
-  }, []);
+  }, [lead, pdiUser])
+
+  useEffect(() => {
+    getPDIStatus()
+  }, [getPDIStatus]);
 
   const stockNumber = (stock) => {
     if (stock === undefined) return;
@@ -85,25 +91,31 @@ export default function EquipmentSection(props) {
   }
 
   function PDIStatus() {
-    if (pdiStatus !== "")
+    if (
+      pdiStatus === "Requested" ||
+      pdiStatus === "In Progress" ||
+      pdiStatus === "Completed"
+    )
       return (
-        <div
-          style={{
-            padding: "2px 4px 2px 4px",
-            background: "rgb(54, 124, 42, 0.9)",
-            borderRadius: "4px",
-          }}
-        >
-          <Typography style={{ fontSize: 12, color: "white" }}>
-            {pdiStatus}
-          </Typography>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <Typography variant="caption">PDI/Setup:</Typography>
+          <div
+            style={{
+              padding: "2px 4px 2px 4px",
+              background: "rgb(54, 124, 42, 0.9)",
+              borderRadius: "4px",
+            }}
+          >
+            <Typography style={{ fontSize: 12, color: "white" }}>
+              {pdiStatus}
+            </Typography>
+          </div>
         </div>
       );
   }
 
-  // TODO - add lead equipment functions for updating firestore values (pdiID on the lead, update equipment status to pdi requested)
-
-  async function setPDITofirestore(id) {
+  async function setPDITofirestore() {
+    const id = moment().format("yyyyMMDDHHmmss");
     const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
     const salesman = `${pdiUser?.firstName} ${pdiUser?.lastName}`;
     const changeLog = [
@@ -113,6 +125,19 @@ export default function EquipmentSection(props) {
         timestamp: timestamp,
       },
     ];
+
+    const modelsOnRequest = equipmentList
+      .map((unit) => unit.model)
+      .toString()
+      .replace(/,/g, ", ");
+
+    const leadChangeLog = {
+      chanage: `PDI/Setup request sent for model(s) ${modelsOnRequest}`,
+      id: id,
+      timestamp: timestamp,
+    };
+
+    lead.changeLog.push(leadChangeLog)
 
     const firestoreRequest = {
       id: id,
@@ -135,7 +160,15 @@ export default function EquipmentSection(props) {
     const leadRef = doc(db, "leads", lead.id);
 
     await setDoc(requestRef, firestoreRequest, { merge: true }).then(() => {
-      setDoc(leadRef, { equipment: lead.equipment }, { merge: true });
+      setDoc(
+        leadRef,
+        {
+          pdiID: firestoreRequest.id,
+          equipment: lead.equipment,
+          changeLog: lead.changeLog,
+        },
+        { merge: true }
+      );
     });
 
     for (var i = 0; i < equipmentList.length; i++) {
@@ -162,13 +195,13 @@ export default function EquipmentSection(props) {
       await setDoc(equipmentRef, equipment, { merge: true });
     }
 
-    // sendNewRequestEmail(
-    //   timestamp,
-    //   equipmentList,
-    //   fullName,
-    //   userProfile,
-    //   salesman
-    // );
+    sendNewRequestEmail(
+      timestamp,
+      equipmentList,
+      salesman,
+      pdiUser,
+      salesman
+    );
     handleCloseConfirmDialog();
   }
 
@@ -188,12 +221,10 @@ export default function EquipmentSection(props) {
           workString = workString.substring(1).trim();
         }
 
-        console.log(workString);
-
         const changeLog = [
           {
             user: fullName,
-            change: `equipment added to request`,
+            change: `equipment added to setup request`,
             timestamp: moment().format("DD-MMM-yyyy hh:mmA"),
           },
         ];
@@ -205,19 +236,16 @@ export default function EquipmentSection(props) {
           serial: unit.serial,
           work: workString,
           notes: unit.pdiNotes,
+          status: "Setup requested",
           changeLog: changeLog,
         };
-
-        const id = moment().format("yyyyMMDDHHmmss");
 
         unit.hasSubmittedPDI = true;
         unit.willSubmitPDI = false;
 
         equipmentList.push(equipment);
         setEquipmentList(equipmentList);
-        console.log("Temp EQ");
-        console.log(equipmentList);
-        setPDITofirestore(id);
+        setPDITofirestore();
       }
     });
   }

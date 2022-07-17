@@ -1,4 +1,3 @@
-import emailjs from "emailjs-com";
 import moment from "moment";
 import {
   collection,
@@ -15,10 +14,17 @@ import { formatPhoneNumber } from "../utils/utils";
 // const templateID = 'template_5dg1ys6';
 // const userID = 'user_3ub5f4KJJHBND1Wzl1FQi';
 
+const ROLE = {
+  ADMIN: "admin",
+  SERVICE: "service",
+  PARTS: "parts",
+  SALES: "sales",
+};
+
 const roles = {
-  request: ["admin", "service", "parts"],
-  loaner: ["admin", "service", "sales"],
-  transport: ["admin", "service"],
+  request: [ROLE.ADMIN, ROLE.SERVICE, ROLE.PARTS],
+  loaner: [ROLE.ADMIN, ROLE.SERVICE, ROLE.SALES],
+  transport: [ROLE.ADMIN, ROLE.SERVICE],
 };
 
 // Sets recipients based on type of send email called
@@ -388,9 +394,10 @@ const sendNewRequestEmail = async (
   // Sets paramaters for the email template
   const emailData = {
     to: recipients,
+    // to: "psides83@hotmail.com",
     replyTo: userProfile.email,
     from: "PDI/Setup Requests<psides.solutions@outlook.com>",
-    cc: userProfile.email,
+    // cc: userProfile.email,
     message: {
       subject: subject,
       html: body,
@@ -399,87 +406,8 @@ const sendNewRequestEmail = async (
 
   // sends the email
   await setDoc(doc(db, "sentEmails", emailID), emailData);
-  // console.log(recipients)
 };
 
-// Send email when loaner is logged.
-const sendNewLoanerEmail = async (
-  model,
-  stock,
-  dateOut,
-  customer,
-  employee,
-  userProfile
-) => {
-  // creates the paramaters for the email template
-  const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
-  const emailID = moment().format("yyyyMMDDHHmmss");
-  const recipients = await setRecipients(roles.loaner, userProfile, "none");
-  const subject = `${model}, ${stock} has been loaned out`;
-  const body = `<body>
-                    <h2>Equipment Loaned Out</h2>
-                    <dl>
-                        <dt>Date Loaned: ${dateOut}</dt>
-                        <dt>model: ${model}</dt>
-                        <dt>Stock Number: ${stock}</dt>
-                        <dt>Customer: ${customer}</dt>
-                        <dt>Loaning Employee: ${employee}</dt>
-                    </dl>
-                </body>`;
-
-  // Sets paramaters for the email template
-  const emailData = {
-    to: recipients,
-    replyTo: userProfile.email,
-    from: "Loaned Equipment Manager<psides.solutions@outlook.com>",
-    cc: userProfile.email,
-    message: {
-      subject: subject,
-      html: body,
-    },
-  };
-
-  // sends the email
-  await setDoc(doc(db, "sentEmails", emailID), emailData);
-  // console.log(recipients)
-};
-
-// Send email when request status is updated:
-const sendLoanerStatusEmail = async (loaner, fullName, userProfile) => {
-  // creates the paramaters for the email template
-  const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
-  const emailID = moment().format("yyyyMMDDHHmmss");
-  const recipients = await setRecipients(roles.loaner, userProfile, "none");
-  const subject = `${loaner?.model}, ${loaner?.stock} has been returned`;
-  const body = `<body>
-                    <h2>Loaned Equipment Returned</h2>
-                    <dl>
-                      <dt>Date Returned: ${timestamp}</dt>
-                      <dt>Model: ${loaner.model}</dt>
-                      <dt>Stock Number: ${loaner?.stock}</dt>
-                      <dt>Customer: ${loaner.customer}</dt>
-                      <dt>Loaning Employee: ${fullName}</dt>
-                    </dl>
-                  </body>`;
-
-  // Sets paramaters for the email template
-  const emailData = {
-    to: recipients,
-    replyTo: userProfile.email,
-    from: "Loaned Equipment Manager<psides.solutions@outlook.com>",
-    cc: userProfile.email,
-    message: {
-      subject: subject,
-      html: body,
-    },
-  };
-
-  // sends the email
-  await setDoc(doc(db, "sentEmails", emailID), emailData);
-  // console.log(recipients)
-};
-
-// TODO emails for transport feature
 // TODO change recepients to correct var when completed
 
 // Sends email when new request is submitted
@@ -492,7 +420,11 @@ const sendNewTransportRequestEmail = async (
 ) => {
   // creates the paramaters for the email template
   const emailID = moment().format("yyyyMMDDHHmmss");
-  const recipients = await setRecipients(roles.transport, userProfile, salesman);
+  const recipients = await setRecipients(
+    roles.transport,
+    userProfile,
+    salesman
+  );
   // const recipients = "psides@sunsouth.com";
   const subject = `New equipment ${transportRequest.type} request from ${fullName}`;
   var body = `<body>
@@ -599,9 +531,11 @@ const sendTransportStatusEmail = async (
                     } Date:</strong> ${moment(startDate).format(
         "DD-MMM-yyyy"
       )}</p>
-                    <p><strong>Scheduled ${transportRequest.type} Time Window:</strong> ${moment(
-        startDate
-      ).format("LT")} - ${moment(endDate).format("LT")}</p>
+                    <p><strong>Scheduled ${
+                      transportRequest.type
+                    } Time Window:</strong> ${moment(startDate).format(
+        "LT"
+      )} - ${moment(endDate).format("LT")}</p>
                     <p>Updated By: ${fullName}</p>
                 <body>`;
     }
@@ -749,8 +683,6 @@ export {
   sendNewEquipmentEmail,
   sendStatusEmail,
   sendNewRequestEmail,
-  sendNewLoanerEmail,
-  sendLoanerStatusEmail,
   sendEquipmentDeletedEmail,
   sendRequestDeletedEmail,
   sendNewTransportRequestEmail,

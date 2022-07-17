@@ -58,8 +58,6 @@ export default class EquipmentFormViewModel {
     this.setIsShowingDialog(false);
   };
 
-  // TODO - add changes for pdi info
-
   logChanges() {
     const equipmentData = this.equipmentData;
     const importedData = this.importedData;
@@ -121,6 +119,14 @@ export default class EquipmentFormViewModel {
         )
       );
     }
+
+    if (equipmentData.willSubmitPDI !== importedData.willSubmitPDI) {
+      setChange(
+        change.push(
+          `Will Sumbit PDI of ${equipmentData.model} updated from ${importedData.willSubmitPDI} to ${equipmentData.willSubmitPDI}`
+        )
+      );
+    }
   }
 
   // Add the equipment to the firestore "leads" collection and the equipment to the fire store "equipment" collection.
@@ -152,6 +158,7 @@ export default class EquipmentFormViewModel {
       timestamp: timestamp,
     });
 
+    equipmentData.work = this.workNullEmpties()
     equipmentData.id = id;
     equipmentData.timestamp = timestamp;
 
@@ -169,6 +176,16 @@ export default class EquipmentFormViewModel {
       { equipment: lead.equipment, changeLog: leadChangeLog },
       { merge: true }
     );
+  };
+
+  workNullEmpties = () => {
+    var temp = [];
+
+    if (this.equipmentData.work !== undefined) {
+      for (let i of this.equipmentData.work) i ? temp.push(i) : temp.push(null);
+    }
+
+    return temp;
   };
 
   // Reset the Lead form
@@ -216,12 +233,10 @@ export default class EquipmentFormViewModel {
       var temp = [];
       if (array !== undefined) {
         for (let i of array) i && temp.push(i);
-        return temp.toString().replace(/(^,)|(,$)/g, '')
+        return temp.toString().replace(/(^,)|(,$)/g, "");
       }
     }
 
-    console.log(removeNulls(equipmentData?.work))
-    console.log(importedData?.work?.replace(/(^,)|(,$)/g, ''))
     if (this.loading) return true;
 
     if (equipmentData.model !== importedData.model) return false;
@@ -230,12 +245,17 @@ export default class EquipmentFormViewModel {
     if (equipmentData.status !== importedData.status) return false;
     if (equipmentData.availability !== importedData.availability) return false;
     if (equipmentData.notes !== importedData.notes) return false;
-    if (equipmentData.willSubmitPDI !== importedData.willSubmitPDI) return false;
+    if (equipmentData.willSubmitPDI !== importedData.willSubmitPDI)
+      return false;
     if (
-      (equipmentData.work.length !== 0 && equipmentData.work.some((item) => { return item !== null }))
-      &&
-      (removeNulls(equipmentData.work) !== importedData?.work?.replace(/(^,)|(,$)/g, '')) 
-      ) return false;
+      equipmentData.work.length !== 0 &&
+      equipmentData.work.some((item) => {
+        return item !== null;
+      }) &&
+      removeNulls(equipmentData.work) !==
+        importedData?.work?.replace(/(^,)|(,$)/g, "")
+    )
+      return false;
     return true;
   }
 

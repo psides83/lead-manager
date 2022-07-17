@@ -10,8 +10,6 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 
-// TODO - gray out pdi section if pdi has been submitted, hide willSubmitPDI checkbox if stock and serial are not filled
-
 function PDIRequestCheckboxes(props) {
   const { equipmentData, setEquipmentData, other, setOther } = props;
 
@@ -24,8 +22,6 @@ function PDIRequestCheckboxes(props) {
   var [checked7, setChecked7] = useState(false);
   var [checked8, setChecked8] = useState(false);
   var [otherDisabled, setOtherDisabled] = useState(true);
-  console.log(equipmentData.work);
-  console.log(other);
 
   // Array of work options that populate the checkbox setion of the form.
   var workOptions = [
@@ -188,7 +184,7 @@ function PDIRequestCheckboxes(props) {
     var temp = [];
 
     if (equipmentData.work !== undefined) {
-      for (let i of equipmentData.work) i && temp.push(i);
+      for (let i of equipmentData?.work) i && temp.push(i);
     }
     var workString = temp.toString().replace(/,/g, ", ");
 
