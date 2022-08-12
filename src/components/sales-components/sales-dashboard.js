@@ -30,6 +30,7 @@ export default function SalesDashboard() {
    // fetches sales data from Firestore
    useEffect(() => {
     fetchSales();
+    console.log(sales)
   }, [fetchSales]);
 
   // sets the UI for to show the trend is up or down with an appropriately colored arrow

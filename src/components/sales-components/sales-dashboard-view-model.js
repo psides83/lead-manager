@@ -54,6 +54,7 @@ class SalesDashboardViewModel {
           if (category === SALES_CATEGORIES.BONUS) return sum + data.bonus;
           return null;
         }, 0);
+        console.log(filteredSales)
       return filteredSales;
     } else {
       return 0;
