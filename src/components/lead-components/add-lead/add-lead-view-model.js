@@ -126,12 +126,12 @@ class AddLeadViewModel {
 
     this.equipmentList.push(this.equipment);
     this.setEquipmentList(this.equipmentList);
-    console.log("Temp EQ");
-    console.log(this.equipmentList);
+    this.setEquipmentSuccess(true);
 
     await this.resetEquipmentForm();
     this.setLoadingEquipment(false);
-    this.setEquipmentSuccess(true);
+    this.setEquipmentSuccess(false);
+
   };
 
   // Squipment submission validation.
