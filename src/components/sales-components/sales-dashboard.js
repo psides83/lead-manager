@@ -10,6 +10,7 @@ import ToggleButtons from "../ui-components/toggle-buttons";
 import SalesDataGrid from "./sales-data-grid";
 import SalesDashboardViewModel from "./sales-dashboard-view-model";
 import { AuthContext } from "../../state-management/auth-context-provider";
+import EquipmentSales from "./equipment-sales";
 
 export default function SalesDashboard() {
   const { userProfile } = useContext(AuthContext);
@@ -79,6 +80,7 @@ export default function SalesDashboard() {
         justifyContent: "center",
       }}
     >
+      <EquipmentSales/>
       <ToggleButtons
         toggleValue={selectedCategory}
         setToggleValue={setSelectedCategory}
