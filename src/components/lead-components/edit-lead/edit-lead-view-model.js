@@ -96,6 +96,8 @@ class EditLeadViewModel {
       timestamp: timestamp,
     });
 
+    this.leadData.mergeWithCoreData = true
+
     const leadRef = doc(db, "leads", this.lead.id);
 
     await setDoc(leadRef, this.leadData, { merge: true });

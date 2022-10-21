@@ -1,9 +1,9 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import {
-  getDoc,
-  doc,
-} from "firebase/firestore";
-import { db } from "../../services/firebase";
+// import {
+//   getDoc,
+//   doc,
+// } from "firebase/firestore";
+// import { db } from "../../services/firebase";
 import { branches } from "../../models/static-data";
 import {
   Box,
@@ -99,22 +99,31 @@ export default function SalesmenList() {
   };
 
   // Fetch loanerss from firestore:
-  const fetch = useCallback(async () => {
+  const fetchSalesmen = useCallback(async () => {
+    
     if (userProfile) {
-      const docRef = doc(db, "salesmen", "salesmen");
-      const docSnap = await getDoc(docRef);
-
-      setSalesmen(docSnap.data().list);
-      console.log(docSnap.data().list);
+      // const docRef = doc(db, "salesmen", "salesmen");
+      // const docSnap = await getDoc(docRef);
+      
+      // setSalesmen(docSnap.data().list);
+      // console.log(docSnap.data().list);
+      
+      
+      
+      const API_URL = "https://psides83.github.io/listJSON/salesmanList.json";
+      const response = await fetch(API_URL);
+      const json = await response.json();
+      console.log(json)
+      setSalesmen(json);
     }
   }, [userProfile]);
 
   useEffect(() => {
-    fetch();
+    fetchSalesmen();
     setTimeout(function () {
       setLoading(false);
     }, 1000);
-  }, [fetch]);
+  }, [fetchSalesmen]);
 
   const search = (salesmen) => {
     return salesmen

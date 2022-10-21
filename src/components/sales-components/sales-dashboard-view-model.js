@@ -1,7 +1,7 @@
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+// import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import moment from "moment";
 import { SALES_CATEGORIES } from "../../models/static-data";
-import { db } from "../../services/firebase";
+// import { db } from "../../services/firebase";
 
 class SalesDashboardViewModel {
   constructor(sales, setSales, year, category) {
@@ -12,26 +12,40 @@ class SalesDashboardViewModel {
   }
 
   fetch = async () => {
-    const salesQuery = query(
-      collection(db, "salesDataByMonth"),
-      orderBy("id", "asc")
-    );
+    // const salesQuery = query(
+    //   collection(db, "salesDataByMonth"),
+    //   orderBy("id", "asc")
+    // );
 
-    onSnapshot(salesQuery, (querySnapshot) => {
-      this.setSales(
-        querySnapshot.docs.map((doc) => ({
-          id: doc.data().id,
-          date: doc.data().date,
-          month: doc.data().month,
-          year: doc.data().year,
-          sales: Number(doc.data().sales),
-          margin: Number(doc.data().margin),
-          cost: Number(doc.data().sales - doc.data().margin),
-          commission: Number(doc.data().commission),
-          bonus: Number(doc.data().bonus),
-        }))
-      );
+    // onSnapshot(salesQuery, (querySnapshot) => {
+    //   this.setSales(
+    //     querySnapshot.docs.map((doc) => ({
+    //       id: doc.data().id,
+    //       date: doc.data().date,
+    //       month: doc.data().month,
+    //       year: doc.data().year,
+    //       sales: Number(doc.data().sales),
+    //       margin: Number(doc.data().margin),
+    //       cost: Number(doc.data().sales - doc.data().margin),
+    //       commission: Number(doc.data().commission),
+    //       bonus: Number(doc.data().bonus),
+    //     }))
+    //   );
+    // });
+
+    const API_URL = "https://psides83.github.io/listJSON/salesByMonth.json";
+    const response = await fetch(API_URL);
+    const json = await response.json();
+
+    json.map((month) => {
+      if (month.bonus === "") { month.bonus = "0" }
+      month.bonus = parseInt(month.bonus)
+      month.cost = Number(month.sales - month.margin)
     });
+
+    console.log(json);
+
+    this.setSales(json);
   };
 
   // calculates sales for the sales dashboard based on the selected year and category
@@ -54,7 +68,7 @@ class SalesDashboardViewModel {
           if (category === SALES_CATEGORIES.BONUS) return sum + data.bonus;
           return null;
         }, 0);
-        console.log(filteredSales)
+      console.log(filteredSales);
       return filteredSales;
     } else {
       return 0;

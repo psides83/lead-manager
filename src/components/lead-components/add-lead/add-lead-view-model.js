@@ -67,6 +67,7 @@ class AddLeadViewModel {
     leadData.salesmanID = this.userProfile.id;
     leadData.quoteLink = "";
     leadData.equipment = this.equipmentList;
+    leadData.mergeWithCoreData = true
 
     console.table(leadData);
 

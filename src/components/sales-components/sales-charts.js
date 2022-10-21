@@ -55,7 +55,7 @@ const SalesCharts = (props) => {
               stroke="#e3e8e7"
               fill="#e3e8e7"
               barSize={12}
-              // radius={[3, 3, 0, 0]}
+              radius={[3, 3, 0, 0]}
             />
             <Bar
               dataKey={"margin"}
