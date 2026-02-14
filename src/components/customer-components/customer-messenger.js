@@ -170,7 +170,6 @@ function CustomerMessenger(props) {
         ))}
         <div ref={bottomRef} />
       </div>
-
       <div
         style={{
           display: "flex",

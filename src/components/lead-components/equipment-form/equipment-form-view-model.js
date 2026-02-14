@@ -5,6 +5,11 @@ import {
   equipmentAvailabilityArray,
   equipmentStatusArray,
 } from "../../../models/static-data";
+import {
+  deleteSetupRequest,
+  deleteEquipmentFromSetupRequest,
+  syncEquipmentToSetupRequest,
+} from "../../../services/setup-request-service";
 
 export default class EquipmentFormViewModel {
   constructor(
@@ -23,7 +28,9 @@ export default class EquipmentFormViewModel {
     setLoading,
     setSuccess,
     setIsShowingDialog,
-    handleCloseDialog
+    handleCloseDialog,
+    pdiUser,
+    userProfile
   ) {
     this.lead = lead;
     this.equipment = equipment;
@@ -41,12 +48,15 @@ export default class EquipmentFormViewModel {
     this.setImportedData = setImportedData;
     this.setIsShowingDialog = setIsShowingDialog;
     this.handleCloseDialog = handleCloseDialog;
+    this.pdiUser = pdiUser;
+    this.userProfile = userProfile;
   }
 
   // deletes the equipment item
-  deleteEquipment = async (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+  deleteEquipment = async (event, options = {}) => {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    const { deleteEmptyRequestToo = false } = options;
     const leadRef = doc(db, "leads", this.lead.id);
 
     const equipmentIndex = this.lead.equipment.indexOf(this.equipment);
@@ -54,7 +64,39 @@ export default class EquipmentFormViewModel {
     this.lead.equipment.splice(equipmentIndex, 1);
 
     await setDoc(leadRef, { equipment: this.lead.equipment }, { merge: true });
+    const requestResult = await deleteEquipmentFromSetupRequest({
+      lead: this.lead,
+      equipment: this.equipment,
+      pdiUser: this.pdiUser,
+      userProfile: this.userProfile,
+    });
 
+    if (requestResult?.requestBecameEmpty) {
+      if (deleteEmptyRequestToo) {
+        await deleteSetupRequest({
+          lead: this.lead,
+          pdiUser: this.pdiUser,
+          userProfile: this.userProfile,
+        });
+        this.setMessage("Empty setup request deleted");
+        this.setOpenSuccess(true);
+      } else {
+        return { requestBecameEmpty: true };
+      }
+    }
+
+    this.setIsShowingDialog(false);
+    return { requestBecameEmpty: false };
+  };
+
+  deleteEmptySetupRequest = async () => {
+    await deleteSetupRequest({
+      lead: this.lead,
+      pdiUser: this.pdiUser,
+      userProfile: this.userProfile,
+    });
+    this.setMessage("Empty setup request deleted");
+    this.setOpenSuccess(true);
     this.setIsShowingDialog(false);
   };
 
@@ -69,8 +111,8 @@ export default class EquipmentFormViewModel {
         change.push(
           `Model edited from ${
             importedData.model === "" ? "BLANK" : importedData.model
-          } to ${equipmentData.model === "" ? "BLANK" : equipmentData.model}`
-        )
+          } to ${equipmentData.model === "" ? "BLANK" : equipmentData.model}`,
+        ),
       );
     }
 
@@ -79,8 +121,8 @@ export default class EquipmentFormViewModel {
         change.push(
           `Stock # for ${equipmentData.model} edited from ${
             importedData.stock === "" ? "BLANK" : importedData.stock
-          } to ${equipmentData.stock === "" ? "BLANK" : equipmentData.stock}`
-        )
+          } to ${equipmentData.stock === "" ? "BLANK" : equipmentData.stock}`,
+        ),
       );
     }
 
@@ -89,16 +131,16 @@ export default class EquipmentFormViewModel {
         change.push(
           `Serial # for ${equipmentData.model} edited from ${
             importedData.serial === "" ? "BLANK" : importedData.serial
-          } to ${equipmentData.serial === "" ? "BLANK" : equipmentData.serial}`
-        )
+          } to ${equipmentData.serial === "" ? "BLANK" : equipmentData.serial}`,
+        ),
       );
     }
 
     if (equipmentData.status !== importedData.status) {
       setChange(
         change.push(
-          `Status of ${equipmentData.model} updated from ${importedData.status} to ${equipmentData.status}`
-        )
+          `Status of ${equipmentData.model} updated from ${importedData.status} to ${equipmentData.status}`,
+        ),
       );
     }
 
@@ -107,24 +149,24 @@ export default class EquipmentFormViewModel {
         change.push(
           `Notes on ${equipmentData.model} edited from ${
             importedData.notes === "" ? "BLANK" : importedData.notes
-          } to ${equipmentData.notes === "" ? "BLANK" : equipmentData.notes}`
-        )
+          } to ${equipmentData.notes === "" ? "BLANK" : equipmentData.notes}`,
+        ),
       );
     }
 
     if (equipmentData.availability !== importedData.availability) {
       setChange(
         change.push(
-          `Availability of ${equipmentData.model} updated from ${importedData.availability} to ${equipmentData.availability}`
-        )
+          `Availability of ${equipmentData.model} updated from ${importedData.availability} to ${equipmentData.availability}`,
+        ),
       );
     }
 
     if (equipmentData.willSubmitPDI !== importedData.willSubmitPDI) {
       setChange(
         change.push(
-          `Will Sumbit PDI of ${equipmentData.model} updated from ${importedData.willSubmitPDI} to ${equipmentData.willSubmitPDI}`
-        )
+          `Will Sumbit PDI of ${equipmentData.model} updated from ${importedData.willSubmitPDI} to ${equipmentData.willSubmitPDI}`,
+        ),
       );
     }
   }
@@ -158,7 +200,7 @@ export default class EquipmentFormViewModel {
       timestamp: timestamp,
     });
 
-    equipmentData.work = this.workNullEmpties()
+    equipmentData.work = this.workNullEmpties();
     equipmentData.id = id;
     equipmentData.timestamp = timestamp;
 
@@ -174,8 +216,15 @@ export default class EquipmentFormViewModel {
     await setDoc(
       leadRef,
       { equipment: lead.equipment, changeLog: leadChangeLog },
-      { merge: true }
+      { merge: true },
     );
+
+    await syncEquipmentToSetupRequest({
+      lead,
+      equipment: equipmentData,
+      pdiUser: this.pdiUser,
+      userProfile: this.userProfile,
+    });
   };
 
   workNullEmpties = () => {
@@ -205,7 +254,7 @@ export default class EquipmentFormViewModel {
     this.setImportedData({});
   }
 
-  // Requst submission validation.
+  // Request submission validation.
   equipmentSubmitValidation = async (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -214,6 +263,7 @@ export default class EquipmentFormViewModel {
     if (this.equipmentData.model === "") {
       this.setMessage("Equipment must have a model");
       this.setOpenError(true);
+      this.setLoading(false);
       return;
     } else {
       await this.setEquipmentToFirestore();

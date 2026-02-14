@@ -6,8 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { CssBaseline } from "@mui/material";
-import { Box } from "@mui/system";
+import { Box, CssBaseline, Toolbar } from "@mui/material";
 import MainAppBar from "./components/app-bar/app-bar";
 import LeadDashboard from "./components/lead-components/dashboard";
 import CustomerAppBar from "./components/customer-components/customer-app-bar";
@@ -20,25 +19,83 @@ import { AuthContext } from "./state-management/auth-context-provider";
 import SalesDashboard from "./components/sales-components/sales-dashboard";
 
 const theme = createTheme({
-  palette: {
-    mode: "light",
-    primary: {
-      main: "#367C2B",
+  cssVariables: true,
+  colorSchemes: {
+    light: {
+      palette: {
+        mode: "light",
+        primary: {
+          main: "#367C2B",
+        },
+        secondary: {
+          main: "#FFDE00",
+        },
+        success: {
+          main: "#66bb6a",
+        },
+        error: {
+          main: "#f44336",
+        },
+        info: {
+          main: "#708090",
+        },
+        background: {
+          default: "#e3e8e8",
+        },
+      },
     },
-    secondary: {
-      main: "#FFDE00",
+  },
+  shape: {
+    borderRadius: 14,
+  },
+  typography: {
+    h4: {
+      fontWeight: 700,
+      letterSpacing: "-0.01em",
     },
-    success: {
-      main: "#66bb6a",
+    h5: {
+      fontWeight: 700,
     },
-    error: {
-      main: "#f44336",
+    h6: {
+      fontWeight: 700,
     },
-    info: {
-      main: "#708090",
+    button: {
+      textTransform: "none",
+      fontWeight: 600,
     },
-    background: {
-      default: "#e3e8e8",
+  },
+  components: {
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backdropFilter: "blur(8px)",
+        },
+      },
+    },
+    MuiCard: {
+      defaultProps: {
+        elevation: 0,
+      },
+      styleOverrides: {
+        root: ({ theme }) => ({
+          border: `1px solid ${theme.palette.divider}`,
+          boxShadow: "0 12px 30px rgba(17, 24, 39, 0.08)",
+        }),
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          border: `1px solid ${theme.palette.divider}`,
+        }),
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 999,
+        },
+      },
     },
   },
 });
@@ -49,7 +106,6 @@ export default function App() {
   // const [notification, setNotification] = useState({ title: "", body: "" });
 
   const RequireAuth = ({ children }) => {
-
     return currentUser ? children : <Navigate to="/sign-in" />;
   };
 
@@ -90,7 +146,8 @@ export default function App() {
       <CssBaseline />
       <Router>
         {currentUser && <MainAppBar />}
-        <Box style={{ marginTop: currentUser && "75px" }}>
+        <Box>
+          {currentUser && <Toolbar />}
           <Routes>
             <Route path="/">
               <Route path="sign-in" element={<SignIn />} />

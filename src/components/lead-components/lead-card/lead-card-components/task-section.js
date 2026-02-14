@@ -44,10 +44,10 @@ export default function TaskSection(props) {
         if (item.leadID === lead.id && !onlyCompleted) {
           return searchParam.some((newItem) => {
             return (
-              item[newItem]
+              // .indexOf(searchText.toLowerCase()) > -1
+              (item[newItem]
                 .toString()
-                .toLowerCase()
-                // .indexOf(searchText.toLowerCase()) > -1
+                .toLowerCase())
             );
           });
         } else if (item.leadID === lead.id && item.isComplete !== onlyCompleted) {

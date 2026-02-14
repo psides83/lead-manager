@@ -75,7 +75,7 @@ function Row({ salesman }) {
 export default function SalesmenList() {
   // #region State Properties
   const { userProfile } = useContext(AuthContext);
-  const { searchText } = useContext(SearchContext)
+  const { searchText } = useContext(SearchContext);
   const [salesmen, setSalesmen] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchParam] = useState(["branch", "firstName", "lastName"]);
@@ -100,20 +100,17 @@ export default function SalesmenList() {
 
   // Fetch loanerss from firestore:
   const fetchSalesmen = useCallback(async () => {
-    
     if (userProfile) {
       // const docRef = doc(db, "salesmen", "salesmen");
       // const docSnap = await getDoc(docRef);
-      
+
       // setSalesmen(docSnap.data().list);
       // console.log(docSnap.data().list);
-      
-      
-      
+
       const API_URL = "https://psides83.github.io/listJSON/salesmanList.json";
       const response = await fetch(API_URL);
       const json = await response.json();
-      console.log(json)
+      console.log(json);
       setSalesmen(json);
     }
   }, [userProfile]);

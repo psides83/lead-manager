@@ -43,13 +43,14 @@ function StatusHistory(props) {
           <History />
         </IconButton>
       </Tooltip>
-     
       <Dialog
         onClose={handleCloseDialog}
         open={isShowingDialog}
         style={{ backdropFilter: "blur(4px)" }}
         scroll="paper"
-        PaperProps={{ style: { borderRadius: 8 }, elevation: 24 }}
+        slotProps={{
+          paper: { style: { borderRadius: 8 }, elevation: 24 }
+        }}
       >
         <DialogTitle id="history-dialog-title">Lead Status History</DialogTitle>
         <DialogContent dividers>

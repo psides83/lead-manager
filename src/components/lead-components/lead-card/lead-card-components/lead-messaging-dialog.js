@@ -58,12 +58,13 @@ function LeadMessagingDialog(props) {
           Message
         </Button>
       </Tooltip>
-
       <Dialog
         onClose={handleCloseDialog}
         open={isShowingDialog}
         style={{ backdropFilter: "blur(5px)" }}
-        PaperProps={{ style: { borderRadius: 8 }, elevation: 24 }}
+        slotProps={{
+          paper: { style: { borderRadius: 8 }, elevation: 24 }
+        }}
       >
         <CustomerMessenger user={userProfile} lead={lead} />
       </Dialog>

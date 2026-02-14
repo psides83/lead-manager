@@ -64,7 +64,9 @@ function ContactHistory(props) {
         open={isShowingDialog}
         style={{ backdropFilter: "blur(5px)" }}
         scroll="paper"
-        PaperProps={{ style: { borderRadius: 8 }, elevation: 24 }}
+        slotProps={{
+          paper: { style: { borderRadius: 8 }, elevation: 24 }
+        }}
       >
         <DialogTitle id="history-dialog-title">
           Lead Contact History

@@ -6,6 +6,8 @@ import {
   Grid,
   Stack,
   Button,
+  Divider,
+  DialogContent,
   MenuItem,
   TextField,
   Typography,
@@ -132,124 +134,157 @@ export default function EditLead(props) {
           <EditRounded />
         </IconButton>
       </Tooltip>
-
       <Dialog
         onClose={handleCloseDialog}
         open={isShowingDialog}
         style={{ backdropFilter: "blur(5px)" }}
-        PaperProps={{ style: { borderRadius: 8 }, elevation: 24 }}
+        fullWidth
+        maxWidth="sm"
+        slotProps={{
+          paper: {
+            style: { borderRadius: 14 },
+            elevation: 24,
+          }
+        }}
       >
-        <Box
-          sx={{
-            maxWidth: "380px",
-            padding: (theme) => theme.spacing(1),
-            paddingLeft: (theme) => theme.spacing(4),
-            paddingRight: (theme) => theme.spacing(4),
-            paddingBottom: (theme) => theme.spacing(3),
-          }}
-        >
-          <Stack direction="row" justifyContent="space-between">
-            <DialogTitle variant="h4">Edit Lead</DialogTitle>
-            <IconButton sx={{ height: 44 }} onClick={handleCloseDialog}>
-              <Close />
-            </IconButton>
-          </Stack>
-          <Grid container spacing={2}>
-            {addLeadInputs.map((input) => (
-              <Grid item key={input.id} xs={input.gridXS} sm={input.gridSM}>
-                <TextField
-                  required={input.required}
-                  fullWidth
-                  autoFocus={input.autoFocus}
-                  size="small"
-                  id={input.id}
-                  name={input.id}
-                  label={input.label}
-                  type={input.type}
-                  labelid={input.id}
-                  variant="outlined"
-                  select={input.select}
-                  value={viewModel.handleLeadValues(input.id)}
-                  onChange={(e) => viewModel.handleInput(e, input.id)}
-                  InputProps={input.inputProps}
-                >
-                  {input.id === "status"
-                    ? leadStatusArray.map((status, index) => (
-                        <MenuItem key={index} value={status}>
-                          {status}
-                        </MenuItem>
-                      ))
-                    : null}
-                </TextField>
-              </Grid>
-            ))}
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ px: 2.5, pt: 2 }}>
+          <DialogTitle sx={{ p: 0 }} variant="h5">
+            Edit Lead
+          </DialogTitle>
+          <IconButton sx={{ height: 40, width: 40 }} onClick={handleCloseDialog}>
+            <Close />
+          </IconButton>
+        </Stack>
+        <DialogContent sx={{ p: 2.5, pt: 1.5 }}>
+          <Box component="form" autoComplete="off" noValidate>
+            <input
+              type="text"
+              name="fake_username"
+              autoComplete="username"
+              style={{ display: "none" }}
+            />
+            <input
+              type="password"
+              name="fake_password"
+              autoComplete="current-password"
+              style={{ display: "none" }}
+            />
 
-            <Grid item>
-              <Stack direction="row">
-                {viewModel.checkBoxes().map((option) => (
-                  <FormControlLabel
-                    key={option.id}
-                    control={
-                      <Checkbox
-                        id={option.id}
-                        checked={option.checkedState}
-                        onChange={(e) => viewModel.handleChange(e)}
-                        color="primary"
-                        value={option.checkedState}
-                      />
-                    }
-                    label={
-                      <Typography style={{ fontSize: 14 }}>
-                        {option.title}
-                      </Typography>
-                    }
-                  />
-                ))}
-              </Stack>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <Button
-                fullWidth
-                color="error"
-                onClick={handleToggleConfirmDialog}
-                startIcon={<DeleteRounded />}
-              >
-                Delete
-              </Button>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ position: "relative" }}>
-                <Button
-                  fullWidth
-                  disabled={viewModel.buttonIsDisabled()}
-                  variant="contained"
-                  endIcon={success ? <CheckRounded /> : <SaveRounded />}
-                  onClick={(e) => viewModel.leadSubmitValidation(e)}
-                >
-                  {loading && (
-                    <CircularProgress
-                      size={24}
-                      color="primary"
-                      sx={{
-                        // color: green[500],
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        marginTop: "-12px",
-                        marginLeft: "-12px",
-                      }}
-                    />
-                  )}
-                  {loading ? "Saving" : success ? "Success" : "Save"}
-                </Button>
+            <Stack spacing={2}>
+              <Box sx={{ p: 1.5, borderRadius: 2, border: "1px solid", borderColor: "divider" }}>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5 }}>
+                  Lead Details
+                </Typography>
+                <Grid container spacing={1.5}>
+                  {addLeadInputs.map((input) => (
+                    <Grid item key={input.id} xs={input.gridXS} sm={input.gridSM}>
+                      <TextField
+                        required={input.required}
+                        fullWidth
+                        autoFocus={input.autoFocus}
+                        size="small"
+                        id={input.id}
+                        name={`lm-edit-${input.id}`}
+                        label={input.label}
+                        type={input.type}
+                        variant="outlined"
+                        select={input.select}
+                        autoComplete="off"
+                        value={viewModel.handleLeadValues(input.id)}
+                        onChange={(e) => viewModel.handleInput(e, input.id)}
+                        slotProps={{
+                          input: {
+                            ...(input.inputProps || {}),
+                          },
+                          htmlInput: {
+                            autoComplete: "new-password",
+                            name: `lm-edit-${input.id}`,
+                            "data-form-type": "other",
+                            "data-lpignore": "true",
+                          },
+                        }}
+                      >
+                        {input.id === "status"
+                          ? leadStatusArray.map((status, index) => (
+                              <MenuItem key={index} value={status}>
+                                {status}
+                              </MenuItem>
+                            ))
+                          : null}
+                      </TextField>
+                    </Grid>
+                  ))}
+                </Grid>
               </Box>
-            </Grid>
-          </Grid>
-        </Box>
-      </Dialog>
 
+              <Box sx={{ p: 1.5, borderRadius: 2, border: "1px solid", borderColor: "divider" }}>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                  Buying Signals
+                </Typography>
+                <Stack direction={{ xs: "column", sm: "row" }}>
+                  {viewModel.checkBoxes().map((option) => (
+                    <FormControlLabel
+                      key={option.id}
+                      control={
+                        <Checkbox
+                          id={option.id}
+                          checked={option.checkedState}
+                          onChange={(e) => viewModel.handleChange(e)}
+                          color="primary"
+                          value={option.checkedState}
+                        />
+                      }
+                      label={<Typography sx={{ fontSize: 14 }}>{option.title}</Typography>}
+                    />
+                  ))}
+                </Stack>
+              </Box>
+
+              <Divider />
+
+              <Grid container spacing={1.5}>
+                <Grid item xs={12} sm={6}>
+                  <Button
+                    fullWidth
+                    color="error"
+                    onClick={handleToggleConfirmDialog}
+                    startIcon={<DeleteRounded />}
+                  >
+                    Delete
+                  </Button>
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ position: "relative" }}>
+                    <Button
+                      fullWidth
+                      disabled={viewModel.buttonIsDisabled()}
+                      variant="contained"
+                      endIcon={success ? <CheckRounded /> : <SaveRounded />}
+                      onClick={(e) => viewModel.leadSubmitValidation(e)}
+                    >
+                      {loading && (
+                        <CircularProgress
+                          size={24}
+                          color="primary"
+                          sx={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            marginTop: "-12px",
+                            marginLeft: "-12px",
+                          }}
+                        />
+                      )}
+                      {loading ? "Saving" : success ? "Success" : "Save"}
+                    </Button>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Stack>
+          </Box>
+        </DialogContent>
+      </Dialog>
       <Dialog onClose={handleCloseConfirmDialog} open={isShowingConfirmDialog}>
         <div
           style={{

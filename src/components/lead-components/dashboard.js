@@ -2,17 +2,18 @@ import React, { useCallback, useState, useEffect, useRef, useContext } from "rea
 import LeadCard from "./lead-card/lead-card";
 import {
   Box,
-  Grid,
+  Container,
+  Divider,
   Tabs,
   Tab,
   TextField,
   MenuItem,
-  CircularProgress,
 } from "@mui/material";
 import Tasks from "./task-list";
 import { Toaster } from "react-hot-toast";
 import { SearchContext } from "../../state-management/search-provider";
 import { fetch, searchable } from "./dashboard-view-model";
+import LeadDashboardSkeleton from "../loading-views/lead-dashboard-skeleton";
 
 const filters = ["Active", "Closed"];
 
@@ -44,6 +45,7 @@ function LeadDashboard() {
 
   //    Fetch leads from firestore
   const fetchLeads = useCallback(async () => {
+    setLoading(true);
     fetch(setLeads, filterParam, timer, setLoading)
   }, [filterParam]);
 
@@ -60,81 +62,85 @@ function LeadDashboard() {
     setValue(newValue);
   };
 
+  const visibleLeads = searchable(leads, searchParam, searchText);
+
   return (
     <>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+      <Container maxWidth="lg" sx={{ py: 2 }}>
         <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          style={{ margin: "10px 20px 0 20px" }}
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "nowrap",
+            gap: 1,
+          }}
         >
-          <Box></Box>
-          <Tabs value={value} onChange={handleChange}>
+          <Tabs
+            value={value}
+            onChange={handleChange}
+            sx={{
+              minHeight: 38,
+              flexShrink: 1,
+              "& .MuiTab-root": { minHeight: 38 },
+            }}
+          >
             <Tab label="Leads" value="leads" />
             <Tab label="Tasks" value="tasks" />
           </Tabs>
-          <div className="cards-filter">
-            <TextField
-              select
-              SelectProps={{ style: { fontSize: 14 } }}
-              InputLabelProps={{ style: { fontSize: 14 } }}
-              size="small"
-              color="secondary"
-              fullWidth
-              variant="outlined"
-              labelid="filter"
-              id="filter"
-              value={filterParam}
-              label="Filter"
-              onChange={(e) => setFilterParam(e.target.value)}
-            >
-              {filters?.map((filter) => (
-                <MenuItem key={filter} style={{ fontSize: 14 }} value={filter}>
-                  {filter}
-                </MenuItem>
-              ))}
-            </TextField>
-          </div>
+          <TextField
+            select
+            size="small"
+            color="secondary"
+            variant="outlined"
+            id="filter"
+            value={filterParam}
+            label="Filter"
+            onChange={(e) => setFilterParam(e.target.value)}
+            sx={{ width: 130, flexShrink: 0 }}
+          >
+            {filters?.map((filter) => (
+              <MenuItem key={filter} value={filter}>
+                {filter}
+              </MenuItem>
+            ))}
+          </TextField>
         </Box>
-        {loading && (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "60vh",
-            }}
-          >
-            <CircularProgress />
-          </Box>
-        )}
-        {!loading && (
-          <Grid
-            container
-            justifyContent={value === "leads" ? "flex-start" : "center"}
-          >
+
+        <Divider sx={{ my: 2 }} />
+
+        {loading ? (
+          <LeadDashboardSkeleton />
+        ) : (
+          <>
             {value === "leads" ? (
-              searchable(leads, searchParam, searchText).map((lead) => (
-                <Grid key={lead.id} item xs={12} sm={6} md={6} lg={4}>
-                  <LeadCard lead={lead} tasks={tasks} />
-                </Grid>
-              ))
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "minmax(0, 380px)",
+                    md: "repeat(2, 380px)",
+                  },
+                  alignItems: "start",
+                  gap: 2,
+                  maxWidth: 800,
+                  mx: "auto",
+                  justifyContent: "center",
+                }}
+              >
+                {visibleLeads.map((lead) => (
+                  <LeadCard key={lead.id} lead={lead} tasks={tasks} />
+                ))}
+              </Box>
             ) : (
-              <Grid item xs={12} sm={6} md={6} lg={4} sx={{ mt: "10px" }}>
-                <Box display="flex" justifyContent="center">
-                  <Tasks />
-                </Box>
-              </Grid>
+              <Box sx={{ mt: "10px", display: "flex", justifyContent: "center" }}>
+                <Tasks />
+              </Box>
             )}
-          </Grid>
+          </>
         )}
-      </Box>
+      </Container>
       <Toaster position="top-center" reverseOrder={true} />
     </>
   );

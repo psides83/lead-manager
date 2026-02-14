@@ -17,6 +17,27 @@ const ToggleButtons = (props) => {
       exclusive
       onChange={handleValue}
       aria-label="text alignment"
+      sx={{
+        mt: 1,
+        p: 0.5,
+        borderRadius: 999,
+        backgroundColor: "background.paper",
+        border: "1px solid",
+        borderColor: "divider",
+        "& .MuiToggleButton-root": {
+          border: "none",
+          borderRadius: 999,
+          px: 1.5,
+          color: "text.secondary",
+        },
+        "& .Mui-selected": {
+          backgroundColor: "primary.main",
+          color: "primary.contrastText",
+          "&:hover": {
+            backgroundColor: "primary.dark",
+          },
+        },
+      }}
     >
       {selections?.map((selection) => (
         <ToggleButton key={selection} value={selection}>

@@ -92,13 +92,14 @@ function ContactDialog(props) {
           </Badge>
         </IconButton>
       </Tooltip>
-
       <Dialog
         onClose={handleCloseDialog}
         open={isShowingDialog}
         style={{ backdropFilter: "blur(5px)" }}
         scroll="paper"
-        PaperProps={{ style: { borderRadius: 8 }, elevation: 24 }}
+        slotProps={{
+          paper: { style: { borderRadius: 8 }, elevation: 24 }
+        }}
       >
         <DialogTitle id="history-dialog-title">
           Choose Contact Method

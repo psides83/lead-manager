@@ -10,11 +10,10 @@ export default function SalesDataGrid(props) {
       <Paper
         elevation={4}
         sx={{
-          borderRadius: "10px",
-          height: "500px",
-          minWidth: "380px",
-          maxWidth: "550px",
-          marginTop: "8px",
+          borderRadius: 2,
+          height: 500,
+          width: "min(100%, 920px)",
+          mt: 1,
         }}
       >
         {sales.length > 0 && (
@@ -24,11 +23,21 @@ export default function SalesDataGrid(props) {
               return null
             })}
             columns={columns}
-            pageSize={12}
-            rowsPerPageOptions={[12]}
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 12, page: 0 },
+              },
+            }}
+            pageSizeOptions={[12]}
             density="compact"
-            hideFooterPagination
-            hideFooter
+            showToolbar
+            slotProps={{
+              toolbar: {
+                showQuickFilter: true,
+                quickFilterProps: { debounceMs: 300 },
+              },
+            }}
+            disableRowSelectionOnClick
           />
         )}
       </Paper>

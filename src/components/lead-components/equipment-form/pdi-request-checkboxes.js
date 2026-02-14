@@ -23,6 +23,14 @@ function PDIRequestCheckboxes(props) {
   var [checked8, setChecked8] = useState(false);
   var [otherDisabled, setOtherDisabled] = useState(true);
 
+  const updateWorkAt = (index, value) => {
+    const nextWork = Array.isArray(equipmentData.work)
+      ? [...equipmentData.work]
+      : [];
+    nextWork[index] = value;
+    setEquipmentData({ ...equipmentData, work: nextWork });
+  };
+
   // Array of work options that populate the checkbox setion of the form.
   var workOptions = [
     {
@@ -64,19 +72,18 @@ function PDIRequestCheckboxes(props) {
 
   // Set the state of the "other" checkbox. It's disabled if the textfield is empty.
   const enableOther = (event) => {
+    const nextOther = event.target.value;
     setOther(event.target.value);
 
-    equipmentData.work[7] = other;
-    setEquipmentData({ ...equipmentData, work: equipmentData.work });
+    updateWorkAt(7, nextOther === "" ? null : nextOther);
 
-    if (event.target.value !== "") {
+    if (nextOther !== "") {
       setOtherDisabled(false);
       setChecked8(true);
-    } else if (event.target.value === "") {
+    } else if (nextOther === "") {
       setOtherDisabled(true);
       setChecked8(false);
-      equipmentData.work[7] = null;
-      setEquipmentData({ ...equipmentData, work: equipmentData.work });
+      updateWorkAt(7, null);
     }
   };
 
@@ -86,78 +93,64 @@ function PDIRequestCheckboxes(props) {
       case "1":
         if (!checked1) {
           setChecked1(true);
-          equipmentData.work[0] = event.target.value;
-          setEquipmentData({ ...equipmentData, work: equipmentData.work });
+          updateWorkAt(0, event.target.value);
         } else {
           setChecked1(false);
-          equipmentData.work[0] = null;
-          setEquipmentData({ ...equipmentData, work: equipmentData.work });
+          updateWorkAt(0, null);
         }
         break;
       case "2":
         if (!checked2) {
           setChecked2(true);
-          equipmentData.work[1] = event.target.value;
-          setEquipmentData({ ...equipmentData, work: equipmentData.work });
+          updateWorkAt(1, event.target.value);
         } else {
           setChecked2(false);
-          equipmentData.work[1] = null;
-          setEquipmentData({ ...equipmentData, work: equipmentData.work });
+          updateWorkAt(1, null);
         }
         break;
       case "3":
         if (!checked3) {
           setChecked3(true);
-          equipmentData.work[2] = event.target.value;
-          setEquipmentData({ ...equipmentData, work: equipmentData.work });
+          updateWorkAt(2, event.target.value);
         } else {
           setChecked3(false);
-          equipmentData.work[2] = null;
-          setEquipmentData({ ...equipmentData, work: equipmentData.work });
+          updateWorkAt(2, null);
         }
         break;
       case "4":
         if (!checked4) {
           setChecked4(true);
-          equipmentData.work[3] = event.target.value;
-          setEquipmentData({ ...equipmentData, work: equipmentData.work });
+          updateWorkAt(3, event.target.value);
         } else {
           setChecked4(false);
-          equipmentData.work[3] = null;
-          setEquipmentData({ ...equipmentData, work: equipmentData.work });
+          updateWorkAt(3, null);
         }
         break;
       case "5":
         if (!checked5) {
           setChecked5(true);
-          equipmentData.work[4] = event.target.value;
-          setEquipmentData({ ...equipmentData, work: equipmentData.work });
+          updateWorkAt(4, event.target.value);
         } else {
           setChecked5(false);
-          equipmentData.work[4] = null;
-          setEquipmentData({ ...equipmentData, work: equipmentData.work });
+          updateWorkAt(4, null);
         }
         break;
       case "6":
         if (!checked6) {
           setChecked6(true);
-          equipmentData.work[5] = event.target.value;
-          setEquipmentData({ ...equipmentData, work: equipmentData.work });
+          updateWorkAt(5, event.target.value);
         } else {
           setChecked6(false);
-          equipmentData.work[5] = null;
-          setEquipmentData({ ...equipmentData, work: equipmentData.work });
+          updateWorkAt(5, null);
         }
         break;
       case "7":
         if (!checked7) {
           setChecked7(true);
-          equipmentData.work[6] = event.target.value;
-          setEquipmentData({ ...equipmentData, work: equipmentData.work });
+          updateWorkAt(6, event.target.value);
         } else {
           setChecked7(false);
-          equipmentData.work[6] = null;
-          setEquipmentData({ ...equipmentData, work: equipmentData.work });
+          updateWorkAt(6, null);
         }
         break;
       case "8":
@@ -306,10 +299,20 @@ function PDIRequestCheckboxes(props) {
               <TextField
                 fullWidth
                 size="small"
-                inputProps={{ style: { fontSize: 14 } }}
                 id="other"
+                name="lm-equipment-other"
                 value={other}
                 onChange={enableOther}
+                autoComplete="off"
+                slotProps={{
+                  htmlInput: {
+                    style: { fontSize: 14 },
+                    autoComplete: "new-password",
+                    name: "lm-equipment-other",
+                    "data-form-type": "other",
+                    "data-lpignore": "true",
+                  }
+                }}
               />
             </Stack>
             <Grid item xs={12} sm={12} style={{ marginTop: "10px" }}>
@@ -317,10 +320,10 @@ function PDIRequestCheckboxes(props) {
                 fullWidth
                 size="small"
                 id={"pdiNotes"}
-                name={"pdiNotes"}
+                name="lm-equipment-pdi-notes"
                 label={"PDI Notes"}
-                labelid={"pdiNotes"}
                 variant="outlined"
+                autoComplete="off"
                 onChange={(e) =>
                   setEquipmentData({
                     ...equipmentData,
@@ -328,6 +331,14 @@ function PDIRequestCheckboxes(props) {
                   })
                 }
                 value={equipmentData.pdiNotes ? equipmentData.pdiNotes : ""}
+                slotProps={{
+                  htmlInput: {
+                    autoComplete: "new-password",
+                    name: "lm-equipment-pdi-notes",
+                    "data-form-type": "other",
+                    "data-lpignore": "true",
+                  }
+                }}
               />
             </Grid>
           </FormGroup>

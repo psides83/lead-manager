@@ -27,73 +27,79 @@ export default function SignIn() {
   const { dispatch } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const [openSuccess, setOpenSuccess] = useState(false);
   const [openError, setOpenError] = useState(false);
   var [validationMessage, setValidationMessage] = useState("");
 
-  const fetchProfile = async (user) => {
-    try {
-      if (user) {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          dispatch({
-            type: AUTH_ACTION.LOGIN,
-            currentUser: user,
-            userProfile: docSnap.data(),
-          });
-          navigate("/");
-        }
-      }
-    } catch (error) {
-      console.log("error", error);
+  const fetchProfile = async (database, userId) => {
+    const docRef = doc(database, "users", userId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      return null;
     }
-  };
-
-  const fetchPDIProfile = async (user) => {
-    try {
-      if (user) {
-        const docRef = doc(pdiDB, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          dispatch({
-            type: AUTH_ACTION.PDI_LOGIN,
-            pdiUser: docSnap.data(),
-          });
-          navigate("/");
-        }
-      }
-    } catch (error) {
-      console.log("error", error);
-    }
+    return docSnap.data();
   };
 
   const signIn = async (e) => {
     e.preventDefault();
+    setIsSigningIn(true);
+    setOpenError(false);
+    setOpenSuccess(false);
 
-    signInWithEmailAndPassword(auth, email, password)
-      .then(async (userCredential) => {
-        // Signed in
-        const user = userCredential.user;
-        fetchProfile(user);
-      })
-      .catch((error) => {
+    try {
+      const [primaryResult, pdiResult] = await Promise.allSettled([
+        signInWithEmailAndPassword(auth, email, password),
+        signInWithEmailAndPassword(pdiAuth, email, password),
+      ]);
+
+      if (primaryResult.status !== "fulfilled") {
         setValidationMessage("The email and/or password do not match");
         setOpenError(true);
+        return;
+      }
+
+      const primaryUser = primaryResult.value.user;
+      const userProfile = await fetchProfile(db, primaryUser.uid);
+      if (!userProfile) {
+        setValidationMessage("Your Lead Manager profile could not be found.");
+        setOpenError(true);
+        return;
+      }
+
+      dispatch({
+        type: AUTH_ACTION.LOGIN,
+        currentUser: primaryUser,
+        userProfile,
       });
 
-      signInWithEmailAndPassword(pdiAuth, email, password)
-      .then(async (userCredential) => {
-        // Signed in
-        const user = userCredential.user;
-        fetchPDIProfile(user);
-      })
-      .catch((error) => {
-        setValidationMessage("The email and/or password do not match");
-        setOpenError(true);
-      });
+      if (pdiResult.status === "fulfilled") {
+        const pdiProfile = await fetchProfile(pdiDB, pdiResult.value.user.uid);
+        if (pdiProfile) {
+          dispatch({
+            type: AUTH_ACTION.PDI_LOGIN,
+            pdiUser: pdiProfile,
+          });
+        } else {
+          setValidationMessage(
+            "Signed in. Setup request profile is missing in the PDI database.",
+          );
+          setOpenSuccess(true);
+        }
+      } else {
+        setValidationMessage(
+          "Signed in. Setup request access is limited because PDI sign-in failed.",
+        );
+        setOpenSuccess(true);
+      }
+
+      navigate("/");
+    } catch (error) {
+      setValidationMessage("Unable to sign in right now. Please try again.");
+      setOpenError(true);
+    } finally {
+      setIsSigningIn(false);
+    }
   };
 
   // Forgot password.
@@ -208,12 +214,13 @@ export default function SignIn() {
             fullWidth
             variant="contained"
             color="primary"
+            disabled={isSigningIn}
             sx={{
               margin: (theme) => theme.spacing(3, 0, 2),
             }}
             onClick={signIn}
           >
-            Sign In
+            {isSigningIn ? "Signing In..." : "Sign In"}
           </Button>
           <Grid container>
             <Grid item xs>

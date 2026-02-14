@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useContext } from "react";
 import { currencyFormatter } from "../../utils/utils";
 import moment from "moment";
 // eslint-disable-next-line
-import { Box, Paper, Stack, Typography } from "@mui/material";
+import { Box, Container, Paper, Stack, Typography } from "@mui/material";
 import { ArrowDownwardRounded, ArrowUpwardRounded } from "@mui/icons-material";
 import { SALES_CATEGORIES, years } from "../../models/static-data";
 import SalesCharts from "./sales-charts";
@@ -10,10 +10,12 @@ import ToggleButtons from "../ui-components/toggle-buttons";
 import SalesDataGrid from "./sales-data-grid";
 import SalesDashboardViewModel from "./sales-dashboard-view-model";
 import { AuthContext } from "../../state-management/auth-context-provider";
+import SalesDashboardSkeleton from "../loading-views/sales-dashboard-skeleton";
 
 export default function SalesDashboard() {
   const { userProfile } = useContext(AuthContext);
   const [sales, setSales] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("sales");
   const [selectedYear, setSelectedYear] = useState(moment().format("yyyy"));
   const categories = Object.values(SALES_CATEGORIES)
@@ -23,14 +25,18 @@ export default function SalesDashboard() {
 
   //    Fetch leads from firestore
   const fetchSales = useCallback(async () => {
-    await viewModel.fetch();
+    try {
+      setLoading(true);
+      await viewModel.fetch();
+    } finally {
+      setLoading(false);
+    }
     // eslint-disable-next-line
   }, []);
 
    // fetches sales data from Firestore
    useEffect(() => {
     fetchSales();
-    console.log(sales)
   }, [fetchSales]);
 
   // sets the UI for to show the trend is up or down with an appropriately colored arrow
@@ -64,19 +70,18 @@ export default function SalesDashboard() {
     }
   };
 
+  if (loading) {
+    return <SalesDashboardSkeleton />;
+  }
+
   return (
-    <Box
-      style={{
+    <Container
+      maxWidth="lg"
+      sx={{
         display: "flex",
         flexDirection: "column",
-        // height: 680,
-        width: "98vw",
-        // background: "white",
-        // border: "solid black 2px",
-        // borderRadius: "10px",
         alignItems: "center",
-        alignContent: "center",
-        justifyContent: "center",
+        py: 2,
       }}
     >
       <ToggleButtons
@@ -119,7 +124,11 @@ export default function SalesDashboard() {
       </Box>
       <Paper
         elevation={4}
-        sx={{ borderRadius: "10px", minWidth: "350px", marginTop: "8px" }}
+        sx={{
+          borderRadius: 2,
+          width: "min(100%, 920px)",
+          mt: 1,
+        }}
       >
         <SalesCharts
           data={sales}
@@ -136,8 +145,7 @@ export default function SalesDashboard() {
           </Typography>
         </Stack>
       </Paper>
-
       <SalesDataGrid sales={sales} selectedYear={selectedYear} />
-    </Box>
+    </Container>
   );
 }

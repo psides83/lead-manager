@@ -236,12 +236,13 @@ export default function UserAccountDialog(props) {
           <AccountCircleRounded color="inherit" />
         </IconButton>
       </Tooltip>
-
       <Dialog
         onClose={handleCloseDialog}
         open={isShowingDialog}
         style={{ backdropFilter: "blur(5px)" }}
-        PaperProps={{ style: { borderRadius: 8 }, elevation: 24 }}
+        slotProps={{
+          paper: { style: { borderRadius: 8 }, elevation: 24 }
+        }}
       >
         <Box
           sx={{
@@ -275,7 +276,9 @@ export default function UserAccountDialog(props) {
                   select={input.select}
                   value={handleUserValues(input.id)}
                   onChange={(e) => handleInput(e, input.id)}
-                  InputProps={input.inputProps}
+                  slotProps={{
+                    input: input.inputProps
+                  }}
                 >
                   {input.select &&
                     userTypes.map((type, index) => (
@@ -328,7 +331,6 @@ export default function UserAccountDialog(props) {
           </Grid>
         </Box>
       </Dialog>
-
       <Dialog onClose={handleCloseConfirmDialog} open={isShowingConfirmDialog}>
         <div
           style={{
