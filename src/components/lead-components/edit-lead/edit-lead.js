@@ -1,6 +1,11 @@
 //Imports
 import React, { useCallback, useEffect, useState } from "react";
-import { addLeadInputs, leadStatusArray } from "../../../models/static-data";
+import {
+  addLeadInputs,
+  closeOutcomeArray,
+  closeReasonArray,
+  leadStatusArray,
+} from "../../../models/static-data";
 import {
   Box,
   Grid,
@@ -42,6 +47,10 @@ export default function EditLead(props) {
     willFinance: false,
     hasTrade: false,
     willPurchase: false,
+    closeOutcome: "",
+    closeReason: "",
+    closeCompetitor: "",
+    closeNotes: "",
     changeLog: [],
   });
   const [importedData, setImportedData] = useState({});
@@ -103,6 +112,10 @@ export default function EditLead(props) {
         willFinance: lead.willFinance,
         hasTrade: lead.hasTrade,
         willPurchase: lead.willPurchase,
+        closeOutcome: lead.closeOutcome || "",
+        closeReason: lead.closeReason || "",
+        closeCompetitor: lead.closeCompetitor || "",
+        closeNotes: lead.closeNotes || "",
         changeLog: lead.changeLog,
       });
       setImportedData({
@@ -115,6 +128,10 @@ export default function EditLead(props) {
         willFinance: lead.willFinance,
         hasTrade: lead.hasTrade,
         willPurchase: lead.willPurchase,
+        closeOutcome: lead.closeOutcome || "",
+        closeReason: lead.closeReason || "",
+        closeCompetitor: lead.closeCompetitor || "",
+        closeNotes: lead.closeNotes || "",
         changeLog: lead.changeLog,
       });
       setLoading(false);
@@ -216,6 +233,74 @@ export default function EditLead(props) {
                   ))}
                 </Grid>
               </Box>
+
+              {leadData.status === "Closed" ? (
+                <Box sx={{ p: 1.5, borderRadius: 2, border: "1px solid", borderColor: "divider" }}>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5 }}>
+                    Close Details
+                  </Typography>
+                  <Grid container spacing={1.5}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        select
+                        size="small"
+                        id="closeOutcome"
+                        label="Outcome"
+                        value={viewModel.handleLeadValues("closeOutcome")}
+                        onChange={(e) => viewModel.handleInput(e, "closeOutcome")}
+                      >
+                        {closeOutcomeArray.map((outcome) => (
+                          <MenuItem key={outcome} value={outcome}>
+                            {outcome}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        select
+                        size="small"
+                        id="closeReason"
+                        label="Close Reason"
+                        value={viewModel.handleLeadValues("closeReason")}
+                        onChange={(e) => viewModel.handleInput(e, "closeReason")}
+                      >
+                        {closeReasonArray.map((reason) => (
+                          <MenuItem key={reason} value={reason}>
+                            {reason}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        id="closeCompetitor"
+                        label="Competitor (optional)"
+                        value={viewModel.handleLeadValues("closeCompetitor")}
+                        onChange={(e) => viewModel.handleInput(e, "closeCompetitor")}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        id="closeNotes"
+                        label="Close Notes (optional)"
+                        multiline
+                        minRows={2}
+                        value={viewModel.handleLeadValues("closeNotes")}
+                        onChange={(e) => viewModel.handleInput(e, "closeNotes")}
+                      />
+                    </Grid>
+                  </Grid>
+                </Box>
+              ) : null}
 
               <Box sx={{ p: 1.5, borderRadius: 2, border: "1px solid", borderColor: "divider" }}>
                 <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>

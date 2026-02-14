@@ -13,6 +13,7 @@ import {
   IconButton,
   List,
   ListItem,
+  Snackbar,
   Stack,
   Tooltip,
   Typography,
@@ -20,11 +21,17 @@ import {
 import EquipmentForm from "../../equipment-form/equipment-form";
 import { AuthContext } from "../../../../state-management/auth-context-provider";
 import { submitSetupRequest } from "../../../../services/setup-request-service";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../../../../services/firebase";
+import { syncEquipmentToSetupRequest } from "../../../../services/setup-request-service";
+import { writeAuditLog } from "../../../../services/audit-log-service";
 
 export default function EquipmentSection(props) {
   const { lead, setMessage, setOpenError, setOpenSuccess } = props;
   const [showingEquipment, setShowingEquipment] = useState(false);
   const [isShowingConfirmDialog, setIsShowingConfirmDialog] = useState(false);
+  const [undoEquipmentOpen, setUndoEquipmentOpen] = useState(false);
+  const [deletedEquipmentPayload, setDeletedEquipmentPayload] = useState(null);
   const { pdiUser, userProfile } = useContext(AuthContext);
 
   const handleCloseConfirmDialog = () => {
@@ -86,6 +93,55 @@ export default function EquipmentSection(props) {
     }
   }
 
+  const handleEquipmentDeleted = (payload) => {
+    setDeletedEquipmentPayload(payload);
+    setUndoEquipmentOpen(true);
+  };
+
+  const handleUndoEquipmentClose = () => {
+    setUndoEquipmentOpen(false);
+  };
+
+  const handleUndoEquipmentDelete = async () => {
+    const equipment = deletedEquipmentPayload?.equipment;
+    const equipmentIndex = deletedEquipmentPayload?.equipmentIndex;
+    if (!equipment) {
+      return;
+    }
+
+    const updatedEquipment = [...(lead.equipment || [])];
+    const safeIndex =
+      typeof equipmentIndex === "number" && equipmentIndex >= 0
+        ? Math.min(equipmentIndex, updatedEquipment.length)
+        : updatedEquipment.length;
+    updatedEquipment.splice(safeIndex, 0, equipment);
+
+    await setDoc(
+      doc(db, "leads", lead.id),
+      { equipment: updatedEquipment },
+      { merge: true },
+    );
+    await syncEquipmentToSetupRequest({
+      lead: { ...lead, equipment: updatedEquipment },
+      equipment,
+      pdiUser,
+      userProfile,
+    });
+    await writeAuditLog({
+      actionType: "equipment_restore_undo",
+      entityType: "equipment",
+      entityId: equipment?.id || equipment?.stock || "",
+      leadId: lead.id,
+      after: equipment,
+      metadata: { equipmentIndex: safeIndex, source: "equipment-section-undo" },
+    });
+
+    setUndoEquipmentOpen(false);
+    setDeletedEquipmentPayload(null);
+    setMessage("Equipment restored");
+    setOpenSuccess(true);
+  };
+
   return (
     <>
       <Stack direction="row" justifyContent="space-between">
@@ -96,6 +152,7 @@ export default function EquipmentSection(props) {
             setMessage={setMessage}
             setOpenError={setOpenError}
             setOpenSuccess={setOpenSuccess}
+            onEquipmentDeleted={handleEquipmentDeleted}
           />
           <SubmitPDIButton />
         </Stack>
@@ -123,6 +180,7 @@ export default function EquipmentSection(props) {
                     setMessage={setMessage}
                     setOpenError={setOpenError}
                     setOpenSuccess={setOpenSuccess}
+                    onEquipmentDeleted={handleEquipmentDeleted}
                   />
 
                   <Stack justifyItems="flex-end" alignContent="flex-end">
@@ -177,6 +235,18 @@ export default function EquipmentSection(props) {
           </div>
         </div>
       </Dialog>
+      <Snackbar
+        open={undoEquipmentOpen}
+        autoHideDuration={6000}
+        onClose={handleUndoEquipmentClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        message="Equipment deleted"
+        action={
+          <Button color="inherit" size="small" onClick={handleUndoEquipmentDelete}>
+            UNDO
+          </Button>
+        }
+      />
     </>
   );
 }

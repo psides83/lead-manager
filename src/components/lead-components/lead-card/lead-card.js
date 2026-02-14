@@ -9,14 +9,18 @@ import {
 import ContactHistory from "../lead-card/lead-card-components/contact-history";
 import StatusHistory from "../lead-card/lead-card-components/status-history";
 import {
+  Button,
   Card,
   CardContent,
   Chip,
+  Dialog,
+  DialogTitle,
   Divider,
   IconButton,
   Menu,
   MenuItem,
   Stack,
+  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -32,10 +36,17 @@ import {
   resolveBranch,
   watchRequestStatus,
 } from "../../../services/setup-request-service";
-import { leadStatusArray } from "../../../models/static-data";
+import {
+  closeOutcomeArray,
+  closeReasonArray,
+  leadStatusArray,
+} from "../../../models/static-data";
 import { doc, setDoc } from "firebase/firestore";
 import moment from "moment";
 import { db } from "../../../services/firebase";
+import { createStatusFollowUpTask } from "../../../services/follow-up-task-service";
+import { buildClosePayload } from "../../../utils/win-loss-intelligence";
+import { writeAuditLog } from "../../../services/audit-log-service";
 
 export default function LeadCard(props) {
   const { lead, tasks } = props;
@@ -46,6 +57,15 @@ export default function LeadCard(props) {
   const [openError, setOpenError] = useState(false);
   const [pdiStatus, setPdiStatus] = useState("");
   const [statusAnchorEl, setStatusAnchorEl] = useState(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isShowingCloseDialog, setIsShowingCloseDialog] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState("");
+  const [closeDetails, setCloseDetails] = useState({
+    closeOutcome: "",
+    closeReason: "",
+    closeCompetitor: "",
+    closeNotes: "",
+  });
   var [message, setMessage] = useState("");
   const { pdiUser, userProfile } = useContext(AuthContext);
 
@@ -97,9 +117,16 @@ export default function LeadCard(props) {
     setStatusAnchorEl(null);
   };
 
-  const handleStatusUpdate = async (nextStatus) => {
-    handleCloseStatusMenu();
+  const handleCloseDialogClose = () => {
+    setIsShowingCloseDialog(false);
+    setPendingStatus("");
+  };
+
+  const applyStatusUpdate = async (nextStatus, closePayload = null) => {
     if (!nextStatus || nextStatus === lead.status) {
+      return;
+    }
+    if (isUpdatingStatus) {
       return;
     }
 
@@ -115,21 +142,91 @@ export default function LeadCard(props) {
     ];
 
     try {
+      setIsUpdatingStatus(true);
       await setDoc(
         doc(db, "leads", lead.id),
         {
           status: nextStatus,
           mergeWithCoreData: true,
           changeLog: updatedChangeLog,
+          ...(closePayload || {}),
         },
         { merge: true },
       );
-      setMessage(`Status updated to ${nextStatus}`);
+      await writeAuditLog({
+        actionType: "lead_status_updated",
+        entityType: "lead",
+        entityId: lead.id,
+        leadId: lead.id,
+        before: { status: lead.status },
+        after: { status: nextStatus, ...(closePayload || {}) },
+        metadata: { source: "lead-card-status-chip" },
+      });
+
+      let followUpResult = { created: false };
+      try {
+        followUpResult = await createStatusFollowUpTask({
+          lead,
+          previousStatus: lead.status,
+          nextStatus,
+        });
+      } catch (_) {
+        // Status update already succeeded; keep UX positive and non-blocking.
+      }
+
+      setMessage(
+        followUpResult?.created
+          ? `Status updated to ${nextStatus}. Follow-up task created.`
+          : `Status updated to ${nextStatus}`,
+      );
       setOpenSuccess(true);
     } catch (error) {
       setMessage(error?.message || "Unable to update status");
       setOpenError(true);
+    } finally {
+      setIsUpdatingStatus(false);
     }
+  };
+
+  const handleStatusUpdate = async (nextStatus) => {
+    handleCloseStatusMenu();
+    if (!nextStatus || nextStatus === lead.status) {
+      return;
+    }
+
+    if (nextStatus === "Closed") {
+      setPendingStatus(nextStatus);
+      setCloseDetails({
+        closeOutcome: lead?.closeOutcome || "",
+        closeReason: lead?.closeReason || "",
+        closeCompetitor: lead?.closeCompetitor || "",
+        closeNotes: lead?.closeNotes || "",
+      });
+      setIsShowingCloseDialog(true);
+      return;
+    }
+
+    await applyStatusUpdate(nextStatus);
+  };
+
+  const handleSubmitCloseDetails = async () => {
+    if (!closeDetails.closeOutcome || !closeDetails.closeReason) {
+      setMessage("Close outcome and close reason are required.");
+      setOpenError(true);
+      return;
+    }
+
+    const closePayload = buildClosePayload({
+      lead,
+      closeOutcome: closeDetails.closeOutcome,
+      closeReason: closeDetails.closeReason,
+      closeCompetitor: closeDetails.closeCompetitor,
+      closeNotes: closeDetails.closeNotes,
+    });
+
+    setIsShowingCloseDialog(false);
+    await applyStatusUpdate(pendingStatus || "Closed", closePayload);
+    setPendingStatus("");
   };
 
   return (
@@ -219,6 +316,7 @@ export default function LeadCard(props) {
               color={statusColor === "default" ? "default" : "success"}
               variant="filled"
               onClick={handleOpenStatusMenu}
+              disabled={isUpdatingStatus}
               sx={{
                 cursor: "pointer",
                 "& .MuiChip-label": {
@@ -272,6 +370,76 @@ export default function LeadCard(props) {
             </MenuItem>
           ))}
         </Menu>
+        <Dialog onClose={handleCloseDialogClose} open={isShowingCloseDialog}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              margin: "5px 25px 25px 25px",
+              minWidth: 360,
+            }}
+          >
+            <DialogTitle>Close Details</DialogTitle>
+            <Stack spacing={1.5}>
+              <TextField
+                select
+                size="small"
+                label="Outcome"
+                value={closeDetails.closeOutcome}
+                onChange={(e) =>
+                  setCloseDetails({ ...closeDetails, closeOutcome: e.target.value })
+                }
+              >
+                {closeOutcomeArray.map((outcome) => (
+                  <MenuItem key={outcome} value={outcome}>
+                    {outcome}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                select
+                size="small"
+                label="Close Reason"
+                value={closeDetails.closeReason}
+                onChange={(e) =>
+                  setCloseDetails({ ...closeDetails, closeReason: e.target.value })
+                }
+              >
+                {closeReasonArray.map((reason) => (
+                  <MenuItem key={reason} value={reason}>
+                    {reason}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                size="small"
+                label="Competitor (optional)"
+                value={closeDetails.closeCompetitor}
+                onChange={(e) =>
+                  setCloseDetails({ ...closeDetails, closeCompetitor: e.target.value })
+                }
+              />
+              <TextField
+                size="small"
+                label="Close Notes (optional)"
+                value={closeDetails.closeNotes}
+                onChange={(e) =>
+                  setCloseDetails({ ...closeDetails, closeNotes: e.target.value })
+                }
+                multiline
+                minRows={2}
+              />
+              <Stack direction="row" justifyContent="space-between">
+                <Button variant="outlined" color="info" onClick={handleCloseDialogClose}>
+                  Cancel
+                </Button>
+                <Button variant="contained" color="primary" onClick={handleSubmitCloseDetails}>
+                  Save Close
+                </Button>
+              </Stack>
+            </Stack>
+          </div>
+        </Dialog>
 
         <Divider sx={{ my: 1.25 }} />
 

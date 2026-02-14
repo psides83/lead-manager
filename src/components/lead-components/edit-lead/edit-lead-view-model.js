@@ -1,6 +1,8 @@
 import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import moment from "moment";
 import { db } from "../../../services/firebase";
+import { createStatusFollowUpTask } from "../../../services/follow-up-task-service";
+import { writeAuditLog } from "../../../services/audit-log-service";
 
 class EditLeadViewModel {
   constructor(
@@ -43,12 +45,38 @@ class EditLeadViewModel {
 
   // Handle deleting of child record.
   deleteLead = async (event) => {
-    event.stopPropagation();
+    event?.stopPropagation?.();
+    const leadBackup = { ...this.lead };
 
     await deleteDoc(doc(db, "leads", this.lead?.id));
+    await writeAuditLog({
+      actionType: "lead_deleted",
+      entityType: "lead",
+      entityId: this.lead?.id,
+      leadId: this.lead?.id,
+      before: leadBackup,
+      metadata: { source: "edit-lead-dialog" },
+    });
 
     this.handleCloseConfirmDialog();
     this.handleCloseDialog();
+    return leadBackup;
+  };
+
+  restoreLead = async (leadBackup) => {
+    if (!leadBackup?.id) {
+      return;
+    }
+
+    await setDoc(doc(db, "leads", leadBackup.id), leadBackup, { merge: true });
+    await writeAuditLog({
+      actionType: "lead_restore_undo",
+      entityType: "lead",
+      entityId: leadBackup.id,
+      leadId: leadBackup.id,
+      after: leadBackup,
+      metadata: { source: "undo-snackbar" },
+    });
   };
 
   // Requst submission validation.
@@ -60,6 +88,17 @@ class EditLeadViewModel {
     if (this.leadData.name === "") {
       this.setMessage("Lead must have a name to be created");
       this.setOpenError(true);
+      this.setLoading(false);
+      return;
+    }
+
+    if (
+      this.leadData.status === "Closed" &&
+      (!this.leadData.closeOutcome || !this.leadData.closeReason)
+    ) {
+      this.setMessage("Close outcome and close reason are required when status is Closed.");
+      this.setOpenError(true);
+      this.setLoading(false);
       return;
     } else {
       await this.setLeadToFirestore()
@@ -96,11 +135,44 @@ class EditLeadViewModel {
       timestamp: timestamp,
     });
 
+    if (this.leadData.status === "Closed" && !this.leadData.closeTimestamp) {
+      this.leadData.closeTimestamp = timestamp;
+      this.leadData.closeUnix = moment().valueOf();
+      if (this.lead?.timestamp) {
+        const createdAt = moment(this.lead.timestamp, "DD-MMM-yyyy hh:mmA", true);
+        if (createdAt.isValid()) {
+          this.leadData.closeCycleDays = Math.max(
+            0,
+            Math.round(moment().diff(createdAt, "hours", true) / 24 * 10) / 10,
+          );
+        }
+      }
+    }
+
     this.leadData.mergeWithCoreData = true
 
     const leadRef = doc(db, "leads", this.lead.id);
 
     await setDoc(leadRef, this.leadData, { merge: true });
+    await writeAuditLog({
+      actionType: "lead_updated",
+      entityType: "lead",
+      entityId: this.lead.id,
+      leadId: this.lead.id,
+      before: this.importedData,
+      after: this.leadData,
+      metadata: { source: "edit-lead-dialog" },
+    });
+
+    try {
+      await createStatusFollowUpTask({
+        lead: this.lead,
+        previousStatus: this.importedData?.status,
+        nextStatus: this.leadData?.status,
+      });
+    } catch (_) {
+      // Lead save already succeeded; don't fail edit on automation issue.
+    }
   };
 
   // builds chang log data for values that have changed
@@ -145,6 +217,30 @@ class EditLeadViewModel {
         change.push(
           `status updated from ${importedData.status} to ${leadData.status}`
         )
+      );
+    }
+
+    if (leadData.closeOutcome !== importedData.closeOutcome) {
+      setChange(
+        change.push(
+          `close outcome updated from ${importedData.closeOutcome || "BLANK"} to ${leadData.closeOutcome || "BLANK"}`,
+        ),
+      );
+    }
+
+    if (leadData.closeReason !== importedData.closeReason) {
+      setChange(
+        change.push(
+          `close reason updated from ${importedData.closeReason || "BLANK"} to ${leadData.closeReason || "BLANK"}`,
+        ),
+      );
+    }
+
+    if (leadData.closeCompetitor !== importedData.closeCompetitor) {
+      setChange(
+        change.push(
+          `competitor updated from ${importedData.closeCompetitor || "BLANK"} to ${leadData.closeCompetitor || "BLANK"}`,
+        ),
       );
     }
 
@@ -205,6 +301,10 @@ class EditLeadViewModel {
       willFinance: false,
       hasTrade: false,
       willPurchase: false,
+      closeOutcome: "",
+      closeReason: "",
+      closeCompetitor: "",
+      closeNotes: "",
     });
     this.setChange([]);
     this.setImportedData({});
@@ -296,6 +396,14 @@ class EditLeadViewModel {
         return leadData.notes;
       case "quoteLink":
         return leadData.quoteLink;
+      case "closeOutcome":
+        return leadData.closeOutcome || "";
+      case "closeReason":
+        return leadData.closeReason || "";
+      case "closeCompetitor":
+        return leadData.closeCompetitor || "";
+      case "closeNotes":
+        return leadData.closeNotes || "";
       default:
         return "";
     }
@@ -315,6 +423,10 @@ class EditLeadViewModel {
       if (leadData.status !== importedData.status) return false;
       if (leadData.quoteLink !== importedData.quoteLink) return false;
       if (leadData.notes !== importedData.notes) return false;
+      if (leadData.closeOutcome !== importedData.closeOutcome) return false;
+      if (leadData.closeReason !== importedData.closeReason) return false;
+      if (leadData.closeCompetitor !== importedData.closeCompetitor) return false;
+      if (leadData.closeNotes !== importedData.closeNotes) return false;
       if (leadData.willFinance !== importedData.willFinance) return false;
       if (leadData.hasTrade !== importedData.hasTrade) return false;
       if (leadData.willPurchase !== importedData.willPurchase) return false;

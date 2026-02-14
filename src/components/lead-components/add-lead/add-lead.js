@@ -3,6 +3,8 @@ import React, { useContext, useState } from "react";
 import {
   addEquipmentInputs,
   addLeadInputs,
+  closeOutcomeArray,
+  closeReasonArray,
   leadStatusArray,
 } from "../../../models/static-data";
 import { styled } from "@mui/material/styles";
@@ -54,6 +56,10 @@ export default function AddLead(props) {
     willFinance: false,
     hasTrade: false,
     willPurchase: false,
+    closeOutcome: "",
+    closeReason: "",
+    closeCompetitor: "",
+    closeNotes: "",
   });
 
   var [equipment, setEquipment] = useState({
@@ -112,8 +118,9 @@ export default function AddLead(props) {
           color="inherit"
           onClick={handleToggleDialog}
           endIcon={<PersonAddAltRounded color="inherit" />}
+          sx={{ whiteSpace: "nowrap" }}
         >
-          <Typography sx={{ display: { xs: "none", sm: "block" } }}>
+          <Typography sx={{ display: { xs: "none", md: "block" }, whiteSpace: "nowrap" }}>
             Add Lead
           </Typography>
         </Button>
@@ -201,6 +208,74 @@ export default function AddLead(props) {
                     ))}
                 </Grid>
               </Box>
+
+              {leadData.status === "Closed" ? (
+                <Box sx={{ p: 1.5, borderRadius: 2, border: "1px solid", borderColor: "divider" }}>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5 }}>
+                    Close Details
+                  </Typography>
+                  <Grid container spacing={1.5}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        select
+                        size="small"
+                        id="closeOutcome"
+                        label="Outcome"
+                        value={viewModel.handleLeadValues("closeOutcome")}
+                        onChange={(e) => viewModel.handleInput(e, "closeOutcome")}
+                      >
+                        {closeOutcomeArray.map((outcome) => (
+                          <MenuItem key={outcome} value={outcome}>
+                            {outcome}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        select
+                        size="small"
+                        id="closeReason"
+                        label="Close Reason"
+                        value={viewModel.handleLeadValues("closeReason")}
+                        onChange={(e) => viewModel.handleInput(e, "closeReason")}
+                      >
+                        {closeReasonArray.map((reason) => (
+                          <MenuItem key={reason} value={reason}>
+                            {reason}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        id="closeCompetitor"
+                        label="Competitor (optional)"
+                        value={viewModel.handleLeadValues("closeCompetitor")}
+                        onChange={(e) => viewModel.handleInput(e, "closeCompetitor")}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        id="closeNotes"
+                        label="Close Notes (optional)"
+                        multiline
+                        minRows={2}
+                        value={viewModel.handleLeadValues("closeNotes")}
+                        onChange={(e) => viewModel.handleInput(e, "closeNotes")}
+                      />
+                    </Grid>
+                  </Grid>
+                </Box>
+              ) : null}
 
               <Box sx={{ p: 1.5, borderRadius: 2, border: "1px solid", borderColor: "divider" }}>
                 <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>

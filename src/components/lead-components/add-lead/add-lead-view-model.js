@@ -68,6 +68,11 @@ class AddLeadViewModel {
     leadData.quoteLink = "";
     leadData.equipment = this.equipmentList;
     leadData.mergeWithCoreData = true
+    if (leadData.status === "Closed") {
+      leadData.closeTimestamp = timestamp;
+      leadData.closeUnix = moment().valueOf();
+      leadData.closeCycleDays = 0;
+    }
 
     console.table(leadData);
 
@@ -85,10 +90,20 @@ class AddLeadViewModel {
     if (this.equipment.model === "" && this.equipmentList.length === 0) {
         this.setMessage("Equipment must have a model to be added to a lead");
         this.setOpenError(true);
+        this.setLoadingLead(false);
       return false;
     } else if (this.leadData.name === "") {
         this.setMessage("Lead must have a name to be created");
         this.setOpenError(true);
+        this.setLoadingLead(false);
+      return false;
+    } else if (
+      this.leadData.status === "Closed" &&
+      (!this.leadData.closeOutcome || !this.leadData.closeReason)
+    ) {
+      this.setMessage("Close outcome and close reason are required when status is Closed.");
+      this.setOpenError(true);
+      this.setLoadingLead(false);
       return false;
     } else {
       console.log("eq added directly from submit");
@@ -239,6 +254,10 @@ class AddLeadViewModel {
       willFinance: false,
       hasTrade: false,
       willPurchase: false,
+      closeOutcome: "",
+      closeReason: "",
+      closeCompetitor: "",
+      closeNotes: "",
     });
   };
 
@@ -285,6 +304,14 @@ class AddLeadViewModel {
         return leadData.status;
       case "notes":
         return leadData.notes;
+      case "closeOutcome":
+        return leadData.closeOutcome || "";
+      case "closeReason":
+        return leadData.closeReason || "";
+      case "closeCompetitor":
+        return leadData.closeCompetitor || "";
+      case "closeNotes":
+        return leadData.closeNotes || "";
       default:
         return "";
     }

@@ -27,6 +27,8 @@ import { db } from "../../services/firebase";
 import { EditRounded, Menu } from "@mui/icons-material";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import moment from "moment";
+import { sortTasksByFollowUpPriority } from "../../utils/task-sort";
+import { writeAuditLog } from "../../services/audit-log-service";
 
 const RowText = (props) => {
   const { item, isEditing } = props;
@@ -56,6 +58,15 @@ const RowText = (props) => {
         },
         { merge: true }
       );
+      writeAuditLog({
+        actionType: "task_completion_toggled",
+        entityType: "task",
+        entityId: item.id,
+        leadId: item.leadID,
+        before: { isComplete: item.isComplete },
+        after: { isComplete: status },
+        metadata: { source: "tasks-tab" },
+      });
     }
   };
 
@@ -107,6 +118,11 @@ const RowText = (props) => {
             >
               {item.leadName}
             </Typography>
+            {!item.isComplete && Number(item.dueUnix || 0) < Date.now() ? (
+              <Typography component="span" variant="caption" color="error.main">
+                Overdue follow-up
+              </Typography>
+            ) : null}
           </Stack>
         )}
       </ListItemText>
@@ -135,15 +151,16 @@ function Tasks() {
     );
 
     onSnapshot(taskQuery, (querySnapshot) => {
-      setTasks(
-        querySnapshot.docs.map((doc) => ({
+      const mappedTasks = querySnapshot.docs.map((doc) => ({
           id: doc.data().id,
+          leadID: doc.data().leadID,
           task: doc.data().task,
           isComplete: doc.data().isComplete,
           leadName: doc.data().leadName,
           order: doc.data().order,
-        }))
-      );
+          dueUnix: doc.data().dueUnix,
+        }));
+      setTasks(sortTasksByFollowUpPriority(mappedTasks));
     });
     console.log("fetch task has run");
   }, []);

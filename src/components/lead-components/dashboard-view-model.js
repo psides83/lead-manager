@@ -6,6 +6,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../../services/firebase";
+import { sortTasksByFollowUpPriority } from "../../utils/task-sort";
 
 const fetch = async (setFunc, filterParam, timer, setLoading) => {
   if (await filterParam) {
@@ -42,6 +43,13 @@ const fetch = async (setFunc, filterParam, timer, setLoading) => {
           messages: doc.data().messages,
           pdiID: doc.data().pdiID,
           pdiBranch: doc.data().pdiBranch,
+          closeOutcome: doc.data().closeOutcome,
+          closeReason: doc.data().closeReason,
+          closeCompetitor: doc.data().closeCompetitor,
+          closeNotes: doc.data().closeNotes,
+          closeTimestamp: doc.data().closeTimestamp,
+          closeUnix: doc.data().closeUnix,
+          closeCycleDays: doc.data().closeCycleDays,
         })),
       );
     });
@@ -57,18 +65,44 @@ const fetch = async (setFunc, filterParam, timer, setLoading) => {
     );
 
     onSnapshot(taskQuery, (querySnapshot) => {
-      setFunc(
-        querySnapshot.docs.map((doc) => ({
+      const mappedTasks = querySnapshot.docs.map((doc) => ({
           id: doc.data().id,
           leadID: doc.data().leadID,
           leadName: doc.data().leadName,
           task: doc.data().task,
           isComplete: doc.data().isComplete,
           timestamp: doc.data().timestamp,
-        })),
-      );
+          dueTimestamp: doc.data().dueTimestamp,
+          dueUnix: doc.data().dueUnix,
+          order: doc.data().order,
+        }));
+      setFunc(sortTasksByFollowUpPriority(mappedTasks));
     });
   }
+};
+
+const fetchClosedLeadsForIntelligence = (setFunc) => {
+  const closedLeadsQuery = query(
+    collection(db, "leads"),
+    where("status", "==", "Closed"),
+  );
+
+  return onSnapshot(closedLeadsQuery, (querySnapshot) => {
+    setFunc(
+      querySnapshot.docs.map((doc) => ({
+        id: doc.data().id,
+        timestamp: doc.data().timestamp,
+        status: doc.data().status,
+        closeOutcome: doc.data().closeOutcome,
+        closeReason: doc.data().closeReason,
+        closeCompetitor: doc.data().closeCompetitor,
+        closeNotes: doc.data().closeNotes,
+        closeTimestamp: doc.data().closeTimestamp,
+        closeUnix: doc.data().closeUnix,
+        closeCycleDays: doc.data().closeCycleDays,
+      })),
+    );
+  });
 };
 
 const searchable = (leads, searchParam, searchText) => {
@@ -90,4 +124,4 @@ const searchable = (leads, searchParam, searchText) => {
     });
 };
 
-export { fetch, searchable };
+export { fetch, searchable, fetchClosedLeadsForIntelligence };

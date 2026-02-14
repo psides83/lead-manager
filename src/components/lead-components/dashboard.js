@@ -12,8 +12,9 @@ import {
 import Tasks from "./task-list";
 import { Toaster } from "react-hot-toast";
 import { SearchContext } from "../../state-management/search-provider";
-import { fetch, searchable } from "./dashboard-view-model";
+import { fetch, fetchClosedLeadsForIntelligence, searchable } from "./dashboard-view-model";
 import LeadDashboardSkeleton from "../loading-views/lead-dashboard-skeleton";
+import WinLossIntelligence from "./win-loss-intelligence";
 
 const filters = ["Active", "Closed"];
 
@@ -21,6 +22,7 @@ function LeadDashboard() {
   const timer = useRef();
   const [loading, setLoading] = useState(true);
   const [leads, setLeads] = useState([]);
+  const [closedLeads, setClosedLeads] = useState([]);
   const [tasks, setTasks] = useState([]);
   // eslint-disable-next-line
   const {searchText} = useContext(SearchContext)
@@ -53,10 +55,16 @@ function LeadDashboard() {
     fetch(setTasks)
   }, []);
 
+  const fetchIntelligence = useCallback(() => {
+    return fetchClosedLeadsForIntelligence(setClosedLeads);
+  }, []);
+
   useEffect(() => {
     fetchLeads();
     fetchTasks();
-  }, [fetchLeads, fetchTasks]);
+    const unsubscribe = fetchIntelligence();
+    return () => unsubscribe?.();
+  }, [fetchLeads, fetchTasks, fetchIntelligence]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -109,6 +117,10 @@ function LeadDashboard() {
         </Box>
 
         <Divider sx={{ my: 2 }} />
+
+        {value === "leads" ? (
+          <WinLossIntelligence closedLeads={closedLeads} />
+        ) : null}
 
         {loading ? (
           <LeadDashboardSkeleton />

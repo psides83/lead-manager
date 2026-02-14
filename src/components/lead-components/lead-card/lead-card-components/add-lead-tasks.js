@@ -13,6 +13,7 @@ import {
 import { setDoc, doc } from "@firebase/firestore";
 import moment from "moment";
 import { db } from "../../../../services/firebase";
+import { writeAuditLog } from "../../../../services/audit-log-service";
 
 /**
  * This component recieves props for the SnackBar to be dislayed once actions are completed or if an erronious input is received.
@@ -60,6 +61,18 @@ function AddTaskDialog(props) {
         { merge: true }
       )
         .then(() => {
+          writeAuditLog({
+            actionType: "task_added",
+            entityType: "task",
+            entityId: id,
+            leadId: lead.id,
+            after: {
+              id,
+              leadID: lead.id,
+              task,
+            },
+            metadata: { source: "add-task-dialog" },
+          });
           setMessage("Task successfully added");
           setOpenSuccess(true);
           handleCloseDialog();

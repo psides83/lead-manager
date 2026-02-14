@@ -21,6 +21,19 @@ const leadStatusArray = [
   "Closed",
 ];
 
+const closeOutcomeArray = ["Won", "Lost"];
+
+const closeReasonArray = [
+  "Price",
+  "Financing",
+  "Inventory unavailable",
+  "Timeline/delivery",
+  "Chose competitor",
+  "No response",
+  "Internal hold/cancelled",
+  "Won - signed",
+];
+
 // array of equipment status options
 const equipmentStatusArray = [
   "Equipment added",
@@ -303,6 +316,8 @@ const SALES_CATEGORIES = {
 
 export {
   leadStatusArray,
+  closeOutcomeArray,
+  closeReasonArray,
   equipmentStatusArray,
   equipmentAvailabilityArray,
   branches,

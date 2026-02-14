@@ -111,6 +111,14 @@ export default function EquipmentForm(props) {
 
     const result = await viewModel.deleteEquipment(event);
     setIsShowingConfirmDialog(false);
+    if (result?.deletedEquipment) {
+      props?.onEquipmentDeleted?.({
+        equipment: result.deletedEquipment,
+        equipmentIndex: result.equipmentIndex,
+      });
+      setMessage("Equipment deleted");
+      setOpenSuccess(true);
+    }
     if (result?.requestBecameEmpty) {
       setIsShowingEmptyRequestDialog(true);
     }
@@ -122,7 +130,15 @@ export default function EquipmentForm(props) {
   };
 
   const handleKeepEmptyRequest = async () => {
-    await viewModel.deleteEquipment();
+    const result = await viewModel.deleteEquipment();
+    if (result?.deletedEquipment) {
+      props?.onEquipmentDeleted?.({
+        equipment: result.deletedEquipment,
+        equipmentIndex: result.equipmentIndex,
+      });
+      setMessage("Equipment deleted");
+      setOpenSuccess(true);
+    }
     setIsShowingEmptyRequestDialog(false);
   };
 

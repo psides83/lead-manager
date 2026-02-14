@@ -10,6 +10,7 @@ import {
   deleteEquipmentFromSetupRequest,
   syncEquipmentToSetupRequest,
 } from "../../../services/setup-request-service";
+import { writeAuditLog } from "../../../services/audit-log-service";
 
 export default class EquipmentFormViewModel {
   constructor(
@@ -59,6 +60,7 @@ export default class EquipmentFormViewModel {
     const { deleteEmptyRequestToo = false } = options;
     const leadRef = doc(db, "leads", this.lead.id);
 
+    const deletedEquipment = { ...this.equipment };
     const equipmentIndex = this.lead.equipment.indexOf(this.equipment);
 
     this.lead.equipment.splice(equipmentIndex, 1);
@@ -81,12 +83,21 @@ export default class EquipmentFormViewModel {
         this.setMessage("Empty setup request deleted");
         this.setOpenSuccess(true);
       } else {
-        return { requestBecameEmpty: true };
+        return { requestBecameEmpty: true, deletedEquipment, equipmentIndex };
       }
     }
 
+    await writeAuditLog({
+      actionType: "equipment_deleted",
+      entityType: "equipment",
+      entityId: deletedEquipment?.id || deletedEquipment?.stock || "",
+      leadId: this.lead?.id,
+      before: deletedEquipment,
+      metadata: { equipmentIndex, source: "equipment-dialog" },
+    });
+
     this.setIsShowingDialog(false);
-    return { requestBecameEmpty: false };
+    return { requestBecameEmpty: false, deletedEquipment, equipmentIndex };
   };
 
   deleteEmptySetupRequest = async () => {
@@ -98,6 +109,38 @@ export default class EquipmentFormViewModel {
     this.setMessage("Empty setup request deleted");
     this.setOpenSuccess(true);
     this.setIsShowingDialog(false);
+  };
+
+  restoreEquipment = async ({ equipment, equipmentIndex }) => {
+    if (!equipment) {
+      return;
+    }
+
+    const leadRef = doc(db, "leads", this.lead.id);
+    const updatedEquipment = [...(this.lead.equipment || [])];
+    const safeIndex =
+      typeof equipmentIndex === "number" && equipmentIndex >= 0
+        ? Math.min(equipmentIndex, updatedEquipment.length)
+        : updatedEquipment.length;
+
+    updatedEquipment.splice(safeIndex, 0, equipment);
+    this.lead.equipment = updatedEquipment;
+
+    await setDoc(leadRef, { equipment: updatedEquipment }, { merge: true });
+    await syncEquipmentToSetupRequest({
+      lead: this.lead,
+      equipment,
+      pdiUser: this.pdiUser,
+      userProfile: this.userProfile,
+    });
+    await writeAuditLog({
+      actionType: "equipment_restore_undo",
+      entityType: "equipment",
+      entityId: equipment?.id || equipment?.stock || "",
+      leadId: this.lead?.id,
+      after: equipment,
+      metadata: { equipmentIndex: safeIndex, source: "undo-snackbar" },
+    });
   };
 
   logChanges() {
@@ -218,6 +261,15 @@ export default class EquipmentFormViewModel {
       { equipment: lead.equipment, changeLog: leadChangeLog },
       { merge: true },
     );
+    await writeAuditLog({
+      actionType: equipment ? "equipment_updated" : "equipment_added",
+      entityType: "equipment",
+      entityId: equipmentData?.id || equipmentData?.stock || "",
+      leadId: lead?.id,
+      before: equipment || null,
+      after: equipmentData,
+      metadata: { source: "equipment-dialog" },
+    });
 
     await syncEquipmentToSetupRequest({
       lead,
