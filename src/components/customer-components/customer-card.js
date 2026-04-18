@@ -24,6 +24,7 @@ import moment from "moment";
 import CustomerContactDialog from "./customer-contact-dialog";
 import { sendQuoteLinkOpenedEmail } from "../../services/email-service";
 import { relativeTime } from "../../utils/utils";
+import EquipmentIcon from "../ui-components/equipment-icon";
 
 function EquipmentSection(props) {
   const { lead } = props;
@@ -43,7 +44,18 @@ function EquipmentSection(props) {
             <ListItem key={unit.id} disablePadding>
               <ListItemText
                 id={unit.id}
-                primary={unit.model}
+                primary={
+                  <Stack direction="row" spacing={0.75} alignItems="center">
+                    <EquipmentIcon model={unit.model} title={unit.model} />
+                    <Typography
+                      component="span"
+                      variant="body1"
+                      sx={{ fontWeight: 500, fontSize: 17 }}
+                    >
+                      {unit.model}
+                    </Typography>
+                  </Stack>
+                }
                 secondary={
                   <>
                     <Typography

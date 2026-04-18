@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { AddTask, Check, Close } from "@mui/icons-material";
 import {
   Box,
@@ -14,6 +14,8 @@ import { setDoc, doc } from "@firebase/firestore";
 import moment from "moment";
 import { db } from "../../../../services/firebase";
 import { writeAuditLog } from "../../../../services/audit-log-service";
+import { AuthContext } from "../../../../state-management/auth-context-provider";
+import { createTaskCreatedNotification } from "../../../../services/notification-service";
 
 /**
  * This component recieves props for the SnackBar to be dislayed once actions are completed or if an erronious input is received.
@@ -27,6 +29,7 @@ import { writeAuditLog } from "../../../../services/audit-log-service";
  */
 function AddTaskDialog(props) {
   const { lead, tasksCount, setMessage, setOpenError, setOpenSuccess } = props;
+  const { userProfile, currentUser } = useContext(AuthContext);
   const [task, setTask] = useState("");
   const [isShowingDialog, setIsShowingDialog] = useState(false);
 
@@ -46,21 +49,28 @@ function AddTaskDialog(props) {
     const id = moment().format("yyyyMMDDHHmmss");
 
     if (task !== "") {
+      const taskPayload = {
+        id,
+        timestamp,
+        leadID: lead.id,
+        leadName: lead.name,
+        task,
+        isComplete: false,
+        order: tasksCount + 1,
+      };
       const taskRef = doc(db, "tasks", id);
       await setDoc(
         taskRef,
-        {
-          id: id,
-          timestamp: timestamp,
-          leadID: lead.id,
-          leadName: lead.name,
-          task: task,
-          isComplete: false,
-          order: tasksCount + 1,
-        },
+        taskPayload,
         { merge: true }
       )
         .then(() => {
+          createTaskCreatedNotification({
+            userId: currentUser?.uid || userProfile?.id,
+            userEmail: userProfile?.email,
+            lead,
+            task: taskPayload,
+          }).catch(() => {});
           writeAuditLog({
             actionType: "task_added",
             entityType: "task",

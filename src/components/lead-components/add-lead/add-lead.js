@@ -29,7 +29,6 @@ import {
 } from "@mui/material";
 import {
   Close,
-  Agriculture,
   AddCircleOutlined,
   PersonAddAltRounded,
   CheckRounded,
@@ -38,6 +37,7 @@ import {
 } from "@mui/icons-material";
 import { AuthContext } from "../../../state-management/auth-context-provider";
 import AddLeadViewModel from "./add-lead-view-model";
+import EquipmentIcon from "../../ui-components/equipment-icon";
 
 const ListItem = styled("li")(({ theme }) => ({
   margin: theme.spacing(0.5),
@@ -181,6 +181,8 @@ export default function AddLead(props) {
                           type={input.type}
                           variant="outlined"
                           select={input.select}
+                          multiline={input.id === "notes"}
+                          minRows={input.id === "notes" ? 3 : undefined}
                           autoComplete="off"
                           value={viewModel.handleLeadValues(input.id)}
                           onChange={(e) => viewModel.handleInput(e, input.id)}
@@ -318,15 +320,36 @@ export default function AddLead(props) {
                   component="ul"
                 >
                   {equipmentList.map((data) => {
-                    const icon = <Agriculture />;
+                    const icon = <EquipmentIcon model={data.model} />;
                     return (
                       <ListItem key={data.id}>
                         <Chip
                           icon={icon}
-                          label={data.model}
+                          label={
+                            <Typography sx={{ fontWeight: 500, fontSize: 16 }}>
+                              {data.model}
+                            </Typography>
+                          }
                           variant="outlined"
                           color="primary"
                           onDelete={viewModel.handleDelete(data)}
+                          sx={{
+                            minHeight: 44,
+                            height: "auto",
+                            py: 0.5,
+                            alignItems: "center",
+                            "& .MuiChip-icon": {
+                              width: 34,
+                              height: 34,
+                              ml: 0.75,
+                              mr: 0.5,
+                            },
+                            "& .MuiChip-label": {
+                              py: 0.5,
+                              display: "flex",
+                              alignItems: "center",
+                            },
+                          }}
                         />
                       </ListItem>
                     );

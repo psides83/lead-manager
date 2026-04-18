@@ -15,12 +15,19 @@ import SalesDashboardSkeleton from "../loading-views/sales-dashboard-skeleton";
 export default function SalesDashboard() {
   const { userProfile } = useContext(AuthContext);
   const [sales, setSales] = useState([]);
+  const [salesMeta, setSalesMeta] = useState({ source: "", syncedAt: "" });
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("sales");
   const [selectedYear, setSelectedYear] = useState(moment().format("yyyy"));
   const categories = Object.values(SALES_CATEGORIES)
 
-  const viewModel = new SalesDashboardViewModel(sales, setSales, selectedYear, selectedCategory)
+  const viewModel = new SalesDashboardViewModel(
+    sales,
+    setSales,
+    selectedYear,
+    selectedCategory,
+    setSalesMeta
+  )
 
 
   //    Fetch leads from firestore
@@ -94,6 +101,16 @@ export default function SalesDashboard() {
         setToggleValue={setSelectedYear}
         selections={years(userProfile.yearStarted)}
       />
+      {salesMeta.source && salesMeta.syncedAt ? (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ mt: 0.5, mb: 1, textAlign: "center" }}
+        >
+          Source: {salesMeta.source} | Synced{" "}
+          {moment(salesMeta.syncedAt).format("MMM D, YYYY h:mm A")}
+        </Typography>
+      ) : null}
       <Box
         sx={{
           display: "flex",

@@ -169,6 +169,7 @@ class EditLeadViewModel {
         lead: this.lead,
         previousStatus: this.importedData?.status,
         nextStatus: this.leadData?.status,
+        userId: this.lead?.salesmanID,
       });
     } catch (_) {
       // Lead save already succeeded; don't fail edit on automation issue.

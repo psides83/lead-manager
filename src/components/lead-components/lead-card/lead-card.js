@@ -169,6 +169,8 @@ export default function LeadCard(props) {
           lead,
           previousStatus: lead.status,
           nextStatus,
+          userId: userProfile?.id,
+          userEmail: userProfile?.email,
         });
       } catch (_) {
         // Status update already succeeded; keep UX positive and non-blocking.
@@ -370,13 +372,17 @@ export default function LeadCard(props) {
             </MenuItem>
           ))}
         </Menu>
-        <Dialog onClose={handleCloseDialogClose} open={isShowingCloseDialog}>
+        <Dialog
+          onClose={handleCloseDialogClose}
+          open={isShowingCloseDialog}
+          fullWidth
+          maxWidth="xs"
+        >
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              margin: "5px 25px 25px 25px",
-              minWidth: 360,
+              margin: "5px 16px 20px 16px",
             }}
           >
             <DialogTitle>Close Details</DialogTitle>

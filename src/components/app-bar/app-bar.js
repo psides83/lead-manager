@@ -1,15 +1,23 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   AppBar,
   Box,
   Container,
+  Grow,
   IconButton,
   InputAdornment,
   TextField,
   Toolbar,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
-import { AgricultureRounded, MenuRounded, SearchRounded } from "@mui/icons-material";
+import {
+  AgricultureRounded,
+  CloseRounded,
+  MenuRounded,
+  SearchRounded,
+} from "@mui/icons-material";
 import Slide from "@mui/material/Slide";
 import useScrollTrigger from "@mui/material/useScrollTrigger";
 import { auth } from "../../services/firebase";
@@ -19,6 +27,9 @@ import DynamicSnackbar from "../ui-components/snackbar";
 import AppBarMenu from "./app-bar-menu";
 import AddLead from "../lead-components/add-lead/add-lead";
 import UserAccountDialog from "../user-components/user-account-dialog";
+import NotificationsMenu from "./notifications-menu";
+import { AuthContext } from "../../state-management/auth-context-provider";
+import { syncOverdueTaskNotifications } from "../../services/notification-service";
 
 function HideOnScroll(props) {
   const { children, window } = props;
@@ -34,10 +45,14 @@ function HideOnScroll(props) {
 }
 
 export default function MainAppBar(props) {
+  const { currentUser, userProfile } = useContext(AuthContext);
   const { searchText, searchDispatch } = useContext(SearchContext);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [openSuccess, setOpenSuccess] = useState(false);
   const [openError, setOpenError] = useState(false);
   const [message, setMessage] = useState("");
+  const [mobileSearchActive, setMobileSearchActive] = useState(false);
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -55,11 +70,50 @@ export default function MainAppBar(props) {
     });
   };
 
+  const handleOpenMobileSearch = () => {
+    setMobileSearchActive(true);
+  };
+
+  const handleCloseMobileSearch = () => {
+    searchDispatch({
+      type: SEARCH_ACTION.SEARCH,
+      searchText: "",
+    });
+    setMobileSearchActive(false);
+  };
+
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
+  useEffect(() => {
+    if (!isMobile) {
+      setMobileSearchActive(false);
+    }
+  }, [isMobile]);
+
+  useEffect(() => {
+    const userId = currentUser?.uid || userProfile?.id;
+    if (!userId) {
+      return () => {};
+    }
+
+    syncOverdueTaskNotifications({
+      userId,
+      userEmail: userProfile?.email || "",
+    });
+
+    const intervalId = window.setInterval(() => {
+      syncOverdueTaskNotifications({
+        userId,
+        userEmail: userProfile?.email || "",
+      });
+    }, 15 * 60 * 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [currentUser, userProfile]);
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -74,87 +128,183 @@ export default function MainAppBar(props) {
         >
           <Container maxWidth="xl">
             <Toolbar sx={{ gap: 1.25 }}>
-              <Link to="/" style={{ color: "white", textDecoration: "none" }}>
-                <IconButton size="large" edge="start" color="inherit" aria-label="Go to dashboard">
-                  <AgricultureRounded />
-                </IconButton>
-              </Link>
+              {isMobile ? (
+                <>
+                  {mobileSearchActive ? (
+                    <Grow in={mobileSearchActive} timeout={220} style={{ width: "100%" }}>
+                      <Box sx={{ width: "100%" }}>
+                        <TextField
+                          autoFocus
+                          size="small"
+                          fullWidth
+                          placeholder="Search leads by name or phone"
+                          value={searchText}
+                          onChange={handleSearchInput}
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: 999,
+                              backgroundColor: "rgba(255,255,255,0.15)",
+                              color: "common.white",
+                              "& fieldset": {
+                                borderColor: "rgba(255,255,255,0.25)",
+                              },
+                              "&:hover fieldset": {
+                                borderColor: "rgba(255,255,255,0.4)",
+                              },
+                              "&.Mui-focused fieldset": {
+                                borderColor: "rgba(255,255,255,0.7)",
+                              },
+                            },
+                            "& .MuiInputBase-input::placeholder": {
+                              color: "rgba(255,255,255,0.8)",
+                              opacity: 1,
+                            },
+                          }}
+                          slotProps={{
+                            input: {
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <SearchRounded sx={{ color: "rgba(255,255,255,0.9)" }} />
+                                </InputAdornment>
+                              ),
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton
+                                    size="small"
+                                    onClick={handleCloseMobileSearch}
+                                    sx={{ color: "rgba(255,255,255,0.9)" }}
+                                  >
+                                    <CloseRounded fontSize="small" />
+                                  </IconButton>
+                                </InputAdornment>
+                              ),
+                            },
+                          }}
+                        />
+                      </Box>
+                    </Grow>
+                  ) : (
+                    <>
+                      <Link to="/" style={{ color: "white", textDecoration: "none" }}>
+                        <IconButton size="large" edge="start" color="inherit" aria-label="Go to dashboard">
+                          <AgricultureRounded />
+                        </IconButton>
+                      </Link>
+                      <Box sx={{ flexGrow: 1 }} />
+                      <IconButton size="large" color="inherit" aria-label="Search" onClick={handleOpenMobileSearch}>
+                        <SearchRounded />
+                      </IconButton>
+                      <NotificationsMenu userId={currentUser?.uid || userProfile?.id} />
+                      <AddLead
+                        setMessage={setMessage}
+                        setOpenError={setOpenError}
+                        setOpenSuccess={setOpenSuccess}
+                      />
+                      <IconButton
+                        size="large"
+                        color="inherit"
+                        aria-label="Open app menu"
+                        onClick={handleClick}
+                        aria-controls={open ? "account-menu" : undefined}
+                        aria-haspopup="true"
+                        aria-expanded={open ? "true" : undefined}
+                      >
+                        <MenuRounded />
+                      </IconButton>
+                      <UserAccountDialog
+                        setMessage={setMessage}
+                        setOpenSuccess={setOpenSuccess}
+                        setOpenError={setOpenError}
+                      />
+                    </>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Link to="/" style={{ color: "white", textDecoration: "none" }}>
+                    <IconButton size="large" edge="start" color="inherit" aria-label="Go to dashboard">
+                      <AgricultureRounded />
+                    </IconButton>
+                  </Link>
 
-              <Typography
-                variant="h6"
-                noWrap
-                sx={{
-                  flexShrink: 0,
-                  display: { xs: "none", md: "block" },
-                  color: "common.white",
-                }}
-              >
-                Lead Manager
-              </Typography>
+                  <Typography
+                    variant="h6"
+                    noWrap
+                    sx={{
+                      flexShrink: 0,
+                      display: { xs: "none", md: "block" },
+                      color: "common.white",
+                    }}
+                  >
+                    Lead Manager
+                  </Typography>
 
-              <TextField
-                size="small"
-                placeholder="Search leads by name or phone"
-                value={searchText}
-                onChange={handleSearchInput}
-                sx={{
-                  width: { xs: "100%", md: 360 },
-                  ml: { xs: 0, md: 1 },
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 999,
-                    backgroundColor: "rgba(255,255,255,0.15)",
-                    color: "common.white",
-                    "& fieldset": {
-                      borderColor: "rgba(255,255,255,0.25)",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "rgba(255,255,255,0.4)",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "rgba(255,255,255,0.7)",
-                    },
-                  },
-                  "& .MuiInputBase-input::placeholder": {
-                    color: "rgba(255,255,255,0.8)",
-                    opacity: 1,
-                  },
-                }}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchRounded sx={{ color: "rgba(255,255,255,0.9)" }} />
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
+                  <TextField
+                    size="small"
+                    placeholder="Search leads by name or phone"
+                    value={searchText}
+                    onChange={handleSearchInput}
+                    sx={{
+                      width: { xs: "100%", md: 360 },
+                      ml: { xs: 0, md: 1 },
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 999,
+                        backgroundColor: "rgba(255,255,255,0.15)",
+                        color: "common.white",
+                        "& fieldset": {
+                          borderColor: "rgba(255,255,255,0.25)",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "rgba(255,255,255,0.4)",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "rgba(255,255,255,0.7)",
+                        },
+                      },
+                      "& .MuiInputBase-input::placeholder": {
+                        color: "rgba(255,255,255,0.8)",
+                        opacity: 1,
+                      },
+                    }}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchRounded sx={{ color: "rgba(255,255,255,0.9)" }} />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                  />
 
-              <Box sx={{ flexGrow: 1 }} />
+                  <Box sx={{ flexGrow: 1 }} />
+                  <NotificationsMenu userId={currentUser?.uid || userProfile?.id} />
 
-              <AddLead
-                setMessage={setMessage}
-                setOpenError={setOpenError}
-                setOpenSuccess={setOpenSuccess}
-              />
+                  <AddLead
+                    setMessage={setMessage}
+                    setOpenError={setOpenError}
+                    setOpenSuccess={setOpenSuccess}
+                  />
 
-              <IconButton
-                size="large"
-                color="inherit"
-                aria-label="Open app menu"
-                onClick={handleClick}
-                aria-controls={open ? "account-menu" : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? "true" : undefined}
-              >
-                <MenuRounded />
-              </IconButton>
+                  <IconButton
+                    size="large"
+                    color="inherit"
+                    aria-label="Open app menu"
+                    onClick={handleClick}
+                    aria-controls={open ? "account-menu" : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? "true" : undefined}
+                  >
+                    <MenuRounded />
+                  </IconButton>
 
-              <UserAccountDialog
-                setMessage={setMessage}
-                setOpenSuccess={setOpenSuccess}
-                setOpenError={setOpenError}
-              />
+                  <UserAccountDialog
+                    setMessage={setMessage}
+                    setOpenSuccess={setOpenSuccess}
+                    setOpenError={setOpenError}
+                  />
+                </>
+              )}
             </Toolbar>
           </Container>
         </AppBar>

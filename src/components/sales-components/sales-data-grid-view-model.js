@@ -1,6 +1,13 @@
 import moment from "moment";
 import { currencyFormatter } from "../../utils/utils";
 
+const resolveRow = (value, row, params) => {
+  if (row) return row;
+  if (params?.row) return params.row;
+  if (value && typeof value === "object" && value.row) return value.row;
+  return {};
+};
+
 const columns = [
     {
       field: "month",
@@ -8,7 +15,11 @@ const columns = [
       // type: "date",
       width: 60,
       editable: false,
-      valueGetter: (params) => moment(params.row.month, "MM").format("MMM"),
+      valueGetter: (value, row, params) => {
+        const safeRow = resolveRow(value, row, params);
+        const month = safeRow.month || "01";
+        return moment(month, "MM").format("MMM");
+      },
     },
     {
       field: "sales",
@@ -16,7 +27,10 @@ const columns = [
       type: "number",
       width: 100,
       editable: false,
-      valueGetter: (params) => currencyFormatter.format(params.row.sales),
+      valueGetter: (value, row, params) => {
+        const safeRow = resolveRow(value, row, params);
+        return currencyFormatter.format(Number(safeRow.sales || 0));
+      },
       // align: "center",
     },
     {
@@ -25,7 +39,10 @@ const columns = [
       type: "number",
       width: 100,
       editable: false,
-      valueGetter: (params) => currencyFormatter.format(params.row.margin),
+      valueGetter: (value, row, params) => {
+        const safeRow = resolveRow(value, row, params);
+        return currencyFormatter.format(Number(safeRow.margin || 0));
+      },
       // align: "center",
     },
     {
@@ -33,7 +50,10 @@ const columns = [
       headerName: "Commission",
       type: "number",
       width: 100,
-      valueGetter: (params) => currencyFormatter.format(params.row.commission),
+      valueGetter: (value, row, params) => {
+        const safeRow = resolveRow(value, row, params);
+        return currencyFormatter.format(Number(safeRow.commission || 0));
+      },
       editable: false,
       // align: "center",
     },
@@ -44,7 +64,10 @@ const columns = [
       width: 100,
       editable: false,
       // type: "select",
-      valueGetter: (params) => currencyFormatter.format(params.row.bonus),
+      valueGetter: (value, row, params) => {
+        const safeRow = resolveRow(value, row, params);
+        return currencyFormatter.format(Number(safeRow.bonus || 0));
+      },
     },
     {
       field: "totalIncome",
@@ -53,14 +76,21 @@ const columns = [
       width: 80,
       editable: false,
       // type: "select",
-      valueGetter: (params) => currencyFormatter.format(income(params)),
+      valueGetter: (value, row, params) => {
+        const safeRow = resolveRow(value, row, params);
+        return currencyFormatter.format(income(safeRow));
+      },
     },
   ];
   
-  const income = (params) => {
-    if (params.row.month === "07" || params.row.month === "12")
-      return params.row.bonus + params.row.commission + 3000.0;
-    return params.row.bonus + params.row.commission + 2000.0;
+  const income = (row) => {
+    const month = String(row?.month || "");
+    const bonus = Number(row?.bonus || 0);
+    const commission = Number(row?.commission || 0);
+    if (month === "07" || month === "12") {
+      return bonus + commission + 3000.0;
+    }
+    return bonus + commission + 2000.0;
   };
 
   export { columns }

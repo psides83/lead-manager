@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../../../../services/firebase";
 import {
@@ -22,8 +22,11 @@ import {
 import AddTaskDialog from "./add-lead-tasks";
 import { sortTasksByFollowUpPriority } from "../../../../utils/task-sort";
 import { writeAuditLog } from "../../../../services/audit-log-service";
+import { AuthContext } from "../../../../state-management/auth-context-provider";
+import { markTaskNotificationsRead } from "../../../../services/notification-service";
 
 export default function TaskSection(props) {
+    const { userProfile, currentUser } = useContext(AuthContext);
     const { lead, tasks, setMessage, setOpenError, setOpenSuccess } =
       props;
     const [searchParam] = useState(["leadID", "isComplete"]);
@@ -97,6 +100,12 @@ export default function TaskSection(props) {
           after: { isComplete: status },
           metadata: { source: "lead-card-task-section" },
         });
+        if (status) {
+          markTaskNotificationsRead({
+            userId: currentUser?.uid || userProfile?.id,
+            taskId: task.id,
+          });
+        }
       }
     };
   

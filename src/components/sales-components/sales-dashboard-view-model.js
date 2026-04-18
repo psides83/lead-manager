@@ -1,14 +1,16 @@
 // import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import moment from "moment";
 import { SALES_CATEGORIES } from "../../models/static-data";
+import { fetchSalesData } from "../../services/sales-data-service";
 // import { db } from "../../services/firebase";
 
 class SalesDashboardViewModel {
-  constructor(sales, setSales, year, category) {
+  constructor(sales, setSales, year, category, setSalesMeta) {
     this.sales = sales;
     this.setSales = setSales;
     this.year = year;
     this.category = category;
+    this.setSalesMeta = setSalesMeta;
   }
 
   fetch = async () => {
@@ -33,19 +35,11 @@ class SalesDashboardViewModel {
     //   );
     // });
 
-    const API_URL = "https://psides83.github.io/listJSON/salesByMonth.json";
-    const response = await fetch(API_URL);
-    const json = await response.json();
-
-    json.map((month) => {
-      if (month.bonus === "") { month.bonus = "0" }
-      month.bonus = parseInt(month.bonus)
-      month.cost = Number(month.sales - month.margin)
-    });
-
-    console.log(json);
-
-    this.setSales(json);
+    const { data, source, syncedAt } = await fetchSalesData();
+    this.setSales(data);
+    if (this.setSalesMeta) {
+      this.setSalesMeta({ source, syncedAt });
+    }
   };
 
   // calculates sales for the sales dashboard based on the selected year and category
@@ -68,7 +62,6 @@ class SalesDashboardViewModel {
           if (category === SALES_CATEGORIES.BONUS) return sum + data.bonus;
           return null;
         }, 0);
-      console.log(filteredSales);
       return filteredSales;
     } else {
       return 0;

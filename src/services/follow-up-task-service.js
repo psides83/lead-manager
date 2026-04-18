@@ -1,6 +1,7 @@
 import moment from "moment";
 import { collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
 import { db } from "./firebase";
+import { createFollowUpTaskNotification } from "./notification-service";
 
 const STATUS_FOLLOW_UP_RULES = {
   "lead created": {
@@ -67,7 +68,13 @@ const STATUS_FOLLOW_UP_RULES = {
 
 const normalizeStatus = (value) => (value || "").toString().trim().toLowerCase();
 
-const createStatusFollowUpTask = async ({ lead, previousStatus, nextStatus }) => {
+const createStatusFollowUpTask = async ({
+  lead,
+  previousStatus,
+  nextStatus,
+  userId,
+  userEmail,
+}) => {
   const normalizedNextStatus = normalizeStatus(nextStatus);
   const normalizedPreviousStatus = normalizeStatus(previousStatus);
 
@@ -108,24 +115,37 @@ const createStatusFollowUpTask = async ({ lead, previousStatus, nextStatus }) =>
   const dueAt = moment().add(followUpRule.delayHours, "hours");
   const id = createdAt.format("yyyyMMDDHHmmssSSS");
 
+  const taskPayload = {
+    id,
+    timestamp: createdAt.format("DD-MMM-yyyy hh:mmA"),
+    dueTimestamp: dueAt.format("DD-MMM-yyyy hh:mmA"),
+    dueUnix: dueAt.valueOf(),
+    leadID: lead.id,
+    leadName: lead.name,
+    task: followUpRule.taskText(lead.name),
+    isComplete: false,
+    order: Number(id),
+    taskType: "status-follow-up",
+    statusTrigger: nextStatus,
+    isAutoFollowUp: true,
+  };
+
   await setDoc(
     doc(db, "tasks", id),
-    {
-      id,
-      timestamp: createdAt.format("DD-MMM-yyyy hh:mmA"),
-      dueTimestamp: dueAt.format("DD-MMM-yyyy hh:mmA"),
-      dueUnix: dueAt.valueOf(),
-      leadID: lead.id,
-      leadName: lead.name,
-      task: followUpRule.taskText(lead.name),
-      isComplete: false,
-      order: Number(id),
-      taskType: "status-follow-up",
-      statusTrigger: nextStatus,
-      isAutoFollowUp: true,
-    },
+    taskPayload,
     { merge: true },
   );
+
+  try {
+    await createFollowUpTaskNotification({
+      userId,
+      userEmail,
+      lead,
+      task: taskPayload,
+    });
+  } catch (_) {
+    // Task creation should remain successful even if notifications fail.
+  }
 
   return { created: true };
 };

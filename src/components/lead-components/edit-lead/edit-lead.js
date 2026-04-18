@@ -206,6 +206,8 @@ export default function EditLead(props) {
                         type={input.type}
                         variant="outlined"
                         select={input.select}
+                        multiline={input.id === "notes"}
+                        minRows={input.id === "notes" ? 3 : undefined}
                         autoComplete="off"
                         value={viewModel.handleLeadValues(input.id)}
                         onChange={(e) => viewModel.handleInput(e, input.id)}

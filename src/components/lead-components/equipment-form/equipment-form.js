@@ -31,6 +31,7 @@ import {
 import EquipmentFormViewModel from "./equipment-form-view-model";
 import PDIRequestCheckboxes from "./pdi-request-checkboxes";
 import { AuthContext } from "../../../state-management/auth-context-provider";
+import EquipmentIcon from "../../ui-components/equipment-icon";
 
 export default function EquipmentForm(props) {
   //#region State Properties
@@ -231,7 +232,14 @@ export default function EquipmentForm(props) {
               id={equipment.id}
               primary={
                 <Stack direction="row" spacing={0.75} alignItems="center">
-                  <Typography component="span">{equipment.model}</Typography>
+                  <EquipmentIcon model={equipment.model} title={equipment.model} />
+                  <Typography
+                    component="span"
+                    variant="body1"
+                    sx={{ fontWeight: 500, fontSize: 17 }}
+                  >
+                    {equipment.model}
+                  </Typography>
                   {equipment.willSubmitPDI && !equipment.hasSubmittedPDI ? (
                     <Tooltip title="Pending PDI/Setup submit">
                       <ScheduleRounded

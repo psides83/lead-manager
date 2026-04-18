@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   Button,
   Checkbox,
@@ -29,9 +29,11 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import moment from "moment";
 import { sortTasksByFollowUpPriority } from "../../utils/task-sort";
 import { writeAuditLog } from "../../services/audit-log-service";
+import { AuthContext } from "../../state-management/auth-context-provider";
+import { markTaskNotificationsRead } from "../../services/notification-service";
 
 const RowText = (props) => {
-  const { item, isEditing } = props;
+  const { item, isEditing, userId } = props;
   const [task, setTask] = useState(item.task);
 
   const blurHandler = async (event) => {
@@ -67,6 +69,12 @@ const RowText = (props) => {
         after: { isComplete: status },
         metadata: { source: "tasks-tab" },
       });
+      if (status) {
+        markTaskNotificationsRead({
+          userId,
+          taskId: item.id,
+        });
+      }
     }
   };
 
@@ -131,6 +139,7 @@ const RowText = (props) => {
 };
 
 function Tasks() {
+  const { userProfile, currentUser } = useContext(AuthContext);
   const [tasks, setTasks] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -254,7 +263,11 @@ function Tasks() {
                               ) : null
                             }
                           >
-                            <RowText item={item} isEditing={isEditing} />
+                            <RowText
+                              item={item}
+                              isEditing={isEditing}
+                              userId={currentUser?.uid || userProfile?.id}
+                            />
                           </ListItem>
                           {index !== tasks.length - 1 ? (
                             <Divider variant="fullWidth" component="li" />
