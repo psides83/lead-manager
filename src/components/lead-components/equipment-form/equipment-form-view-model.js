@@ -31,7 +31,9 @@ export default class EquipmentFormViewModel {
     setIsShowingDialog,
     handleCloseDialog,
     pdiUser,
-    userProfile
+    userProfile,
+    externalRequestId,
+    setExternalRequestId,
   ) {
     this.lead = lead;
     this.equipment = equipment;
@@ -51,6 +53,8 @@ export default class EquipmentFormViewModel {
     this.handleCloseDialog = handleCloseDialog;
     this.pdiUser = pdiUser;
     this.userProfile = userProfile;
+    this.externalRequestId = externalRequestId;
+    this.setExternalRequestId = setExternalRequestId;
   }
 
   // deletes the equipment item
@@ -179,6 +183,22 @@ export default class EquipmentFormViewModel {
       );
     }
 
+    if ((equipmentData.quotePrice || "") !== (importedData.quotePrice || "")) {
+      setChange(
+        change.push(
+          `Quote price for ${equipmentData.model} edited from ${
+            importedData.quotePrice === "" || importedData.quotePrice === undefined
+              ? "BLANK"
+              : `$${importedData.quotePrice}`
+          } to ${
+            equipmentData.quotePrice === "" || equipmentData.quotePrice === undefined
+              ? "BLANK"
+              : `$${equipmentData.quotePrice}`
+          }`,
+        ),
+      );
+    }
+
     if (equipmentData.status !== importedData.status) {
       setChange(
         change.push(
@@ -222,6 +242,9 @@ export default class EquipmentFormViewModel {
 
     const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
     const id = equipment ? equipment.id : moment().format("yyyyMMDDHHmmss");
+    const normalizedRequestId = String(this.externalRequestId || "").trim();
+    const resolvedBranch =
+      lead?.pdiBranch || this.pdiUser?.branch || this.userProfile?.branch || "";
     this.logChanges();
     var changeString = this.change.toString().replace(/,/g, ", ");
 
@@ -246,6 +269,13 @@ export default class EquipmentFormViewModel {
     equipmentData.work = this.workNullEmpties();
     equipmentData.id = id;
     equipmentData.timestamp = timestamp;
+    if (normalizedRequestId) {
+      equipmentData.hasSubmittedPDI = true;
+      equipmentData.willSubmitPDI = false;
+      if (!equipmentData.status || equipmentData.status === "Equipment added") {
+        equipmentData.status = "Setup requested";
+      }
+    }
 
     if (equipment) {
       const currentEquipmentIndex = lead.equipment.indexOf(equipment);
@@ -256,11 +286,24 @@ export default class EquipmentFormViewModel {
 
     const leadRef = doc(db, "leads", lead?.id);
 
-    await setDoc(
-      leadRef,
-      { equipment: lead.equipment, changeLog: leadChangeLog },
-      { merge: true },
-    );
+    const leadUpdate = {
+      equipment: lead.equipment,
+      changeLog: leadChangeLog,
+    };
+    if (normalizedRequestId) {
+      leadUpdate.pdiID = normalizedRequestId;
+      if (resolvedBranch) {
+        leadUpdate.pdiBranch = resolvedBranch;
+      }
+    }
+
+    await setDoc(leadRef, leadUpdate, { merge: true });
+    if (normalizedRequestId) {
+      lead.pdiID = normalizedRequestId;
+      if (resolvedBranch) {
+        lead.pdiBranch = resolvedBranch;
+      }
+    }
     await writeAuditLog({
       actionType: equipment ? "equipment_updated" : "equipment_added",
       entityType: "equipment",
@@ -295,6 +338,7 @@ export default class EquipmentFormViewModel {
       model: "",
       stock: "",
       serial: "",
+      quotePrice: "",
       availability: "Availability Unknown",
       status: "Equipment added",
       notes: "",
@@ -304,6 +348,7 @@ export default class EquipmentFormViewModel {
     });
     this.setChange([]);
     this.setImportedData({});
+    this.setExternalRequestId("");
   }
 
   // Request submission validation.
@@ -344,10 +389,13 @@ export default class EquipmentFormViewModel {
     if (equipmentData.model !== importedData.model) return false;
     if (equipmentData.stock !== importedData.stock) return false;
     if (equipmentData.serial !== importedData.serial) return false;
+    if ((equipmentData.quotePrice || "") !== (importedData.quotePrice || "")) return false;
     if (equipmentData.status !== importedData.status) return false;
     if (equipmentData.availability !== importedData.availability) return false;
     if (equipmentData.notes !== importedData.notes) return false;
     if (equipmentData.willSubmitPDI !== importedData.willSubmitPDI)
+      return false;
+    if ((this.externalRequestId || "").trim() !== String(this.lead?.pdiID || "").trim())
       return false;
     if (
       equipmentData.work.length !== 0 &&
@@ -375,6 +423,13 @@ export default class EquipmentFormViewModel {
       value = newValue.replace(/[^0-9]/g, "");
     }
 
+    if (id === "quotePrice") {
+      const rawValue = e.target.value.replace(/[^0-9.]/g, "");
+      const [whole = "", ...decimalParts] = rawValue.split(".");
+      const decimals = decimalParts.join("").slice(0, 2);
+      value = decimals.length > 0 ? `${whole}.${decimals}` : whole;
+    }
+
     this.setEquipmentData({ ...this.equipmentData, [id]: value });
   }
 
@@ -389,6 +444,8 @@ export default class EquipmentFormViewModel {
         return equipmentData.stock;
       case "serial":
         return equipmentData.serial;
+      case "quotePrice":
+        return equipmentData.quotePrice || "";
       case "status":
         return equipmentData.status;
       case "availability":

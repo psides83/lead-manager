@@ -7,6 +7,7 @@ import {
 } from "@mui/icons-material";
 import {
   Button,
+  Chip,
   Collapse,
   Dialog,
   DialogTitle,
@@ -27,7 +28,7 @@ import { syncEquipmentToSetupRequest } from "../../../../services/setup-request-
 import { writeAuditLog } from "../../../../services/audit-log-service";
 
 export default function EquipmentSection(props) {
-  const { lead, setMessage, setOpenError, setOpenSuccess } = props;
+  const { lead, pdiStatus, setMessage, setOpenError, setOpenSuccess } = props;
   const [showingEquipment, setShowingEquipment] = useState(false);
   const [isShowingConfirmDialog, setIsShowingConfirmDialog] = useState(false);
   const [undoEquipmentOpen, setUndoEquipmentOpen] = useState(false);
@@ -59,6 +60,36 @@ export default function EquipmentSection(props) {
     if (serial === null) return;
     if (serial === "") return;
     return <Typography variant="caption">{`Serial: ${serial}`}</Typography>;
+  };
+
+  const pdiChip = (unit) => {
+    if (!unit?.hasSubmittedPDI || !pdiStatus) {
+      return null;
+    }
+
+    let chipSx = {
+      height: 20,
+      "& .MuiChip-label": { px: 0.75, fontSize: 11, fontWeight: 600, color: "white" },
+    };
+
+    if (pdiStatus === "Completed") {
+      chipSx = { ...chipSx, bgcolor: "rgb(54, 124, 42, 0.9)" };
+    } else if (pdiStatus === "In Progress") {
+      chipSx = { ...chipSx, bgcolor: "#1565c0" };
+    } else if (pdiStatus === "Requested") {
+      chipSx = { ...chipSx, bgcolor: "#b26a00" };
+    } else {
+      chipSx = { ...chipSx, bgcolor: "grey.700" };
+    }
+
+    return (
+      <Chip
+        size="small"
+        label={`PDI: ${pdiStatus}`}
+        variant="filled"
+        sx={chipSx}
+      />
+    );
   };
 
   function SubmitPDIButton() {
@@ -184,6 +215,7 @@ export default function EquipmentSection(props) {
                   />
 
                   <Stack justifyItems="flex-end" alignContent="flex-end">
+                    {pdiChip(unit)}
                     {stockNumber(unit.stock)}
                     {serialNumber(unit.serial)}
                   </Stack>

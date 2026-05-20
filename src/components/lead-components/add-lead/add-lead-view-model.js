@@ -2,12 +2,15 @@ import { doc, setDoc } from "firebase/firestore";
 import moment from "moment";
 import { equipmentAvailabilityArray, equipmentStatusArray } from "../../../models/static-data";
 import { db } from "../../../services/firebase";
+import { writeAuditLog } from "../../../services/audit-log-service";
+import { createTaskCreatedNotification } from "../../../services/notification-service";
 
 class AddLeadViewModel {
   constructor(
     setMessage,
     setOpenSuccess,
     setOpenError,
+    currentUser,
     userProfile,
     leadData,
     setLeadData,
@@ -19,11 +22,16 @@ class AddLeadViewModel {
     setLoadingLead,
     setLeadSuccess,
     setLoadingEquipment,
-    setEquipmentSuccess
+    setEquipmentSuccess,
+    taskNote,
+    setTaskNote,
+    taskNoteList,
+    setTaskNoteList
   ) {
     this.setMessage = setMessage;
     this.setOpenSuccess = setOpenSuccess;
     this.setOpenError = setOpenError;
+    this.currentUser = currentUser;
     this.userProfile = userProfile;
     this.leadData = leadData;
     this.setLeadData = setLeadData;
@@ -36,6 +44,10 @@ class AddLeadViewModel {
     this.setLeadSuccess = setLeadSuccess;
     this.setLoadingEquipment = setLoadingEquipment;
     this.setEquipmentSuccess = setEquipmentSuccess;
+    this.taskNote = taskNote;
+    this.setTaskNote = setTaskNote;
+    this.taskNoteList = taskNoteList;
+    this.setTaskNoteList = setTaskNoteList;
   }
 
   // Add the lead to the firestore "leads" collection and the equipment to the fire store "equipment" collection.
@@ -81,14 +93,66 @@ class AddLeadViewModel {
     await setDoc(leadRef, leadData, { merge: true });
   };
 
+  setTaskNotesToFirestore = async () => {
+    if (this.taskNoteList.length === 0) {
+      return;
+    }
+
+    const userId = this.currentUser?.uid || this.userProfile?.id;
+    const lead = this.leadData;
+
+    await Promise.all(
+      this.taskNoteList.map(async (taskNote, index) => {
+        const taskPayload = {
+          ...taskNote,
+          leadID: lead.id,
+          leadName: lead.name,
+          order: index + 1,
+        };
+        const taskRef = doc(db, "tasks", taskPayload.id);
+
+        await setDoc(taskRef, taskPayload, { merge: true });
+
+        createTaskCreatedNotification({
+          userId,
+          userEmail: this.userProfile?.email,
+          lead,
+          task: taskPayload,
+        }).catch(() => {});
+
+        writeAuditLog({
+          actionType: "task_added",
+          entityType: "task",
+          entityId: taskPayload.id,
+          leadId: lead.id,
+          after: {
+            id: taskPayload.id,
+            leadID: lead.id,
+            task: taskPayload.task,
+          },
+          metadata: { source: "add-lead-dialog" },
+        });
+      })
+    );
+  };
+
+  hasRequiredLeadContext = () => {
+    return (
+      this.equipment.model !== "" ||
+      this.equipmentList.length > 0 ||
+      this.taskNote.trim() !== "" ||
+      this.taskNoteList.length > 0
+    );
+  };
+
   // Requst submission validation.
   leadSubmitValidation = async (event) => {
     event.preventDefault();
     event.stopPropagation();
     this.setLoadingLead(true);
 
-    if (this.equipment.model === "" && this.equipmentList.length === 0) {
-        this.setMessage("Equipment must have a model to be added to a lead");
+    if (!this.hasRequiredLeadContext()) {
+        this.setMessage("Add equipment or at least one task / note before saving the lead");
         this.setOpenError(true);
         this.setLoadingLead(false);
       return false;
@@ -111,7 +175,11 @@ class AddLeadViewModel {
         console.log("another eq added first");
         await this.pushEquipmentToLead();
       }
-      await this.setLeadToFirestore().then(()=> {
+      if (this.taskNote.trim() !== "") {
+        await this.pushTaskNoteToLead();
+      }
+      await this.setLeadToFirestore().then(async ()=> {
+        await this.setTaskNotesToFirestore();
         this.setLoadingLead(false);
         this.setLeadSuccess(true);
         this.setMessage("Lead successfully submitted");
@@ -168,10 +236,52 @@ class AddLeadViewModel {
     }
   };
 
+  pushTaskNoteToLead = async () => {
+    const id = `${moment().format("yyyyMMDDHHmmss")}${this.taskNoteList.length + 1}`;
+    const timestamp = moment().format("DD-MMM-yyyy hh:mmA");
+    const taskNote = {
+      id,
+      timestamp,
+      task: this.taskNote.trim(),
+      isComplete: false,
+      order: this.taskNoteList.length + 1,
+    };
+
+    this.taskNoteList.push(taskNote);
+    this.setTaskNoteList(this.taskNoteList);
+    this.setEquipmentSuccess(true);
+    this.setTaskNote("");
+    this.setLoadingEquipment(false);
+    this.setEquipmentSuccess(false);
+  };
+
+  taskNoteSubmitValidation = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    this.setLoadingEquipment(true);
+
+    if (this.taskNote.trim() === "") {
+      this.setMessage("Please enter a task or note to add to the lead");
+      this.setOpenError(true);
+      this.setLoadingEquipment(false);
+      return;
+    }
+
+    await this.pushTaskNoteToLead();
+    this.setMessage("Task / note successfully added to the lead");
+    this.setOpenSuccess(true);
+  };
+
   // Handle deleting of equipment from the lead.
   handleDelete = (equipmentToDelete) => () => {
     this.setEquipmentList((equipmentList) =>
       equipmentList.filter((equiment) => equiment.id !== equipmentToDelete.id)
+    );
+  };
+
+  handleDeleteTaskNote = (taskNoteToDelete) => () => {
+    this.setTaskNoteList((taskNoteList) =>
+      taskNoteList.filter((taskNote) => taskNote.id !== taskNoteToDelete.id)
     );
   };
 
@@ -241,6 +351,8 @@ class AddLeadViewModel {
     await this.resetEquipmentForm();
     await this.resetLeadForm();
     this.setEquipmentList([]);
+    this.setTaskNote("");
+    this.setTaskNoteList([]);
   };
 
   // Reset the Lead form
@@ -268,6 +380,7 @@ class AddLeadViewModel {
       model: "",
       stock: "",
       serial: "",
+      quotePrice: "",
       availability: "Availability Unknown",
       status: "Equipment added",
       notes: "",
@@ -331,7 +444,18 @@ class AddLeadViewModel {
       value = newValue.replace(/[^0-9]/g, "");
     }
 
+    if (id === "quotePrice") {
+      const rawValue = e.target.value.replace(/[^0-9.]/g, "");
+      const [whole = "", ...decimalParts] = rawValue.split(".");
+      const decimals = decimalParts.join("").slice(0, 2);
+      value = decimals.length > 0 ? `${whole}.${decimals}` : whole;
+    }
+
     this.setEquipment({ ...this.equipment, [id]: value });
+  };
+
+  handleTaskNoteInput(e) {
+    this.setTaskNote(e.target.value);
   };
 
 
@@ -347,6 +471,8 @@ class AddLeadViewModel {
         return equipment.stock;
       case "serial":
         return equipment.serial;
+      case "quotePrice":
+        return equipment.quotePrice || "";
       case "status":
         return equipment.status;
       case "availability":

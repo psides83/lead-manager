@@ -53,6 +53,13 @@ input {
     /* align-content: center; */
 }
 
+@media (min-width: 900px) {
+    .searchAndFilter {
+        flex-direction: column;
+        align-items: flex-end;
+    }
+}
+
 #search:focus {
     outline: none !important;
 }

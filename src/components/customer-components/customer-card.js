@@ -74,6 +74,19 @@ function EquipmentSection(props) {
                     >
                       {` — ${unit.availability}`}
                     </Typography>
+                    {unit.quotePrice ? (
+                      <Typography
+                        sx={{ display: "block" }}
+                        component="span"
+                        variant="caption"
+                        color="text.secondary"
+                      >
+                        {`Quote: $${Number(unit.quotePrice).toLocaleString(undefined, {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 2,
+                        })}`}
+                      </Typography>
+                    ) : null}
                   </>
                 }
               />

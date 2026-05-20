@@ -95,7 +95,7 @@ export default function MainAppBar(props) {
   }, [isMobile]);
 
   useEffect(() => {
-    const userId = currentUser?.uid || userProfile?.id;
+    const userId = currentUser?.uid;
     if (!userId) {
       return () => {};
     }
@@ -194,7 +194,7 @@ export default function MainAppBar(props) {
                       <IconButton size="large" color="inherit" aria-label="Search" onClick={handleOpenMobileSearch}>
                         <SearchRounded />
                       </IconButton>
-                      <NotificationsMenu userId={currentUser?.uid || userProfile?.id} />
+                      <NotificationsMenu userId={currentUser?.uid} />
                       <AddLead
                         setMessage={setMessage}
                         setOpenError={setOpenError}
@@ -278,7 +278,7 @@ export default function MainAppBar(props) {
                   />
 
                   <Box sx={{ flexGrow: 1 }} />
-                  <NotificationsMenu userId={currentUser?.uid || userProfile?.id} />
+                  <NotificationsMenu userId={currentUser?.uid} />
 
                   <AddLead
                     setMessage={setMessage}

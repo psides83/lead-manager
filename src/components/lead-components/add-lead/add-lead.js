@@ -30,10 +30,12 @@ import {
 import {
   Close,
   AddCircleOutlined,
+  AddTaskRounded,
   PersonAddAltRounded,
   CheckRounded,
   SaveRounded,
   CheckCircleOutlineRounded,
+  NotesRounded,
 } from "@mui/icons-material";
 import { AuthContext } from "../../../state-management/auth-context-provider";
 import AddLeadViewModel from "./add-lead-view-model";
@@ -46,7 +48,7 @@ const ListItem = styled("li")(({ theme }) => ({
 export default function AddLead(props) {
   //#region State Properties
   const { setMessage, setOpenSuccess, setOpenError } = props;
-  const { userProfile } = useContext(AuthContext);
+  const { currentUser, userProfile } = useContext(AuthContext);
   var [leadData, setLeadData] = useState({
     name: "",
     email: "",
@@ -66,6 +68,7 @@ export default function AddLead(props) {
     model: "",
     stock: "",
     serial: "",
+    quotePrice: "",
     availability: "Availability Unknown",
     status: "Equipment added",
     notes: "",
@@ -73,6 +76,9 @@ export default function AddLead(props) {
     hasSubmittedPDI: false,
   });
   var [equipmentList, setEquipmentList] = useState([]);
+  var [taskNote, setTaskNote] = useState("");
+  var [taskNoteList, setTaskNoteList] = useState([]);
+  const [leadEntryMode, setLeadEntryMode] = useState("equipment");
   const [isShowingDialog, setIsShowingDialog] = useState(false);
   const [loadingLead, setLoadingLead] = useState(false);
   const [leadSuccess, setLeadSuccess] = useState(false);
@@ -88,6 +94,7 @@ export default function AddLead(props) {
     setMessage,
     setOpenSuccess,
     setOpenError,
+    currentUser,
     userProfile,
     leadData,
     setLeadData,
@@ -99,7 +106,11 @@ export default function AddLead(props) {
     setLoadingLead,
     setLeadSuccess,
     setLoadingEquipment,
-    setEquipmentSuccess
+    setEquipmentSuccess,
+    taskNote,
+    setTaskNote,
+    taskNoteList,
+    setTaskNoteList
   );
   //#endregion
 
@@ -303,98 +314,171 @@ export default function AddLead(props) {
               </Box>
 
               <Box sx={{ p: 1.5, borderRadius: 2, border: "1px solid", borderColor: "divider" }}>
-                <Typography variant="subtitle2" color="text.secondary">
-                  {viewModel.heading()}
-                </Typography>
+                <Grid container spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      {leadEntryMode === "equipment" ? viewModel.heading() : "Tasks / Notes on Lead"}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      select
+                      size="small"
+                      id="leadEntryMode"
+                      label="Add to lead"
+                      value={leadEntryMode}
+                      onChange={(e) => setLeadEntryMode(e.target.value)}
+                    >
+                      <MenuItem value="equipment">Equipment</MenuItem>
+                      <MenuItem value="taskNote">Task / Note</MenuItem>
+                    </TextField>
+                  </Grid>
+                </Grid>
                 <Divider sx={{ my: 1.25 }} />
 
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    listStyle: "none",
-                    p: 0,
-                    m: 0,
-                    mb: 1,
-                  }}
-                  component="ul"
-                >
-                  {equipmentList.map((data) => {
-                    const icon = <EquipmentIcon model={data.model} />;
-                    return (
-                      <ListItem key={data.id}>
-                        <Chip
-                          icon={icon}
-                          label={
-                            <Typography sx={{ fontWeight: 500, fontSize: 16 }}>
-                              {data.model}
-                            </Typography>
-                          }
-                          variant="outlined"
-                          color="primary"
-                          onDelete={viewModel.handleDelete(data)}
-                          sx={{
-                            minHeight: 44,
-                            height: "auto",
-                            py: 0.5,
-                            alignItems: "center",
-                            "& .MuiChip-icon": {
-                              width: 34,
-                              height: 34,
-                              ml: 0.75,
-                              mr: 0.5,
-                            },
-                            "& .MuiChip-label": {
-                              py: 0.5,
-                              display: "flex",
-                              alignItems: "center",
-                            },
-                          }}
-                        />
-                      </ListItem>
-                    );
-                  })}
-                </Box>
+                {leadEntryMode === "equipment" ? (
+                  <>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        listStyle: "none",
+                        p: 0,
+                        m: 0,
+                        mb: 1,
+                      }}
+                      component="ul"
+                    >
+                      {equipmentList.map((data) => {
+                        const icon = <EquipmentIcon model={data.model} />;
+                        return (
+                          <ListItem key={data.id}>
+                            <Chip
+                              icon={icon}
+                              label={
+                                <Typography sx={{ fontWeight: 500, fontSize: 16 }}>
+                                  {data.model}
+                                </Typography>
+                              }
+                              variant="outlined"
+                              color="primary"
+                              onDelete={viewModel.handleDelete(data)}
+                              sx={{
+                                minHeight: 44,
+                                height: "auto",
+                                py: 0.5,
+                                alignItems: "center",
+                                "& .MuiChip-icon": {
+                                  width: 34,
+                                  height: 34,
+                                  ml: 0.75,
+                                  mr: 0.5,
+                                },
+                                "& .MuiChip-label": {
+                                  py: 0.5,
+                                  display: "flex",
+                                  alignItems: "center",
+                                },
+                              }}
+                            />
+                          </ListItem>
+                        );
+                      })}
+                    </Box>
 
-                <Grid container spacing={1.5}>
-                  {addEquipmentInputs.map((input) => (
-                    <Grid item key={input.id} xs={input.gridXS} sm={input.gridSM}>
-                      <TextField
-                        required={input.required}
-                        fullWidth
-                        select={input.select}
-                        type={input.type}
-                        size="small"
-                        id={input.id}
-                        name={`lm-equipment-${input.id}`}
-                        label={input.label}
-                        variant="outlined"
-                        autoComplete="off"
-                        onChange={(e) => viewModel.handleEquipmentInput(e, input.id)}
-                        value={viewModel.handleEquipmentValues(input.id)}
-                        slotProps={{
-                          htmlInput: {
-                            ...(input.inputProps || {}),
-                            autoComplete: "new-password",
-                            name: `lm-equipment-${input.id}`,
-                            "data-form-type": "other",
-                            "data-lpignore": "true",
-                          },
-                        }}
-                      >
-                        {input.select === true
-                          ? viewModel
-                              .equipmentSelectArray(input.id)
-                              ?.map((status, index) => (
-                                <MenuItem key={index} value={status}>
-                                  {status}
-                                </MenuItem>
-                              ))
-                          : null}
-                      </TextField>
+                    <Grid container spacing={1.5}>
+                      {addEquipmentInputs.map((input) => (
+                        <Grid item key={input.id} xs={input.gridXS} sm={input.gridSM}>
+                          <TextField
+                            required={input.required}
+                            fullWidth
+                            select={input.select}
+                            type={input.type}
+                            size="small"
+                            id={input.id}
+                            name={`lm-equipment-${input.id}`}
+                            label={input.label}
+                            variant="outlined"
+                            autoComplete="off"
+                            onChange={(e) => viewModel.handleEquipmentInput(e, input.id)}
+                            value={viewModel.handleEquipmentValues(input.id)}
+                            slotProps={{
+                              htmlInput: {
+                                ...(input.inputProps || {}),
+                                autoComplete: "new-password",
+                                name: `lm-equipment-${input.id}`,
+                                "data-form-type": "other",
+                                "data-lpignore": "true",
+                              },
+                            }}
+                          >
+                            {input.select === true
+                              ? viewModel
+                                  .equipmentSelectArray(input.id)
+                                  ?.map((status, index) => (
+                                    <MenuItem key={index} value={status}>
+                                      {status}
+                                    </MenuItem>
+                                  ))
+                              : null}
+                          </TextField>
+                        </Grid>
+                      ))}
                     </Grid>
-                  ))}
-                </Grid>
+                  </>
+                ) : (
+                  <>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        listStyle: "none",
+                        p: 0,
+                        m: 0,
+                        mb: 1,
+                      }}
+                      component="ul"
+                    >
+                      {taskNoteList.map((data) => (
+                        <ListItem key={data.id}>
+                          <Chip
+                            icon={<NotesRounded />}
+                            label={
+                              <Typography sx={{ fontWeight: 500, fontSize: 14 }}>
+                                {data.task}
+                              </Typography>
+                            }
+                            variant="outlined"
+                            color="primary"
+                            onDelete={viewModel.handleDeleteTaskNote(data)}
+                            sx={{
+                              minHeight: 40,
+                              height: "auto",
+                              py: 0.5,
+                              maxWidth: "100%",
+                              "& .MuiChip-label": {
+                                py: 0.5,
+                                whiteSpace: "normal",
+                              },
+                            }}
+                          />
+                        </ListItem>
+                      ))}
+                    </Box>
+
+                    <TextField
+                      fullWidth
+                      multiline
+                      minRows={3}
+                      size="small"
+                      id="taskNote"
+                      label="Task / Note"
+                      value={taskNote}
+                      onChange={(e) => viewModel.handleTaskNoteInput(e)}
+                    />
+                  </>
+                )}
               </Box>
 
               <Grid container spacing={1.5}>
@@ -404,16 +488,26 @@ export default function AddLead(props) {
                       fullWidth
                       variant="outlined"
                       size="small"
-                      disabled={equipment.model === "" || loadingEquipment}
+                      disabled={
+                        leadEntryMode === "equipment"
+                          ? equipment.model === "" || loadingEquipment
+                          : taskNote.trim() === "" || loadingEquipment
+                      }
                       color="primary"
                       startIcon={
                         equipmentSuccess ? (
                           <CheckCircleOutlineRounded />
-                        ) : (
+                        ) : leadEntryMode === "equipment" ? (
                           <AddCircleOutlined />
+                        ) : (
+                          <AddTaskRounded />
                         )
                       }
-                      onClick={(e) => viewModel.equipmentSubmitValidation(e)}
+                      onClick={(e) =>
+                        leadEntryMode === "equipment"
+                          ? viewModel.equipmentSubmitValidation(e)
+                          : viewModel.taskNoteSubmitValidation(e)
+                      }
                     >
                       {loadingEquipment && (
                         <CircularProgress
@@ -428,7 +522,11 @@ export default function AddLead(props) {
                           }}
                         />
                       )}
-                      {equipmentSuccess ? "Successfully Added" : "Add More Equipment"}
+                      {equipmentSuccess
+                        ? "Successfully Added"
+                        : leadEntryMode === "equipment"
+                        ? "Add More Equipment"
+                        : "Add Task / Note"}
                     </Button>
                   </Box>
                 </Grid>
@@ -439,7 +537,7 @@ export default function AddLead(props) {
                       size="small"
                       disabled={
                         leadData.name === "" ||
-                        (equipment.model === "" && equipmentList.length === 0) ||
+                        !viewModel.hasRequiredLeadContext() ||
                         loadingLead
                       }
                       variant="contained"

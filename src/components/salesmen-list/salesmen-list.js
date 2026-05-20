@@ -1,4 +1,10 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 // import {
 //   getDoc,
 //   doc,
@@ -54,7 +60,7 @@ function Row({ salesman }) {
   // Request row UI:
   return (
     <React.Fragment>
-      <TableRow key={salesman.id} sx={{ "& > *": { borderBottom: "unset" } }}>
+      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
         <TableCell key="branch" component="th" scope="row">
           {salesman.branch}
         </TableCell>
@@ -85,15 +91,26 @@ export default function SalesmenList() {
     useState(false);
   // #endregion
 
+  const normalizeValue = useCallback((value) => {
+    return String(value || "")
+      .trim()
+      .toLowerCase();
+  }, []);
+
+  const normalizeBranchToken = useCallback((value) => {
+    return normalizeValue(value).replace(/[^a-z0-9]/g, "");
+  }, [normalizeValue]);
+
   const handleCloseTransferRequest = () => {
     setisShowingTransferRequest(false);
   };
 
   const handleToggleTransferRequest = () => {
     setEmails(() => {
-      var branchEmails = [];
-      search(salesmen).map((salesman) => branchEmails.push(salesman.email));
-      return branchEmails.toString().replace(/,/g, "; ");
+      const branchEmails = visibleSalesmen
+        .map((salesman) => salesman.email)
+        .filter(Boolean);
+      return branchEmails.join("; ");
     });
     setisShowingTransferRequest(!isShowingTransferRequest);
   };
@@ -122,39 +139,43 @@ export default function SalesmenList() {
     }, 1000);
   }, [fetchSalesmen]);
 
-  const search = (salesmen) => {
-    return salesmen
-      .sort(function (a, b) {
-        return a.branch - b.branch;
-      })
+  const visibleSalesmen = useMemo(() => {
+    const normalizedSearch = (searchText || "").trim().toLowerCase();
+    const normalizedFilter = normalizeBranchToken(filterParam || "All");
+
+    return [...salesmen]
+      .sort((a, b) =>
+        String(a?.branch || "").localeCompare(String(b?.branch || ""))
+      )
       .filter((item) => {
-        /*
-      // in here we check if our region is equal to our c state
-      // if it's equal to then only return the items that match
-      // if not return All the countries
-      */
-        if (item.branch === filterParam) {
-          return searchParam.some((newItem) => {
-            return (
-              item[newItem]
-                .toString()
-                .toLowerCase()
-                .indexOf(searchText.toLowerCase()) > -1
-            );
-          });
-        } else if (filterParam === "All") {
-          return searchParam.some((newItem) => {
-            return (
-              item[newItem]
-                .toString()
-                .toLowerCase()
-                .indexOf(searchText.toLowerCase()) > -1
-            );
-          });
+        const branchValue = normalizeValue(item?.branch);
+        const normalizedBranchValue = normalizeBranchToken(branchValue);
+        const branchMatches =
+          normalizedFilter === "all" ||
+          normalizedBranchValue === normalizedFilter;
+
+        if (!branchMatches) {
+          return false;
         }
-        return null;
+
+        if (!normalizedSearch) {
+          return true;
+        }
+
+        return searchParam.some((newItem) =>
+          String(item?.[newItem] || "")
+            .toLowerCase()
+            .includes(normalizedSearch)
+        );
       });
-  };
+  }, [
+    filterParam,
+    normalizeBranchToken,
+    normalizeValue,
+    salesmen,
+    searchParam,
+    searchText,
+  ]);
 
   // Table UI:
   return (
@@ -247,8 +268,11 @@ export default function SalesmenList() {
                 >
                   <SalesmenTableHeaderView />
                   <TableBody>
-                    {search(salesmen).map((salesman) => (
-                      <Row key={salesman.email} salesman={salesman} />
+                    {visibleSalesmen.map((salesman, index) => (
+                      <Row
+                        key={salesman?.id ?? `${salesman?.email || "salesman"}-${index}`}
+                        salesman={salesman}
+                      />
                     ))}
                   </TableBody>
                 </Table>

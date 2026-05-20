@@ -3,7 +3,9 @@ import {
   AccountBalanceRounded,
   AgricultureRounded,
   AttachMoneyRounded,
-  LinkRounded,
+  ExpandLessRounded,
+  ExpandMoreRounded,
+  OpenInNewRounded,
   MailRounded,
 } from "@mui/icons-material";
 import ContactHistory from "../lead-card/lead-card-components/contact-history";
@@ -13,6 +15,7 @@ import {
   Card,
   CardContent,
   Chip,
+  Collapse,
   Dialog,
   DialogTitle,
   Divider,
@@ -47,6 +50,7 @@ import { db } from "../../../services/firebase";
 import { createStatusFollowUpTask } from "../../../services/follow-up-task-service";
 import { buildClosePayload } from "../../../utils/win-loss-intelligence";
 import { writeAuditLog } from "../../../services/audit-log-service";
+import { Link as RouterLink } from "react-router-dom";
 
 export default function LeadCard(props) {
   const { lead, tasks } = props;
@@ -59,6 +63,7 @@ export default function LeadCard(props) {
   const [statusAnchorEl, setStatusAnchorEl] = useState(null);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isShowingCloseDialog, setIsShowingCloseDialog] = useState(false);
+  const [showLeadInfo, setShowLeadInfo] = useState(false);
   const [pendingStatus, setPendingStatus] = useState("");
   const [closeDetails, setCloseDetails] = useState({
     closeOutcome: "",
@@ -231,6 +236,24 @@ export default function LeadCard(props) {
     setPendingStatus("");
   };
 
+  const toggleLeadInfo = (event) => {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    setShowLeadInfo((prev) => !prev);
+  };
+
+  const hasLeadInfoValue = (value) => {
+    if (value === undefined || value === null) return false;
+    if (typeof value === "string" && value.trim() === "") return false;
+    return true;
+  };
+
+  const hasPhone = hasLeadInfoValue(lead.phone);
+  const hasEmail = hasLeadInfoValue(lead.email);
+  const hasQuoteLink = hasLeadInfoValue(lead.quoteLink);
+  const hasNotes = hasLeadInfoValue(lead.notes);
+  const hasAnyLeadInfo = hasPhone || hasEmail || hasQuoteLink || hasNotes;
+
   return (
     <Card
       sx={{
@@ -254,23 +277,28 @@ export default function LeadCard(props) {
           direction="row"
           justifyContent="space-between"
           alignItems="center"
-          // spacing={2}
         >
-          <Typography variant="h5" sx={{ overflowWrap: "anywhere", pr: 1 }}>
-            {name}
-          </Typography>
-          <Stack direction="row" justifyContent="flex-end" sx={{ flexShrink: 0 }}>
-            <Tooltip title="Copy Customer Link">
-              <IconButton onClick={(e) => viewModel.copyLeadLink(e)}>
-                <LinkRounded />
-              </IconButton>
-            </Tooltip>
+          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ minWidth: 0, pr: 1 }}>
+            <Typography variant="h5" sx={{ overflowWrap: "anywhere" }}>
+              {name}
+            </Typography>
+            {hasAnyLeadInfo ? (
+              <Tooltip title={showLeadInfo ? "Hide lead info" : "Show lead info"}>
+                <IconButton
+                  size="small"
+                  onClick={toggleLeadInfo}
+                  sx={{ ml: 0.25, flexShrink: 0 }}
+                >
+                  {showLeadInfo ? <ExpandLessRounded fontSize="small" /> : <ExpandMoreRounded fontSize="small" />}
+                </IconButton>
+              </Tooltip>
+            ) : null}
+          </Stack>
 
-            <ContactDialog lead={lead} />
-
-            <Tooltip title="Email Lead">
-              <IconButton aria-label="edit" onClick={(e) => viewModel.logEmail(e)}>
-                <MailRounded />
+          <Stack direction="row" alignItems="center" sx={{ flexShrink: 0 }}>
+            <Tooltip title="Open Details Page">
+              <IconButton component={RouterLink} to={`/lead/${lead.id}`}>
+                <OpenInNewRounded />
               </IconButton>
             </Tooltip>
             <EditLead
@@ -282,27 +310,89 @@ export default function LeadCard(props) {
           </Stack>
         </Stack>
 
-        <Stack direction="row" spacing={1}>
-          <Typography variant="caption" color="text.secondary" gutterBottom>
-            {`Created ${dateCreated.slice(0, dateCreated.length - 8)}`}
-          </Typography>
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+            <Typography variant="caption" color="text.secondary" gutterBottom>
+              {`Created ${dateCreated.slice(0, dateCreated.length - 8)}`}
+            </Typography>
 
-          {lead.willFinance ? (
-            <Tooltip title="Financed">
-              <AccountBalanceRounded color="primary" fontSize="small" />
-            </Tooltip>
-          ) : null}
-          {lead.hasTrade ? (
-            <Tooltip title="Has Trade">
-              <AgricultureRounded color="primary" fontSize="small" />
-            </Tooltip>
-          ) : null}
-          {lead.willPurchase ? (
-            <Tooltip title="Will Purchase">
-              <AttachMoneyRounded color="primary" fontSize="small" />
-            </Tooltip>
-          ) : null}
+            {lead.willFinance ? (
+              <Tooltip title="Financed">
+                <AccountBalanceRounded color="primary" fontSize="small" />
+              </Tooltip>
+            ) : null}
+            {lead.hasTrade ? (
+              <Tooltip title="Has Trade">
+                <AgricultureRounded color="primary" fontSize="small" />
+              </Tooltip>
+            ) : null}
+            {lead.willPurchase ? (
+              <Tooltip title="Will Purchase">
+                <AttachMoneyRounded color="primary" fontSize="small" />
+              </Tooltip>
+            ) : null}
         </Stack>
+
+        <Collapse in={showLeadInfo && hasAnyLeadInfo} timeout={180}>
+          <Stack
+            spacing={0.5}
+            sx={{
+              mt: 0.5,
+              mb: 1,
+              p: 1,
+              borderRadius: 1.5,
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "rgba(255,255,255,0.35)",
+            }}
+          >
+            {hasPhone ? (
+              <Typography variant="caption" color="text.secondary">
+                Phone:{" "}
+                <Typography component="span" variant="caption" color="text.primary">
+                  {lead.phone}
+                </Typography>
+              </Typography>
+            ) : null}
+
+            {hasEmail ? (
+              <Typography variant="caption" color="text.secondary">
+                Email:{" "}
+                <Typography component="span" variant="caption" color="text.primary">
+                  {lead.email}
+                </Typography>
+              </Typography>
+            ) : null}
+
+            {hasQuoteLink ? (
+              <Typography variant="caption" color="text.secondary">
+                Quote Link:{" "}
+                <a href={lead.quoteLink} target="_blank" rel="noreferrer">
+                  Open
+                </a>
+              </Typography>
+            ) : null}
+
+            {hasNotes ? (
+              <Stack spacing={0.25}>
+                <Typography variant="caption" color="text.secondary">
+                  Notes:
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.primary"
+                  sx={{
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                    lineHeight: 1.45,
+                  }}
+                >
+                  {lead.notes}
+                </Typography>
+              </Stack>
+            ) : null}
+
+          </Stack>
+        </Collapse>
 
         <Stack
           direction="row"
@@ -330,31 +420,16 @@ export default function LeadCard(props) {
             />
           </Stack>
 
-          <Stack sx={{ flex: 1, minWidth: 0 }} alignItems="center">
-            {(pdiStatus === "Requested" ||
-              pdiStatus === "In Progress" ||
-              pdiStatus === "Completed") ? (
-              <Stack direction="row" spacing={0.5} alignItems="center">
-                <Typography variant="caption">PDI/Setup:</Typography>
-                <Stack
-                  sx={{
-                    width: "fit-content",
-                    px: 0.5,
-                    py: 0.25,
-                    borderRadius: 1,
-                    background: "rgb(54, 124, 42, 0.9)",
-                  }}
-                >
-                  <Typography sx={{ fontSize: 12, color: "white" }}>
-                    {pdiStatus}
-                  </Typography>
-                </Stack>
-              </Stack>
-            ) : null}
-          </Stack>
-
           <Stack sx={{ flex: 1, minWidth: 0 }} alignItems="flex-end">
-            <StatusHistory events={lead.changeLog} />
+            <Stack direction="row" alignItems="center" spacing={0.25}>
+              <ContactDialog lead={lead} />
+              <Tooltip title="Email Lead">
+                <IconButton aria-label="email lead" onClick={(e) => viewModel.logEmail(e)}>
+                  <MailRounded />
+                </IconButton>
+              </Tooltip>
+              <StatusHistory events={lead.changeLog} />
+            </Stack>
           </Stack>
         </Stack>
         <Menu
@@ -451,6 +526,7 @@ export default function LeadCard(props) {
 
         <EquipmentSection
           lead={lead}
+          pdiStatus={pdiStatus}
           setMessage={setMessage}
           setOpenError={setOpenError}
           setOpenSuccess={setOpenSuccess}

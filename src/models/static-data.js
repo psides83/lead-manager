@@ -217,6 +217,16 @@ const addEquipmentInputs = [
     multiline: false,
   },
   {
+    id: "quotePrice",
+    label: "Quote Price (optional)",
+    type: "text",
+    gridXS: 12,
+    gridSM: 6,
+    required: false,
+    select: false,
+    multiline: false,
+  },
+  {
     id: "status",
     label: "Status",
     type: "text",

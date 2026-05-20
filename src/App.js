@@ -17,6 +17,7 @@ import Loading from "./components/loading-views/loading";
 import SalesmenList from "./components/salesmen-list/salesmen-list";
 import { AuthContext } from "./state-management/auth-context-provider";
 import SalesDashboard from "./components/sales-components/sales-dashboard";
+import LeadDetailPage from "./components/lead-components/lead-detail-page";
 
 const theme = createTheme({
   cssVariables: true,
@@ -102,10 +103,14 @@ const theme = createTheme({
 
 export default function App() {
   // eslint-disable-next-line
-  const { currentUser } = useContext(AuthContext);
+  const { currentUser, authLoading } = useContext(AuthContext);
   // const [notification, setNotification] = useState({ title: "", body: "" });
 
   const RequireAuth = ({ children }) => {
+    if (authLoading) {
+      return <Loading />;
+    }
+
     return currentUser ? children : <Navigate to="/sign-in" />;
   };
 
@@ -145,9 +150,9 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        {currentUser && <MainAppBar />}
+        {!authLoading && currentUser && <MainAppBar />}
         <Box>
-          {currentUser && <Toolbar />}
+          {!authLoading && currentUser && <Toolbar />}
           <Routes>
             <Route path="/">
               <Route path="sign-in" element={<SignIn />} />
@@ -172,6 +177,14 @@ export default function App() {
                 element={
                   <RequireAuth>
                     <SalesDashboard />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="lead/:leadId"
+                element={
+                  <RequireAuth>
+                    <LeadDetailPage />
                   </RequireAuth>
                 }
               />

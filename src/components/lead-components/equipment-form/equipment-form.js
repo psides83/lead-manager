@@ -25,6 +25,7 @@ import {
   CheckRounded,
   Close,
   DeleteRounded,
+  EditRounded,
   ScheduleRounded,
   SaveRounded,
 } from "@mui/icons-material";
@@ -41,6 +42,7 @@ export default function EquipmentForm(props) {
     model: "",
     stock: "",
     serial: "",
+    quotePrice: "",
     availability: "Availability Unknown",
     status: "Equipment added",
     notes: "",
@@ -57,6 +59,7 @@ export default function EquipmentForm(props) {
   const [isShowingEmptyRequestDialog, setIsShowingEmptyRequestDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [externalRequestId, setExternalRequestId] = useState("");
   // var [work, setWork] = useState([]);
   var [other, setOther] = useState("");
   //#endregion
@@ -161,7 +164,9 @@ export default function EquipmentForm(props) {
     setIsShowingDialog,
     handleCloseDialog,
     pdiUser,
-    userProfile
+    userProfile,
+    externalRequestId,
+    setExternalRequestId,
   );
 
   // load data from equipment
@@ -179,6 +184,7 @@ export default function EquipmentForm(props) {
         model: equipment.model,
         stock: equipment.stock,
         serial: equipment.serial,
+        quotePrice: equipment.quotePrice || "",
         availability: equipment.availability,
         notes: equipment.notes,
         status: equipment.status,
@@ -193,6 +199,7 @@ export default function EquipmentForm(props) {
         model: equipment.model,
         stock: equipment.stock,
         serial: equipment.serial,
+        quotePrice: equipment.quotePrice || "",
         availability: equipment.availability,
         notes: equipment.notes,
         status: equipment.status,
@@ -201,12 +208,16 @@ export default function EquipmentForm(props) {
         work: removeNulls(equipment.work),
         pdiNotes: equipment.pdiNotes ? equipment.pdiNotes : "",
       });
+      setExternalRequestId(lead?.pdiID || "");
       if (equipment.work?.length === 8) {
         setOther(equipment.work[7])
       }
     }
+    if (isShowingDialog && !equipment) {
+      setExternalRequestId(lead?.pdiID || "");
+    }
     // eslint-disable-next-line
-  }, [isShowingDialog, equipment]);
+  }, [isShowingDialog, equipment, lead?.pdiID]);
 
   useEffect(() => {
     loadEquipmentData();
@@ -223,6 +234,12 @@ export default function EquipmentForm(props) {
             onClick={handleToggleDialog}
           >
             <AddCircleOutlineRounded color="primary" />
+          </IconButton>
+        </Tooltip>
+      ) : props?.iconButton ? (
+        <Tooltip title="Edit Equipment">
+          <IconButton size="small" aria-label="edit equipment" onClick={handleToggleDialog}>
+            <EditRounded fontSize="small" />
           </IconButton>
         </Tooltip>
       ) : (
@@ -273,6 +290,19 @@ export default function EquipmentForm(props) {
                   >
                     {` — ${equipment.availability}`}
                   </Typography>
+                  {equipment.quotePrice ? (
+                    <Typography
+                      sx={{ display: "block" }}
+                      component="span"
+                      variant="caption"
+                      color="text.secondary"
+                    >
+                      {`Quote: $${Number(equipment.quotePrice).toLocaleString(undefined, {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 2,
+                      })}`}
+                    </Typography>
+                  ) : null}
                 </>
               }
             />
@@ -365,6 +395,20 @@ export default function EquipmentForm(props) {
                 <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
                   PDI / Setup
                 </Typography>
+                {equipment ? (
+                  <Grid container spacing={1.5} sx={{ mb: 1 }}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        label="Request ID (optional)"
+                        value={externalRequestId}
+                        onChange={(e) => setExternalRequestId(e.target.value)}
+                        helperText="Use if this request was created outside this app."
+                      />
+                    </Grid>
+                  </Grid>
+                ) : null}
                 <PDIRequestCheckboxes
                   equipmentData={equipmentData}
                   setEquipmentData={setEquipmentData}
